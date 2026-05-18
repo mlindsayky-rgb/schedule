@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summer Schedule</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;background:#faf8f4}
+:root{
+  --navy:#1a1a2e;--navy-mid:#2d2d5e;--navy-hover:#3a3a6e;
+  --purple:#4a2c6e;--green:#2d6a4f;--green-soft:#40916c;--green-pale:#d8f3dc;
+  --amber:#b5510a;--amber-pale:#fef3e2;--amber-mid:#f4a261;
+  --cream:#faf8f4;--cream-dark:#f0ece4;--gray:#6b7280;--gray-pale:#f1f0ee;
+  --white:#ffffff;--border:#ddd8d0;
+  --teal:#1a6b6b;--teal-pale:#e0f2f1;--teal-border:#80cbc4;
+  --red:#b91c1c;--red-pale:#fef2f2;--red-border:#fca5a5;
+}
+
+/* ── PIN SCREEN ── */
+#pin-screen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:24px}
+#pin-screen h1{color:#fff;font-size:22px;font-weight:bold;letter-spacing:.06em;text-align:center}
+#pin-screen p{color:rgba(255,255,255,.6);font-size:13px;font-style:italic;text-align:center}
+.pin-dots{display:flex;gap:14px;justify-content:center;margin:8px 0}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.4);background:transparent;transition:background .15s}
+.pin-dot.filled{background:#fff;border-color:#fff}
+.pin-pad{display:grid;grid-template-columns:repeat(3,72px);gap:10px;justify-content:center}
+.pin-btn{width:72px;height:72px;border-radius:12px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:22px;font-family:Georgia,serif;cursor:pointer;transition:background .15s}
+.pin-btn:hover{background:rgba(255,255,255,.18)}
+.pin-btn:active{background:rgba(255,255,255,.28)}
+.pin-btn.zero{grid-column:2}
+.pin-btn.del{font-size:16px;border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.04)}
+#pin-error{color:#fca5a5;font-size:13px;font-style:italic;text-align:center;min-height:20px}
+
+/* ── SYNC BAR ── */
+#sync-bar{background:#2d2d5e;color:rgba(255,255,255,.75);font-size:10px;text-align:center;padding:4px;letter-spacing:.04em;font-style:italic;transition:background .3s}
+#sync-bar.ok{background:#2d6a4f}
+#sync-bar.err{background:#7f1d1d}
+
+.app{max-width:100%;background:var(--cream);min-height:100vh}
+.tabs{display:flex;flex-wrap:wrap;background:var(--navy)}
+.tab{padding:11px 16px;border:none;background:none;cursor:pointer;font-size:11px;font-family:Georgia,serif;letter-spacing:.06em;color:rgba(255,255,255,.55);text-transform:uppercase;font-weight:500;border-bottom:3px solid transparent;transition:color .15s,background .15s}
+.tab:hover{color:#fff;background:var(--navy-hover)}
+.tab.active{color:#fff;font-weight:bold;border-bottom:3px solid rgba(255,255,255,.5);background:var(--navy-mid)}
+.panel{display:none}.panel.active{display:block}
+.app-body{padding:1rem}
+.grid{display:grid;gap:12px}
+.day-block{border:1px solid var(--border);border-radius:6px;overflow:hidden;box-shadow:0 1px 4px rgba(26,26,46,.06)}
+.day-block.pto-day{border-color:#fca5a5}
+.day-block.pto-done{border-color:#86efac}
+.day-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--navy)}
+.day-name{color:#fff;font-size:13px;font-weight:bold;letter-spacing:.08em;text-transform:uppercase}
+.day-hours{color:rgba(255,255,255,.38);font-size:10px;font-style:italic;margin-left:7px}
+.day-open-count{color:rgba(255,255,255,.6);font-size:11px;font-style:italic}
+.day-slots{padding:10px;background:var(--cream)}
+.slot{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:4px;margin-bottom:6px;cursor:pointer;border:1px solid transparent;transition:filter .15s}
+.slot:hover{filter:brightness(.93)}
+.slot.available{background:var(--green-pale);border-color:#b7e4c7}
+.slot.booked{background:#e8eaf6;border-color:#c5cae9}
+.slot.partial{background:var(--amber-pale);border-color:#fcd9a8}
+.slot.full{background:#fff0d6;border-color:var(--amber-mid)}
+.slot.fixed{background:#ede7f6;border-color:#ce93d8}
+.slot.blocked{background:var(--gray-pale);border-color:#d1d5db}
+.slot.pto-sub-needed{background:var(--red-pale);border-color:var(--red-border)}
+.slot.pto-sub-done{background:#f0fdf4;border-color:#86efac}
+.slot.pto-notify-needed{background:var(--red-pale);border-color:var(--red-border)}
+.slot.pto-notify-done{background:#f0fdf4;border-color:#86efac}
+.slot.pto-dim{background:var(--gray-pale);border-color:#e5e7eb;opacity:.45;cursor:default}
+.slot.readonly{cursor:default}
+.slot.readonly:hover{filter:none}
+.cc-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:4px;border:1px dashed var(--teal-border);background:var(--teal-pale);margin-top:8px}
+.cc-bar-time{font-size:11px;color:var(--teal);min-width:90px;font-style:italic;flex-shrink:0}
+.cc-bar-label{font-size:12px;color:var(--teal);font-weight:500}
+.cc-bar-badge{font-size:10px;padding:1px 8px;border-radius:20px;background:#b2dfdb;color:#004d40;margin-left:auto}
+.slot-time{font-size:11px;color:var(--gray);min-width:90px;font-style:italic;flex-shrink:0}
+.slot-body{flex:1;min-width:0}
+.slot-lbl{font-size:13px;color:var(--navy);font-weight:600}
+.slot-meta{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
+.tbadge{font-size:10px;padding:1px 8px;border-radius:20px;font-family:Georgia,serif}
+.type-private{background:#c5cae9;color:#1a237e}.type-group{background:#b2dfdb;color:#004d40}
+.type-liveball{background:#f8bbd0;color:#880e4f}.type-camp{background:#ffe0b2;color:#e65100}
+.type-adult-team{background:#ce93d8;color:#4a148c}.type-hp-clinic{background:#b39ddb;color:#311b92}
+.type-blocked{background:#d1d5db;color:#374151}
+.pips{display:flex;gap:2px;align-items:center}
+.pip{width:7px;height:7px;border-radius:50%;border:1px solid #9ca3af}
+.pip.on{background:var(--amber);border-color:var(--amber)}
+.fill-lbl{font-size:11px;color:var(--gray);font-style:italic}
+.slot-right{display:flex;align-items:center;flex-shrink:0;gap:5px}
+.rchip{font-size:10px;padding:2px 9px;border-radius:20px;background:#fff8e1;color:#5d4037;border:1px solid #ffe082;display:inline-flex;align-items:center;gap:5px}
+.rchip button{background:none;border:none;cursor:pointer;color:#9b1c1c;font-size:11px;padding:0}
+.fnote{font-size:10px;color:var(--purple);background:#f3e5f5;border-radius:20px;padding:2px 8px;display:inline-flex;align-items:center;gap:4px}
+.send-btn{width:36px;height:36px;border-radius:8px;background:var(--green-soft);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;transition:background .15s,transform .1s;flex-shrink:0}
+.send-btn:hover{background:var(--green);transform:scale(1.08)}
+.pto-banner{background:#7f1d1d;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px}
+.pto-bl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pto-tag{background:#dc2626;color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
+.pto-dates{color:rgba(255,255,255,.85);font-style:italic}
+.pto-prog{color:rgba(255,255,255,.7);font-size:11px}
+.pto-nav{display:flex;align-items:center;gap:6px}
+.pto-nb{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;font-family:Georgia,serif}
+.pto-nb:disabled{opacity:.35;cursor:default}
+.pto-nlbl{font-size:11px;color:rgba(255,255,255,.8);min-width:90px;text-align:center;font-style:italic}
+.pbr{font-size:10px;padding:3px 9px;border-radius:20px;background:#dc2626;color:#fff;font-weight:600;white-space:nowrap}
+.pbg{font-size:10px;padding:3px 9px;border-radius:20px;background:var(--green-soft);color:#fff;font-weight:600;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.leg{display:flex;gap:8px;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gray);font-style:italic}
+.ld{width:9px;height:9px;border-radius:50%}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:9px 20px;border-radius:5px;cursor:pointer;font-size:13px;font-family:Georgia,serif;font-weight:600;border:none;transition:background .15s;background:#1a1a2e;color:#fff}
+.btn:hover{background:#3a3a6e}
+.btn-sm{padding:7px 14px;font-size:12px}
+.bcx{background:#4b5563;color:#fff}.bcx:hover{background:#374151}
+.bdg{background:#9b1c1c;color:#fff}.bdg:hover{background:#7a1515}
+.bpto{background:#7f1d1d;color:#fff}.bpto:hover{background:#991b1b}
+.bptoc{background:#4b5563;color:#fff}
+input,select,textarea{padding:8px 11px;border:1.5px solid #c5c0b8;border-radius:5px;font-size:13px;font-family:Georgia,serif;background:#fff;color:#1a1a2e;width:100%}
+textarea{resize:vertical}
+.mo{position:fixed;inset:0;background:rgba(26,26,46,.55);display:flex;align-items:center;justify-content:center;z-index:100}
+.md{background:#faf8f4;border-radius:10px;padding:1.6rem;width:390px;max-width:95vw;border:1.5px solid #ddd8d0;max-height:92vh;overflow-y:auto;box-shadow:0 10px 40px rgba(26,26,46,.25)}
+.md h3{font-size:18px;font-weight:bold;color:#1a1a2e;margin-bottom:18px}
+.ma{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;flex-wrap:wrap;padding-top:16px;border-top:1px solid var(--border)}
+.f{margin-bottom:14px}
+.f label,.fl{font-size:11px;color:#6b7280;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+.ch{font-size:11px;color:#6b7280;margin-top:4px;font-style:italic}
+.ph{font-size:10px;color:var(--amber);margin-top:3px;font-style:italic;display:none}
+.mp{background:#f0ece4;border-radius:6px;padding:12px 14px;font-size:13px;color:#1a1a2e;line-height:1.6;border-left:3px solid var(--green-soft);margin-bottom:14px;font-style:italic}
+.ppk{border:1.5px solid #c5c0b8;border-radius:6px;overflow:hidden;margin-bottom:8px;background:#fff}
+.pki{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;border-bottom:1px solid #ede9e1;transition:background .1s}
+.pki:last-child{border-bottom:none}
+.pki:hover{background:var(--green-pale)}
+.pki.sel{background:#e8eaf6}
+.pki.dis{opacity:.35;cursor:default;pointer-events:none}
+.pkn{font-size:13px;color:#1a1a2e}
+.pkc{font-size:16px;color:var(--green-soft);font-weight:bold}
+.pke{padding:12px 14px;font-size:12px;color:#6b7280;font-style:italic}
+.rr{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:30px;align-items:center}
+.pc{display:flex;align-items:flex-start;gap:12px;padding:12px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;background:#fff}
+.av{width:38px;height:38px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;color:#fff;flex-shrink:0}
+.dp{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.pill{font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);cursor:pointer;user-select:none;font-family:Georgia,serif;background:#fff;color:#6b7280}
+.pill.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.nb{border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:10px;background:#fff}
+.ar{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;background:#fff}
+.at{font-size:10px;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em}
+.at-work{background:#e8eaf6;color:#1a237e}.at-life{background:var(--green-pale);color:var(--green)}
+.at-camp{background:#fff3e0;color:#e65100}.at-personal{background:#fce4ec;color:#880e4f}
+.an{background:#f0ece4;border-radius:4px;padding:9px 13px;font-size:11px;color:#6b7280;margin-bottom:14px;border-left:3px solid var(--green-soft);font-style:italic}
+.cd{border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden;background:#fff}
+.cdh{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--navy)}
+.cdt{font-weight:bold;font-size:13px;color:#fff;letter-spacing:.06em;text-transform:uppercase}
+.cdhr{font-size:12px;color:rgba(255,255,255,.6);font-style:italic}
+.cdb{padding:12px}
+.cdnl{font-size:11px;color:#6b7280;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;display:flex;justify-content:space-between}
+.cdsr{display:flex;justify-content:flex-end;margin-top:6px}
+.cdo{opacity:.45}
+.cctg{font-size:10px;padding:4px 12px;border-radius:20px;border:1.5px solid rgba(255,255,255,.5);cursor:pointer;background:transparent;color:rgba(255,255,255,.8);font-family:Georgia,serif;font-weight:500}
+.cctg.on{background:var(--green-soft);border-color:var(--green-soft);color:#fff}
+.pnab{width:100%;margin-top:8px;font-size:12px;background:#1a1a2e;color:#fff;padding:8px;border-radius:5px;cursor:pointer;border:none;font-family:Georgia,serif;font-weight:600}
+/* role badge in corner */
+.role-badge{position:fixed;bottom:12px;right:12px;background:rgba(26,26,46,.7);color:rgba(255,255,255,.6);font-size:10px;padding:4px 10px;border-radius:20px;font-family:Georgia,serif;font-style:italic;z-index:50;cursor:pointer}
+.role-badge:hover{background:rgba(26,26,46,.9)}
+</style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div id="pin-screen">
+  <div>
+    <h1>Summer Schedule</h1>
+    <p style="margin-top:6px">Enter your PIN to continue</p>
+  </div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
+  </div>
+  <div id="pin-error"></div>
+  <div class="pin-pad">
+    <button class="pin-btn" onclick="pinTap('1')">1</button>
+    <button class="pin-btn" onclick="pinTap('2')">2</button>
+    <button class="pin-btn" onclick="pinTap('3')">3</button>
+    <button class="pin-btn" onclick="pinTap('4')">4</button>
+    <button class="pin-btn" onclick="pinTap('5')">5</button>
+    <button class="pin-btn" onclick="pinTap('6')">6</button>
+    <button class="pin-btn" onclick="pinTap('7')">7</button>
+    <button class="pin-btn" onclick="pinTap('8')">8</button>
+    <button class="pin-btn" onclick="pinTap('9')">9</button>
+    <button class="pin-btn zero" onclick="pinTap('0')">0</button>
+    <button class="pin-btn del" onclick="pinDel()">⌫</button>
+  </div>
+</div>
+
+<!-- ROLE BADGE -->
+<div class="role-badge" id="role-badge" style="display:none" onclick="lockApp()">🔒 Lock</div>
+
+<!-- SYNC BAR -->
+<div id="sync-bar" style="display:none">Connecting...</div>
+
+<div class="app" id="main-app" style="display:none">
+<div class="tabs" id="tab-bar">
+  <button class="tab active" id="tab-schedule" onclick="st('schedule')">Schedule</button>
+  <button class="tab" id="tab-childcare" onclick="st('childcare')">Childcare</button>
+  <button class="tab" id="tab-people" onclick="st('people')" style="display:none">People</button>
+  <button class="tab" id="tab-notes" onclick="st('notes')" style="display:none">Notes</button>
+  <button class="tab" id="tab-life" onclick="st('life')" style="display:none">Life</button>
+</div>
+<div id="pto-banner" style="display:none"></div>
+<div class="app-body">
+<div id="panel-schedule" class="panel active">
+  <div class="sh">
+    <div class="leg">
+      <div class="li"><div class="ld" style="background:#40916c"></div>Open</div>
+      <div class="li"><div class="ld" style="background:#2d2d5e"></div>Booked</div>
+      <div class="li"><div class="ld" style="background:#b5510a"></div>Partial</div>
+      <div class="li"><div class="ld" style="background:#6b3f9e"></div>Fixed</div>
+      <div class="li"><div class="ld" style="background:#1a6b6b"></div>Childcare</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center" id="sched-controls"></div>
+  </div>
+  <div id="schedule-grid" class="grid"></div>
+</div>
+<div id="panel-childcare" class="panel"><div class="an" id="cc-note"></div><div id="cc-grid"></div></div>
+<div id="panel-people" class="panel">
+  <div class="an">Manage your lesson roster and notification preferences.</div>
+  <div class="sh"><span style="font-size:12px;color:var(--gray);font-style:italic" id="people-count"></span><button class="btn btn-sm" onclick="openAddPerson()">+ Add person</button></div>
+  <div id="people-list"></div>
+</div>
+<div id="panel-notes" class="panel">
+  <div class="sh"><span style="font-size:15px;font-weight:bold;color:var(--navy)">Daily Notes</span><button class="btn btn-sm" onclick="openAddNote()">+ New note</button></div>
+  <div id="notes-list"></div>
+</div>
+<div id="panel-life" class="panel">
+  <div class="sh"><span style="font-size:15px;font-weight:bold;color:var(--navy)">Activities</span><button class="btn btn-sm" onclick="openAddActivity()">+ Add activity</button></div>
+  <div id="activity-list"></div>
+</div>
+</div>
+</div>
+
+<div id="modal" class="mo" style="display:none" onclick="if(event.target===this)cm()"></div>
+
+<script>
+// ── PIN & ROLES ──
+const PINS={mike:'8613',caregiver:'2370'};
+let role=null; // 'mike' or 'caregiver'
+let pinEntry='';
+
+function pinTap(d){
+  if(pinEntry.length>=4)return;
+  pinEntry+=d;
+  updateDots();
+  if(pinEntry.length===4)setTimeout(checkPin,120);
+}
+function pinDel(){if(pinEntry.length>0){pinEntry=pinEntry.slice(0,-1);updateDots();document.getElementById('pin-error').textContent='';}}
+function updateDots(){
+  for(let i=0;i<4;i++){document.getElementById('d'+i).classList.toggle('filled',i<pinEntry.length);}
+}
+function checkPin(){
+  if(pinEntry===PINS.mike){unlockApp('mike');}
+  else if(pinEntry===PINS.caregiver){unlockApp('caregiver');}
+  else{
+    document.getElementById('pin-error').textContent='Incorrect PIN — try again';
+    pinEntry='';updateDots();
+    setTimeout(()=>{document.getElementById('pin-error').textContent='';},2000);
+  }
+}
+function unlockApp(r){
+  role=r;pinEntry='';
+  document.getElementById('pin-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  document.getElementById('sync-bar').style.display='block';
+  document.getElementById('role-badge').style.display='block';
+  document.getElementById('role-badge').textContent=(r==='mike'?'👤 Mike':'👶 Caregiver')+' — Lock';
+  setupRole();
+  boot();
+}
+function lockApp(){
+  role=null;pinEntry='';
+  document.getElementById('pin-screen').style.display='flex';
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('sync-bar').style.display='none';
+  document.getElementById('role-badge').style.display='none';
+  updateDots();
+}
+function setupRole(){
+  const isMike=role==='mike';
+  // Show/hide tabs
+  document.getElementById('tab-people').style.display=isMike?'':'none';
+  document.getElementById('tab-notes').style.display=isMike?'':'none';
+  document.getElementById('tab-life').style.display=isMike?'':'none';
+  // Schedule controls
+  document.getElementById('sched-controls').innerHTML=isMike
+    ?`<button class="btn btn-sm bpto" onclick="openPTO()" id="pto-btn">PTO</button><button class="btn btn-sm" onclick="openAddSlot()">+ Add slot</button>`
+    :'';
+  // Childcare note
+  document.getElementById('cc-note').textContent=isMike
+    ?'Edit childcare hours and activity notes for your caregiver.'
+    :'Here are today\'s childcare hours and notes from Mike.';
+  // Default tab for caregiver
+  if(!isMike)st('childcare');
+}
+
+// ── SUPABASE ──
+const SURL='https://vztyrxqdnqzvkfwfnipt.supabase.co';
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6dHlyeHFkbnF6dmtmd2ZuaXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODc3NDAsImV4cCI6MjA5NDY2Mzc0MH0.HCVqqQ_i6ETY8EL19Is1pHVn2qj8hFXqMnCd4ifH0E8';
+const TBL='schedule_data';
+const HDR={'apikey':SKEY,'Authorization':`Bearer ${SKEY}`,'Content-Type':'application/json'};
+
+async function dbGet(k){try{const r=await fetch(`${SURL}/rest/v1/${TBL}?key=eq.${encodeURIComponent(k)}&select=value`,{headers:HDR});const d=await r.json();return d&&d.length?JSON.parse(d[0].value):null;}catch(e){return null;}}
+async function dbUpsert(k,v){try{await fetch(`${SURL}/rest/v1/${TBL}`,{method:'POST',headers:{...HDR,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({key:k,value:JSON.stringify(v)})});syncBar('ok','✓ Synced');}catch(e){syncBar('err','⚠ Sync error');}}
+function syncBar(cls,msg){const b=document.getElementById('sync-bar');b.textContent=msg;b.className=cls;if(cls==='ok')setTimeout(()=>{b.textContent='Live — changes sync automatically';b.className='';},2500);}
+
+// ── CONSTANTS ──
+const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+const SHORT=['Mon','Tue','Wed','Thu','Fri'];
+const LT={
+  'private':{label:'Private lesson',cap:1,cls:'type-private',fixed:false},
+  'group':{label:'Special group',cap:4,cls:'type-group',fixed:false},
+  'liveball':{label:'Liveball',cap:8,cls:'type-liveball',fixed:false},
+  'camp':{label:'Camp',cap:12,cls:'type-camp',fixed:false},
+  'adult-team':{label:'Adult Team',cap:0,cls:'type-adult-team',fixed:true},
+  'hp-clinic':{label:'HP Clinic',cap:0,cls:'type-hp-clinic',fixed:true},
+  'blocked':{label:'Blocked',cap:0,cls:'type-blocked',fixed:true},
+};
+const DCC={start:'9:00 AM',end:'12:00 PM',active:true,note:''};
+const hm=(h,m)=>h*60+m;
+function mtd(m){const h=Math.floor(m/60),mm=m%60,ap=h<12?'AM':'PM',h12=h===0?12:h>12?h-12:h;return mm===0?`${h12} ${ap}`:`${h12}:${String(mm).padStart(2,'0')} ${ap}`;}
+const sdsp=s=>`${mtd(s.startM)}\u2013${mtd(s.endM)}`;
+const shr=s=>{const d=s.endM-s.startM;return d>0?d/60:0;};
+function pti(str){const s=str.trim(),c=s.indexOf(':');if(c===-1)return parseInt(s)*60;return parseInt(s.slice(0,c))*60+parseInt(s.slice(c+1)||'0');}
+const cp=p=>(p||'').replace(/\D/g,'');
+const pv=p=>cp(p).length===10;
+const gln=n=>{const p=n.trim().split(' ');return p[p.length-1];};
+const fdl=str=>new Date(str+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric'});
+const fds=str=>new Date(str+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+function fhr(h){if(h===0)return'';const r=Math.round(h*2)/2,w=Math.floor(r);return r%1!==0?`${w}.5 hrs`:`${w} hr${w!==1?'s':''}`;}
+const vmsg=()=>`Hey! I will be on vacation from ${pto.startDate?fdl(pto.startDate):'[start]'} to ${pto.endDate?fdl(pto.endDate):'[end]'}. I'll need to cancel our lesson, but will be back for the next one if that is ok.`;
+const nmsg=(slot,day)=>`Hey! I have an opening this week for a lesson if interested. You can ignore this text if not \u2014 ${day} ${sdsp(slot)}. Reply YES to claim. \u2014 Mike`;
+
+// ── SEED DATA ──
+const SEED=[
+  {id:1,day:'Monday',startM:hm(10,0),endM:hm(11,0),label:'Lesson \u2014 Khan',type:'private',status:'booked',roster:['Khan']},
+  {id:2,day:'Monday',startM:hm(11,0),endM:hm(12,30),label:'Adult Team \u2014 Scholtz',type:'adult-team',status:'fixed',roster:[]},
+  {id:3,day:'Monday',startM:hm(12,30),endM:hm(14,0),label:'Adult Team \u2014 Meagher',type:'adult-team',status:'fixed',roster:[]},
+  {id:4,day:'Tuesday',startM:hm(9,0),endM:hm(12,0),label:'HP Clinic \u2014 Summer HP',type:'hp-clinic',status:'fixed',roster:[]},
+  {id:5,day:'Tuesday',startM:hm(12,0),endM:hm(13,0),label:'Lesson',type:'private',status:'available',roster:[]},
+  {id:6,day:'Wednesday',startM:hm(9,0),endM:hm(10,0),label:'Lesson',type:'private',status:'available',roster:[]},
+  {id:7,day:'Wednesday',startM:hm(10,0),endM:hm(11,30),label:'Live Ball',type:'liveball',status:'available',roster:[]},
+  {id:8,day:'Wednesday',startM:hm(11,30),endM:hm(12,30),label:'Lesson',type:'private',status:'available',roster:[]},
+  {id:9,day:'Wednesday',startM:hm(13,0),endM:hm(14,0),label:'Lesson',type:'private',status:'available',roster:[]},
+  {id:10,day:'Thursday',startM:hm(9,30),endM:hm(11,0),label:'Adult Team \u2014 Brunning',type:'adult-team',status:'fixed',roster:[]},
+  {id:11,day:'Thursday',startM:hm(11,0),endM:hm(12,0),label:"Lesson \u2014 O'Brien",type:'private',status:'booked',roster:["O'Brien"]},
+  {id:12,day:'Thursday',startM:hm(12,0),endM:hm(13,0),label:'Lesson',type:'private',status:'available',roster:[]},
+  {id:13,day:'Friday',startM:hm(9,0),endM:hm(10,0),label:'Lesson \u2014 Williams',type:'private',status:'booked',roster:['Williams']},
+  {id:14,day:'Friday',startM:hm(10,0),endM:hm(12,0),label:'HP Clinic \u2014 Summer HP',type:'hp-clinic',status:'fixed',roster:[]},
+  {id:15,day:'Friday',startM:hm(12,0),endM:hm(13,0),label:'Lesson',type:'private',status:'available',roster:[]},
+  {id:16,day:'Friday',startM:hm(13,0),endM:hm(14,0),label:'Lesson \u2014 Kane',type:'private',status:'booked',roster:['Kane']},
+];
+const SCC={Monday:{start:'10:00 AM',end:'12:30 PM',active:true,note:''},Tuesday:{start:'9:00 AM',end:'12:00 PM',active:true,note:''},Wednesday:{start:'9:30 AM',end:'12:00 PM',active:true,note:''},Thursday:{start:'9:30 AM',end:'12:00 PM',active:true,note:''},Friday:{start:'9:00 AM',end:'12:00 PM',active:true,note:''}};
+
+// ── STATE ──
+let S={slots:SEED.map(s=>({...s})),childcare:JSON.parse(JSON.stringify(SCC)),people:[],notes:[],activities:[],nextId:60};
+let pto={active:false,startDate:null,endDate:null,subs:{},notified:{},viewWeekOffset:0};
+let _ps=[],_st=null;
+
+function save(){
+  // Caregiver can only save childcare
+  clearTimeout(_st);
+  _st=setTimeout(async()=>{
+    const keys=role==='mike'
+      ?['people','notes','activities','childcare','nextId','pto']
+      :['childcare'];
+    await Promise.all(keys.map(k=>dbUpsert(k,k==='pto'?pto:k==='nextId'?S.nextId:S[k])));
+  },800);
+}
+
+async function boot(){
+  syncBar('','Loading from cloud...');
+  try{
+    const [people,notes,activities,childcare,nextId,ptoD]=await Promise.all([dbGet('people'),dbGet('notes'),dbGet('activities'),dbGet('childcare'),dbGet('nextId'),dbGet('pto')]);
+    if(people)S.people=people;if(notes)S.notes=notes;if(activities)S.activities=activities;
+    if(childcare)S.childcare=childcare;if(nextId)S.nextId=nextId;if(ptoD)Object.assign(pto,ptoD);
+    syncBar('ok','✓ Loaded');
+  }catch(e){syncBar('err','Could not connect — working offline');}
+  if(role==='mike')renderSchedule();
+  else renderCC();
+}
+
+// ── HELPERS ──
+const isF=t=>LT[t]?.fixed===true;
+function ss(s){if(isF(s.type))return'fixed';if(s.status==='blocked')return'blocked';if(s.status==='booked')return'booked';const cap=LT[s.type]?.cap||1,f=s.roster.length;if(f===0)return'available';if(f>=cap)return'full';if(f>0)return'partial';return'available';}
+
+function st(t){
+  const tabs=['schedule','childcare','people','notes','life'];
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',tabs[i]===t));
+  document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+  if(t==='schedule')renderSchedule();if(t==='childcare')renderCC();
+  if(t==='people')renderPeople();if(t==='notes')renderNotes();if(t==='life')renderLife();
+}
+
+function rpips(f,c){const s=Math.min(c,8);let h='<div class="pips">';for(let i=0;i<s;i++)h+=`<div class="pip ${i<f?'on':''}"></div>`;if(c>8)h+=`<span style="font-size:10px;color:#6b7280;margin-left:2px">+${c-8}</span>`;return h+'</div>';}
+
+// ── PTO ──
+function ptoDates(){if(!pto.active||!pto.startDate||!pto.endDate)return[];const dates=[],cur=new Date(pto.startDate+'T12:00:00'),end=new Date(pto.endDate+'T12:00:00');while(cur<=end){const dow=cur.getDay();if(dow>=1&&dow<=5)dates.push(cur.toISOString().slice(0,10));cur.setDate(cur.getDate()+1);}return dates;}
+function ptoWeeks(){const dates=ptoDates();if(!dates.length)return[];const weeks=[];let cur=[],lastM=null;dates.forEach(d=>{const dt=new Date(d+'T12:00:00'),dow=dt.getDay(),m=new Date(dt);m.setDate(dt.getDate()-(dow-1));const ms=m.toISOString().slice(0,10);if(ms!==lastM){if(cur.length)weeks.push(cur);cur=[];lastM=ms;}cur.push(d);});if(cur.length)weeks.push(cur);return weeks;}
+const DN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function dayInPTO(day){if(!pto.active)return false;const wk=ptoWeeks();if(!wk.length)return false;const wi=Math.min(pto.viewWeekOffset,wk.length-1);return wk[wi].some(d=>DN[new Date(d+'T12:00:00').getDay()]===day);}
+function ptoProg(){const dates=ptoDates();let total=0,done=0;S.slots.forEach(s=>{const inP=dates.some(d=>DN[new Date(d+'T12:00:00').getDay()]===s.day);if(!inP)return;const st2=ss(s),l=LT[s.type];if(l&&l.fixed){total++;if(pto.subs[s.id])done++;}else if(st2==='booked'||st2==='partial'||st2==='full'){total++;if(pto.notified[s.id])done++;}});return{total,done};}
+
+function renderPTOBanner(){
+  const bn=document.getElementById('pto-banner');
+  if(role!=='mike'){bn.style.display='none';return;}
+  const btn=document.getElementById('pto-btn');
+  if(!pto.active){bn.style.display='none';if(btn){btn.textContent='PTO';btn.className='btn btn-sm bpto';btn.onclick=openPTO;}return;}
+  const wks=ptoWeeks(),nw=wks.length,{total,done}=ptoProg(),wi=Math.min(pto.viewWeekOffset,nw-1),wd=wks[wi]||[];
+  const ws=wd[0]?fds(wd[0]):'',we=wd[wd.length-1]?fds(wd[wd.length-1]):'';
+  bn.style.display='flex';if(btn){btn.textContent='Clear PTO';btn.className='btn btn-sm bptoc';btn.onclick=clearPTO;}
+  bn.innerHTML=`<div class="pto-bl"><span class="pto-tag">PTO ACTIVE</span><span class="pto-dates">${fdl(pto.startDate)} \u2013 ${fdl(pto.endDate)}</span><span class="pto-prog">${done}/${total} handled</span></div><div class="pto-nav"><button class="pto-nb" onclick="ptoNav(-1)" ${wi===0?'disabled':''}>&#8592;</button><span class="pto-nlbl">Week ${wi+1}/${nw}<br><span style="font-size:10px">${ws}${we&&we!==ws?' \u2013 '+we:''}</span></span><button class="pto-nb" onclick="ptoNav(1)" ${wi>=nw-1?'disabled':''}>&#8594;</button></div>`;
+}
+function ptoNav(d){const wks=ptoWeeks();pto.viewWeekOffset=Math.max(0,Math.min(wks.length-1,pto.viewWeekOffset+d));save();renderSchedule();renderPTOBanner();}
+function openPTO(){if(pto.active){clearPTO();return;}const today=new Date().toISOString().slice(0,10);sm(`<h3>&#127774; Set PTO Dates</h3><p style="font-size:13px;color:#6b7280;font-style:italic;margin-bottom:16px">Mon\u2013Fri in this range get flagged. Weekends ignored.</p><div class="f"><label>Start date</label><input id="ps" type="date" value="${today}"></div><div class="f"><label>End date</label><input id="pe" type="date" value="${today}"></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm bpto" onclick="actPTO()">Activate PTO</button></div>`);}
+function actPTO(){const s=document.getElementById('ps').value,e=document.getElementById('pe').value;if(!s||!e||s>e){alert('Please enter a valid date range.');return;}pto.active=true;pto.startDate=s;pto.endDate=e;pto.subs={};pto.notified={};pto.viewWeekOffset=0;save();cm();renderSchedule();renderPTOBanner();}
+function clearPTO(){pto.active=false;pto.startDate=null;pto.endDate=null;pto.subs={};pto.notified={};pto.viewWeekOffset=0;save();renderSchedule();renderPTOBanner();}
+
+function openSubModal(sid){const s=S.slots.find(x=>x.id===sid);if(!s)return;const cur=pto.subs[sid]||'',last=Object.values(pto.subs).filter(Boolean).pop()||'';const po=S.people.length?`<div class="ppk" style="max-height:180px;overflow-y:auto">${S.people.map(p=>`<div class="pki" onclick="subSel(${sid},'${p.name.replace(/'/g,"\\'")}')">${p.name}</div>`).join('')}</div>`:'';sm(`<h3>&#128101; Assign Sub</h3><p style="font-size:13px;color:#6b7280;font-style:italic;margin-bottom:14px">${s.label} \u2014 ${s.day}</p>${last&&last!==cur?`<button class="btn btn-sm" style="width:100%;background:#2d6a4f;margin-bottom:10px" onclick="subSel(${sid},'${last.replace(/'/g,"\\'")}')">Use last sub: ${last}</button>`:''}${po}<div class="f" style="margin-top:8px"><label>Or type a name</label><input id="sub-in" placeholder="Coach name" value="${cur}"></div><div class="ma">${cur?`<button class="btn btn-sm bdg" onclick="clrSub(${sid})">Remove sub</button>`:''}<button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSub(${sid})">Save</button></div>`);}
+function subSel(sid,n){const i=document.getElementById('sub-in');if(i)i.value=n;}
+function svSub(sid){const n=document.getElementById('sub-in')?.value?.trim();if(!n){alert('Enter a sub name.');return;}pto.subs[sid]=n;save();cm();renderSchedule();renderPTOBanner();}
+function clrSub(sid){delete pto.subs[sid];save();cm();renderSchedule();renderPTOBanner();}
+function openNotifyModal(sid){const s=S.slots.find(x=>x.id===sid);if(!s)return;const msg=vmsg(),enc=encodeURIComponent(msg);const links=s.roster.map(ln=>{const p=S.people.find(x=>gln(x.name)===ln||x.name===ln);if(p&&cp(p.phone))return`<a href="sms:${cp(p.phone)}?body=${enc}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border:1.5px solid #ddd8d0;border-radius:6px;font-size:13px;font-family:Georgia,serif;margin-bottom:8px;color:#1a1a2e;text-decoration:none;background:#faf8f4"><span>${p.name}</span><span style="color:#6b7280;font-size:11px;font-style:italic">${cp(p.phone)} \u203a</span></a>`;return`<div style="padding:8px 12px;border:1px solid #ddd8d0;border-radius:6px;font-size:12px;color:#6b7280;font-style:italic;margin-bottom:6px">${ln} \u2014 no phone on file</div>`;}).join('');sm(`<h3>&#9992; Cancel Lesson</h3><div class="mp">${msg}</div><p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:10px">Tap name to open in Messages:</p>${links||'<div style="font-size:12px;color:#6b7280;font-style:italic;margin-bottom:10px">No client linked yet.</div>'}<div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="mkNotified(${sid})">Mark as notified</button></div>`);}
+function mkNotified(sid){pto.notified[sid]=true;save();cm();renderSchedule();renderPTOBanner();}
+function mkAllNotified(day){S.slots.forEach(s=>{if(s.day!==day)return;const st2=ss(s);if(!isF(s.type)&&(st2==='booked'||st2==='partial'||st2==='full'))pto.notified[s.id]=true;});save();renderSchedule();renderPTOBanner();}
+
+// ── SCHEDULE ──
+function renderSchedule(){
+  renderPTOBanner();
+  const grid=document.getElementById('schedule-grid');
+  const bd={};DAYS.forEach(d=>bd[d]=[]);S.slots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
+  const isMike=role==='mike';
+  grid.innerHTML=DAYS.map(day=>{
+    const slots=bd[day],open=slots.filter(s=>ss(s)==='available').length;
+    const hrs=fhr(slots.reduce((sum,s)=>sum+shr(s),0));
+    const cc=S.childcare[day],ccb=cc&&cc.active?`<div class="cc-bar"><span class="cc-bar-time">${cc.start} \u2013 ${cc.end}</span><span class="cc-bar-label">Childcare</span><span class="cc-bar-badge">Coverage</span></div>`:'';
+    const isPTO=pto.active&&dayInPTO(day)&&isMike;
+    const acts=slots.filter(s=>{const st2=ss(s),l=LT[s.type];return(l&&l.fixed)||(st2==='booked'||st2==='partial'||st2==='full');});
+    const allDone=isPTO&&acts.length>0&&acts.every(s=>{const l=LT[s.type];return l&&l.fixed?!!pto.subs[s.id]:!!pto.notified[s.id];});
+    const dbc='day-block'+(isPTO?(allDone?' pto-done':' pto-day'):'');
+    const hasPL=isPTO&&slots.some(s=>{const st2=ss(s);return!isF(s.type)&&(st2==='booked'||st2==='partial'||st2==='full')&&!pto.notified[s.id];});
+    return`<div class="${dbc}">
+      <div class="day-header">
+        <div style="display:flex;align-items:baseline"><span class="day-name">${day}</span>${hrs&&!isPTO?`<span class="day-hours">(${hrs})</span>`:''}</div>
+        <span class="day-open-count">${isPTO?'<span style="color:#fca5a5;font-size:11px;font-style:italic">PTO</span>':open?open+' open':''}</span>
+      </div>
+      <div class="day-slots">
+        ${slots.map(s=>{
+          const st2=ss(s),l=LT[s.type]||LT.blocked,cap=l.cap,fil=s.roster.length,av=st2==='available';
+          if(isPTO&&isMike){
+            if(l.fixed){const sub=pto.subs[s.id];return`<div class="slot ${sub?'pto-sub-done':'pto-sub-needed'}" onclick="openSubModal(${s.id})"><span class="slot-time">${sdsp(s)}</span><div class="slot-body"><div class="slot-lbl">${s.label}</div><div class="slot-meta"><span class="tbadge ${l.cls}">${l.label}</span></div></div><div class="slot-right">${sub?`<span class="pbg">&#10003; ${sub}</span>`:`<span class="pbr">Sub needed</span>`}</div></div>`;}
+            if(st2==='booked'||st2==='partial'||st2==='full'){const nt=pto.notified[s.id];return`<div class="slot ${nt?'pto-notify-done':'pto-notify-needed'}" onclick="openNotifyModal(${s.id})"><span class="slot-time">${sdsp(s)}</span><div class="slot-body"><div class="slot-lbl">${s.label}</div><div class="slot-meta"><span class="tbadge ${l.cls}">${l.label}</span></div></div><div class="slot-right">${nt?`<span class="pbg">&#10003; Notified</span>`:`<span class="pbr">Cancel lesson</span>`}</div></div>`;}
+            return`<div class="slot pto-dim"><span class="slot-time">${sdsp(s)}</span><div class="slot-body"><div class="slot-lbl" style="color:#9ca3af">${s.label}</div></div></div>`;
+          }
+          const clickFn=isMike?`onclick="editSlot(${s.id})"`:'' ;
+          return`<div class="slot ${st2} ${isMike?'':'readonly'}" ${clickFn}>
+            <span class="slot-time">${sdsp(s)}</span>
+            <div class="slot-body"><div class="slot-lbl">${s.label}</div>
+              <div class="slot-meta"><span class="tbadge ${l.cls}">${l.label}</span>
+                ${l.fixed?`<span class="fnote">&#x1F512; Fixed</span>`:`<div style="display:flex;align-items:center;gap:4px">${rpips(fil,cap)}<span class="fill-lbl">${fil}/${cap}</span></div>${s.roster.length?`<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:2px">${s.roster.map(r=>`<span class="rchip">${r}</span>`).join('')}</div>`:''}`}
+              </div>
+            </div>
+            <div class="slot-right">${av&&isMike?`<button class="send-btn" onclick="event.stopPropagation();notifySlot('${day}',${s.id})">&#x2708;</button>`:''}</div>
+          </div>`;
+        }).join('')}
+        ${hasPL?`<button class="pnab" onclick="mkAllNotified('${day}')">Mark all ${day} lessons notified</button>`:''}
+        ${ccb}
+        ${isMike&&!isPTO?`<div style="padding:6px 2px 2px"><button class="btn btn-sm" onclick="openAddSlot('${day}')" style="font-size:10px">+ Add to ${day}</button></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── PEOPLE PICKER ──
+function autoLbl(){const e=document.getElementById('e-label');if(!e)return;if(_ps.length===0){if(e.value.includes('\u2014')||e.value==='Lesson')e.value='Lesson';return;}const n=_ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return p?gln(p.name):'';}).filter(Boolean);e.value=`Lesson \u2014 ${n.join(', ')}`;}
+function bPPk(sid){const s=S.slots.find(x=>x.id===sid);if(!s)return'';const cap=LT[s.type]?.cap||1,ac=_ps.length>=cap;if(!S.people.length)return`<div class="pke">No people yet.</div>`;return`<div class="ppk">${S.people.map(p=>{const sel=_ps.includes(p.id),dis=!sel&&ac;return`<div class="pki ${sel?'sel':''} ${dis?'dis':''}" onclick="togPP(${sid},${p.id})"><span class="pkn">${p.name}</span>${sel?'<span class="pkc">\u2713</span>':''}</div>`;}).join('')}</div>`;}
+function bRC(sid){if(!_ps.length)return`<span style="font-size:11px;color:var(--gray);font-style:italic">No one selected yet</span>`;return _ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return`<span class="rchip">${p?p.name:'?'} <button onclick="togPP(${sid},${pid})">\u2715</button></span>`;}).join('');}
+function togPP(sid,pid){const s=S.slots.find(x=>x.id===sid);if(!s)return;const cap=LT[s.type]?.cap||1,idx=_ps.indexOf(pid);if(idx>=0)_ps.splice(idx,1);else{if(_ps.length>=cap)return;_ps.push(pid);}const pe=document.getElementById('slot-ppk');if(pe)pe.innerHTML=bPPk(sid);const ce=document.getElementById('slot-rc');if(ce)ce.innerHTML=bRC(sid);autoLbl();}
+
+function editSlot(id){
+  if(role!=='mike')return;
+  const s=S.slots.find(x=>x.id===id);if(!s)return;
+  const l=LT[s.type]||LT.blocked,cap=l.cap;_ps=[];
+  s.roster.forEach(n=>{const p=S.people.find(x=>x.name===n||gln(x.name)===n);if(p&&!_ps.includes(p.id))_ps.push(p.id);});
+  const ss2=`${Math.floor(s.startM/60)}:${String(s.startM%60).padStart(2,'0')}`,es=`${Math.floor(s.endM/60)}:${String(s.endM%60).padStart(2,'0')}`;
+  const rs=l.fixed?`<div style="font-size:11px;color:#6b3f9e;font-style:italic;padding:6px 0">Fixed \u2014 no roster needed</div>`:`<div class="f"><div class="fl">Roster (${cap} spot${cap!==1?'s':''})</div><div id="slot-rc" class="rr">${bRC(id)}</div><div id="slot-ppk">${bPPk(id)}</div></div>`;
+  const stSec=l.fixed?'':`<div class="f"><label>Status</label><select id="e-status"><option value="auto" ${s.status!=='blocked'&&s.status!=='booked'?'selected':''}>Auto</option><option value="booked" ${s.status==='booked'?'selected':''}>Booked</option><option value="blocked" ${s.status==='blocked'?'selected':''}>Blocked</option></select></div>`;
+  sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma"><button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);
+}
+function uch(){const t=document.getElementById('e-type')?.value,l=LT[t],el=document.getElementById('cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
+function svSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;s.label=document.getElementById('e-label').value;s.startM=pti(document.getElementById('e-start').value);s.endM=pti(document.getElementById('e-end').value);const nt=document.getElementById('e-type').value;if(nt!==s.type){s.type=nt;if(isF(nt)){s.roster=[];s.status='fixed';}else{const nc=LT[nt]?.cap||1;_ps=_ps.slice(0,nc);s.status='auto';}}if(!isF(s.type)){s.roster=_ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return p?gln(p.name):'';}).filter(Boolean);const se=document.getElementById('e-status');if(se){const v=se.value;s.status=v==='auto'?'auto':v;}}save();cm();renderSchedule();}
+function delSlot(id){if(role!=='mike')return;S.slots=S.slots.filter(s=>s.id!==id);save();cm();renderSchedule();}
+function openAddSlot(def='Monday'){if(role!=='mike')return;sm(`<h3>Add Slot</h3><div class="f"><label>Day</label><select id="n-day">${DAYS.map(d=>`<option value="${d}" ${d===def?'selected':''}>${d}</option>`).join('')}</select></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="n-start" placeholder="10:00"></div><div style="flex:1"><div class="fl">End</div><input id="n-end" placeholder="11:30"></div></div><div class="f"><label>Label</label><input id="n-label" placeholder="e.g. Lesson \u2014 Smith"></div><div class="f"><label>Type</label><select id="n-type" onchange="ach()">${Object.entries(LT).map(([k,v])=>`<option value="${k}">${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="add-cap-hint">Capacity: 1</div></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addSlot()">Add</button></div>`);}
+function ach(){const t=document.getElementById('n-type')?.value,l=LT[t],el=document.getElementById('add-cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
+function addSlot(){if(role!=='mike')return;const type=document.getElementById('n-type').value;const s={id:S.nextId++,day:document.getElementById('n-day').value,startM:pti(document.getElementById('n-start').value),endM:pti(document.getElementById('n-end').value),label:document.getElementById('n-label').value,type,status:isF(type)?'fixed':'auto',roster:[]};S.slots.push(s);save();cm();renderSchedule();}
+
+function notifySlot(day,sid){
+  if(role!=='mike')return;
+  const slot=S.slots.find(s=>s.id===sid);if(!slot)return;
+  const interested=S.people.filter(p=>p.notifyAll||p.days.includes(day));
+  if(!interested.length){sm(`<h3>No One to Notify</h3><p style="font-size:13px;color:#6b7280;margin-bottom:12px">No people marked as interested in ${day}.</p><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Close</button></div>`);return;}
+  const msg=nmsg(slot,day),enc=encodeURIComponent(msg);
+  const links=interested.map(p=>`<a href="sms:${cp(p.phone)}?body=${enc}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border:1.5px solid #ddd8d0;border-radius:6px;font-size:13px;font-family:Georgia,serif;margin-bottom:8px;color:#1a1a2e;text-decoration:none;background:#faf8f4"><span>${p.name}</span><span style="color:#6b7280;font-size:11px;font-style:italic">${cp(p.phone)} \u203a</span></a>`).join('');
+  sm(`<h3>&#x2708; Notify \u2014 ${day}</h3><div class="mp">${msg}</div><p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:10px">Tap a name to open in Messages:</p>${links}<div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Done</button></div>`);
+}
+
+// ── CHILDCARE ──
+function renderCC(){
+  document.getElementById('cc-grid').innerHTML=DAYS.map(day=>{
+    const cc=S.childcare[day]||{...DCC},isMike=role==='mike';
+    return`<div class="cd ${!cc.active?'cdo':''}"><div class="cdh"><span class="cdt">${day}</span><div style="display:flex;align-items:center;gap:8px">${cc.active?`<span class="cdhr">&#x1F552; ${cc.start} \u2013 ${cc.end}</span>`:'<span style="font-size:12px;color:rgba(255,255,255,.5);font-style:italic">Day off</span>'}<button class="cctg ${cc.active?'on':''}" onclick="togCC('${day}')">${cc.active?'On':'Off'}</button>${isMike&&cc.active?`<button class="btn btn-sm" onclick="editCCH('${day}')" style="font-size:10px;padding:4px 10px">Edit hours</button>`:''}</div></div>${cc.active?`<div class="cdb"><div class="cdnl"><span>Activity notes</span><span>${isMike?'Visible to caregiver':''}</span></div><textarea rows="3" placeholder="e.g. Pool in the morning...">${cc.note||''}</textarea><div class="cdsr"><button class="btn btn-sm" onclick="svCCN('${day}',this.closest('.cdb').querySelector('textarea').value,this)">Save note</button></div></div>`:''}</div>`;
+  }).join('');
+}
+function togCC(day){if(!S.childcare[day])S.childcare[day]={...DCC};S.childcare[day].active=!S.childcare[day].active;save();renderCC();if(role==='mike')renderSchedule();}
+function svCCN(day,val,btn){if(!S.childcare[day])S.childcare[day]={...DCC};S.childcare[day].note=val;save();btn.textContent='Saved \u2713';setTimeout(()=>{btn.textContent='Save note';},1500);}
+function editCCH(day){if(role!=='mike')return;const cc=S.childcare[day]||{...DCC};sm(`<h3>Edit Hours \u2014 ${day}</h3><div class="f"><label>Start</label><input id="cc-s" value="${cc.start}"></div><div class="f"><label>End</label><input id="cc-e" value="${cc.end}"></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svCCH('${day}')">Save</button></div>`);}
+function svCCH(day){if(role!=='mike')return;if(!S.childcare[day])S.childcare[day]={...DCC};S.childcare[day].start=document.getElementById('cc-s').value;S.childcare[day].end=document.getElementById('cc-e').value;save();cm();renderCC();renderSchedule();}
+
+// ── PEOPLE (mike only) ──
+function renderPeople(){
+  if(role!=='mike')return;
+  document.getElementById('people-count').textContent=S.people.length+' people on roster';
+  const list=document.getElementById('people-list');
+  if(!S.people.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic;padding:8px 0">No people yet.</div>';return;}
+  list.innerHTML=S.people.map(p=>{const bad=p.phone&&!pv(p.phone);return`<div class="pc"><div class="av">${p.initials}</div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-weight:bold;font-size:14px">${p.name}</span>${p.notifyAll?'<span class="pill on" style="font-size:10px">All slots</span>':''}</div><div style="font-size:12px;color:${bad?'#b5510a':'#6b7280'};margin:2px 0;font-style:italic">${p.phone||'No phone'}${bad?' \u26a0\ufe0f':''}</div><div class="dp">${SHORT.map((d,i)=>`<span class="pill ${p.days.includes(DAYS[i])?'on':''}" onclick="togDay(${p.id},'${DAYS[i]}')">${d}</span>`).join('')}</div></div><div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0"><button class="btn btn-sm bcx" onclick="openEP(${p.id})">Edit</button><button class="btn btn-sm bdg" onclick="delP(${p.id})">\u2715</button></div></div>`;}).join('');
+}
+function togDay(pid,day){if(role!=='mike')return;const p=S.people.find(x=>x.id===pid);if(!p)return;const i=p.days.indexOf(day);if(i>=0)p.days.splice(i,1);else p.days.push(day);save();renderPeople();}
+function delP(id){if(role!=='mike')return;S.people=S.people.filter(p=>p.id!==id);save();renderPeople();}
+function openEP(id){if(role!=='mike')return;const p=S.people.find(x=>x.id===id);if(!p)return;sm(`<h3>Edit Person</h3><div class="f"><label>Full name</label><input id="ep-n" value="${p.name}"></div><div class="f"><label>Phone</label><input id="ep-p" type="tel" value="${p.phone}" placeholder="5025551234" oninput="chph()"><div id="ep-ph" class="ph" style="${p.phone&&!pv(p.phone)?'display:block':''}">Digits only</div></div><div class="f"><label>Initials</label><input id="ep-i" value="${p.initials}" maxlength="3"></div><div class="f"><label><input type="checkbox" id="ep-a" style="width:auto;margin-right:6px" ${p.notifyAll?'checked':''}>Notify for all open slots</label></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svEP(${id})">Save</button></div>`);}
+function chph(){const i=document.getElementById('ep-p'),h=document.getElementById('ep-ph');if(i&&h)h.style.display=i.value&&!pv(i.value)?'block':'none';}
+function svEP(id){if(role!=='mike')return;const p=S.people.find(x=>x.id===id);if(!p)return;p.name=document.getElementById('ep-n').value.trim();p.phone=cp(document.getElementById('ep-p').value);p.initials=document.getElementById('ep-i').value.trim()||p.name.split(' ').map(w=>w[0]).join('').toUpperCase();p.notifyAll=document.getElementById('ep-a').checked;save();cm();renderPeople();}
+function openAddPerson(){if(role!=='mike')return;sm(`<h3>Add Person</h3><div class="f"><label>Full name</label><input id="p-n" placeholder="First Last"></div><div class="f"><label>Phone</label><input id="p-p" type="tel" placeholder="5025551234" oninput="chphn()"><div id="p-ph" class="ph">Digits only</div></div><div class="f"><label>Initials (auto-filled if blank)</label><input id="p-i" maxlength="3" placeholder="JT"></div><div class="f"><label><input type="checkbox" id="p-a" style="width:auto;margin-right:6px">Notify for all open slots</label></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addP()">Add</button></div>`);}
+function chphn(){const i=document.getElementById('p-p'),h=document.getElementById('p-ph');if(i&&h)h.style.display=i.value&&!pv(i.value)?'block':'none';}
+function addP(){if(role!=='mike')return;const n=document.getElementById('p-n').value.trim();if(!n)return;const p={id:S.nextId++,name:n,phone:cp(document.getElementById('p-p').value),initials:document.getElementById('p-i').value.trim()||n.split(' ').map(w=>w[0]).join('').toUpperCase(),days:[],notifyAll:document.getElementById('p-a').checked};S.people.push(p);save();cm();renderPeople();}
+
+// ── NOTES (mike only) ──
+function renderNotes(){if(role!=='mike')return;const list=document.getElementById('notes-list');if(!S.notes.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic">No notes yet.</div>';return;}list.innerHTML=S.notes.slice().reverse().map(n=>`<div class="nb"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:11px;color:#6b7280;font-style:italic">${n.date}</div><button class="btn btn-sm bdg" onclick="delNote(${n.id})" style="padding:4px 10px">\u2715</button></div><div style="font-size:13px;line-height:1.7;margin-top:6px">${n.text}</div></div>`).join('');}
+function delNote(id){if(role!=='mike')return;S.notes=S.notes.filter(n=>n.id!==id);save();renderNotes();}
+function openAddNote(){if(role!=='mike')return;const today=new Date().toISOString().slice(0,10);sm(`<h3>Add Note</h3><div class="f"><label>Date</label><input id="nn-d" type="date" value="${today}"></div><div class="f"><label>Note</label><textarea id="nn-t" rows="4"></textarea></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addNote()">Save</button></div>`);}
+function addNote(){if(role!=='mike')return;const n={id:S.nextId++,date:document.getElementById('nn-d').value,text:document.getElementById('nn-t').value};S.notes.push(n);save();cm();renderNotes();}
+
+// ── LIFE (mike only) ──
+function renderLife(){if(role!=='mike')return;const list=document.getElementById('activity-list');const sorted=[...S.activities].sort((a,b)=>a.date>b.date?1:-1);if(!sorted.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic">No activities yet.</div>';return;}list.innerHTML=sorted.map(a=>`<div class="ar"><span class="at at-${a.type}">${a.type}</span><span style="font-size:12px;color:#6b7280;min-width:80px;font-style:italic">${a.date}</span><span style="font-size:12px;color:#6b7280;min-width:58px">${a.time}</span><span style="flex:1;font-size:13px">${a.label}</span><button class="btn btn-sm bdg" onclick="delAct(${a.id})" style="padding:4px 10px">\u2715</button></div>`).join('');}
+function delAct(id){if(role!=='mike')return;S.activities=S.activities.filter(a=>a.id!==id);save();renderLife();}
+function openAddActivity(){if(role!=='mike')return;const today=new Date().toISOString().slice(0,10);sm(`<h3>Add Activity</h3><div class="f"><label>Date</label><input id="a-d" type="date" value="${today}"></div><div class="f"><label>Time</label><input id="a-t" placeholder="6:00 PM"></div><div class="f"><label>Description</label><input id="a-l"></div><div class="f"><label>Type</label><select id="a-ty"><option value="work">Work</option><option value="camp">Camp</option><option value="personal">Personal</option><option value="life">Life</option></select></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addAct()">Add</button></div>`);}
+function addAct(){if(role!=='mike')return;const a={id:S.nextId++,date:document.getElementById('a-d').value,time:document.getElementById('a-t').value,label:document.getElementById('a-l').value,type:document.getElementById('a-ty').value};S.activities.push(a);save();cm();renderLife();}
+
+function sm(html){const o=document.getElementById('modal');o.style.display='flex';o.innerHTML=`<div class="md" onclick="event.stopPropagation()">${html}</div>`;}
+function cm(){document.getElementById('modal').style.display='none';_ps=[];}
+</script>
+</body>
+</html>
