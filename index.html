@@ -262,7 +262,12 @@ textarea{resize:vertical}
 <!-- CHILDCARE -->
 <div id="panel-childcare" class="panel">
   <div id="cc-top-note" class="an"></div>
-  <div id="cc-event-pills" class="event-pills" style="margin-bottom:12px"></div>
+  <div id="cc-event-pills" class="event-pills" style="margin-bottom:8px"></div>
+  <div class="week-nav" style="margin-bottom:8px">
+    <button class="week-nav-btn" onclick="changeCCWeek(-1)">&#8592;</button>
+    <span class="week-nav-lbl" id="cc-week-label"></span>
+    <button class="week-nav-btn" onclick="changeCCWeek(1)">&#8594;</button>
+  </div>
   <div id="cc-grid"></div>
 </div>
 
@@ -395,7 +400,9 @@ function dateInRange(dateStr,startStr,endStr){return dateStr>=startStr&&dateStr<
 
 // Current view week offset (0=this week)
 let weekOffset=0;
+let ccWeekOffset=0;
 function getViewMonday(){return addDays(mondayOf(new Date()),weekOffset*7);}
+function getCCViewMonday(){return addDays(mondayOf(new Date()),ccWeekOffset*7);}
 function getNextMonday(){return addDays(mondayOf(new Date()),7);}
 
 const vmsg=()=>`Hey! I will be on vacation from ${pto.startDate?fmtDateLong(pto.startDate):'[start]'} to ${pto.endDate?fmtDateLong(pto.endDate):'[end]'}. I'll need to cancel our lesson, but will be back for the next one if that is ok.`;
@@ -424,7 +431,7 @@ const SCC={Monday:{start:'10:00 AM',end:'12:30 PM',active:true,note:''},Tuesday:
 
 // STATE
 // lifeEvents: [{id, type:'camp'|'vacation', title, startDate, endDate, days(camp only), startTime(camp), endTime(camp), kids(camp), notes, ptoLinked, archived}]
-let S={slots:SEED.map(s=>({...s})),childcare:JSON.parse(JSON.stringify(SCC)),people:[],notes:[],activities:[],requests:[],lifeEvents:[],nextId:60};
+let S={slots:SEED.map(s=>({...s})),childcare:JSON.parse(JSON.stringify(SCC)),childcareDateNotes:{},people:[],notes:[],activities:[],requests:[],lifeEvents:[],nextId:60};
 let pto={active:false,startDate:null,endDate:null,subs:{},notified:{},viewWeekOffset:0};
 let _ps=[],_st=null,_showArchived=false;
 
@@ -436,7 +443,7 @@ function save(){
   _st=setTimeout(async()=>{
     syncBar('','Saving...');
     const keys=role==='mike'
-      ?['people','notes','activities','childcare','nextId','pto','requests','lifeEvents','slots']
+      ?['people','notes','activities','childcare','childcareDateNotes','nextId','pto','requests','lifeEvents','slots']
       :['childcare'];
     for(const k of keys){
       const v=k==='pto'?pto:k==='nextId'?S.nextId:S[k];
@@ -448,15 +455,16 @@ function save(){
 async function boot(){
   syncBar('','Loading from cloud...');
   try{
-    const [people,notes,activities,childcare,nextId,ptoD,requests,lifeEvents,slots]=await Promise.all([
+    const [people,notes,activities,childcare,nextId,ptoD,requests,lifeEvents,slots,cdNotes]=await Promise.all([
       dbGet('people'),dbGet('notes'),dbGet('activities'),dbGet('childcare'),
-      dbGet('nextId'),dbGet('pto'),dbGet('requests'),dbGet('lifeEvents'),dbGet('slots')
+      dbGet('nextId'),dbGet('pto'),dbGet('requests'),dbGet('lifeEvents'),dbGet('slots'),dbGet('childcareDateNotes')
     ]);
     if(people)S.people=people;if(notes)S.notes=notes;if(activities)S.activities=activities;
     if(childcare)S.childcare=childcare;if(nextId)S.nextId=nextId;
     if(ptoD)Object.assign(pto,ptoD);if(requests)S.requests=requests;
     if(lifeEvents)S.lifeEvents=lifeEvents;
     if(slots)S.slots=slots;else S.slots=SEED.map(s=>({...s}));
+    if(cdNotes)S.childcareDateNotes=cdNotes;else S.childcareDateNotes={};
     // Auto-archive past life events
     autoArchiveLifeEvents();
     syncBar('ok','✓ Loaded from cloud');
@@ -489,6 +497,7 @@ function rpips(f,c){const s=Math.min(c,8);let h='<div class="pips">';for(let i=0
 
 // ── WEEK NAVIGATION ──
 function changeWeek(dir){weekOffset+=dir;renderSchedule();}
+function changeCCWeek(dir){ccWeekOffset+=dir;renderCC();}
 
 function renderWeekLabel(){
   const mon=getViewMonday();
@@ -801,8 +810,11 @@ function goToRequests(){st('people');const s=document.getElementById('people-sea
 function renderSchedule(){
   renderPTOBanner();updateReqBanner();
   renderWeekLabel();
-  // Event pills for NEXT week (always, regardless of view)
-  renderEventPills('event-pills',eventsNextWeek());
+  // Event pills: show for viewed week, PLUS next week reminder when on current week
+  const viewedEvents=eventsInWeek(getViewMonday());
+  const nextEvents=weekOffset===0?eventsNextWeek().filter(e=>!viewedEvents.find(v=>v.id===e.id)):[];
+  const allPills=[...viewedEvents,...nextEvents.filter(e=>!viewedEvents.find(v=>v.id===e.id))];
+  renderEventPills('event-pills',allPills);
   // Setup controls
   if(role==='mike'){
     document.getElementById('sched-controls').innerHTML=`<button class="btn btn-sm bpto" onclick="openPTO()" id="pto-btn">PTO</button><button class="btn btn-sm" onclick="openAddSlot()">+ Add slot</button>`;
@@ -875,12 +887,19 @@ function renderCC(){
   updateReqBanner();
   // Event pills for next week — visible to caregiver too
   renderEventPills('cc-event-pills',eventsNextWeek());
+  // Also show current week events if any
+  const curWeekEvts=eventsInWeek(mondayOf(new Date()));
+  if(curWeekEvts.length)renderEventPills('cc-event-pills',[...curWeekEvts,...eventsNextWeek().filter(e=>!curWeekEvts.find(v=>v.id===e.id))]);
   document.getElementById('cc-grid').innerHTML=DAYS.map(day=>{
     const cc=S.childcare[day]||{...DCC},m=role==='mike';
     return`<div class="cd ${!cc.active?'cdo':''}"><div class="cdh"><span class="cdt">${day}</span><div style="display:flex;align-items:center;gap:8px">${cc.active?`<span class="cdhr">&#x1F552; ${cc.start} \u2013 ${cc.end}</span>`:'<span style="font-size:12px;color:rgba(255,255,255,.5);font-style:italic">Day off</span>'}<button class="cctg ${cc.active?'on':''}" onclick="togCC('${day}')">${cc.active?'On':'Off'}</button>${m&&cc.active?`<button class="btn btn-sm" onclick="editCCH('${day}')" style="font-size:10px;padding:4px 10px">Edit hours</button>`:''}</div></div>${cc.active?`<div class="cdb"><div class="cdnl"><span>Activity notes</span><span>${m?'Visible to caregiver':''}</span></div><textarea rows="3" placeholder="e.g. Pool in the morning...">${cc.note||''}</textarea><div class="cdsr"><button class="btn btn-sm" onclick="svCCN('${day}',this.closest('.cdb').querySelector('textarea').value,this)">Save note</button></div></div>`:''}</div>`;
   }).join('');
 }
 function togCC(day){if(!S.childcare[day])S.childcare[day]={...DCC};S.childcare[day].active=!S.childcare[day].active;save();renderCC();if(role==='mike')renderSchedule();}
+function svDateNote(date,val,btn){
+  S.childcareDateNotes[date]=val;
+  save();btn.textContent='Saved ✓';setTimeout(()=>{btn.textContent='Save note';},1500);
+}
 function svCCN(day,val,btn){if(!S.childcare[day])S.childcare[day]={...DCC};S.childcare[day].note=val;save();btn.textContent='Saved \u2713';setTimeout(()=>{btn.textContent='Save note';},1500);}
 function editCCH(day){if(role!=='mike')return;const cc=S.childcare[day]||{...DCC};sm(`<h3>Edit Hours \u2014 ${day}</h3><div class="f"><label>Start</label><input id="cc-s" value="${cc.start}"></div><div class="f"><label>End</label><input id="cc-e" value="${cc.end}"></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svCCH('${day}')">Save</button></div>`);}
 function svCCH(day){if(role!=='mike')return;if(!S.childcare[day])S.childcare[day]={...DCC};S.childcare[day].start=document.getElementById('cc-s').value;S.childcare[day].end=document.getElementById('cc-e').value;save();cm();renderCC();renderSchedule();}
