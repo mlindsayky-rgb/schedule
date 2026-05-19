@@ -411,7 +411,7 @@ function save(){
   _st=setTimeout(async()=>{
     syncBar('','Saving...');
     const keys=role==='mike'
-      ?['people','notes','activities','childcare','nextId','pto','requests','lifeEvents']
+      ?['people','notes','activities','childcare','nextId','pto','requests','lifeEvents','slots']
       :['childcare'];
     for(const k of keys){
       const v=k==='pto'?pto:k==='nextId'?S.nextId:S[k];
@@ -423,14 +423,15 @@ function save(){
 async function boot(){
   syncBar('','Loading from cloud...');
   try{
-    const [people,notes,activities,childcare,nextId,ptoD,requests,lifeEvents]=await Promise.all([
+    const [people,notes,activities,childcare,nextId,ptoD,requests,lifeEvents,slots]=await Promise.all([
       dbGet('people'),dbGet('notes'),dbGet('activities'),dbGet('childcare'),
-      dbGet('nextId'),dbGet('pto'),dbGet('requests'),dbGet('lifeEvents')
+      dbGet('nextId'),dbGet('pto'),dbGet('requests'),dbGet('lifeEvents'),dbGet('slots')
     ]);
     if(people)S.people=people;if(notes)S.notes=notes;if(activities)S.activities=activities;
     if(childcare)S.childcare=childcare;if(nextId)S.nextId=nextId;
     if(ptoD)Object.assign(pto,ptoD);if(requests)S.requests=requests;
     if(lifeEvents)S.lifeEvents=lifeEvents;
+    if(slots)S.slots=slots;else S.slots=SEED.map(s=>({...s}));
     // Auto-archive past life events
     autoArchiveLifeEvents();
     syncBar('ok','✓ Loaded from cloud');
