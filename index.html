@@ -169,6 +169,10 @@ textarea{resize:vertical}
 .cctg{font-size:10px;padding:4px 12px;border-radius:20px;border:1.5px solid rgba(255,255,255,.5);cursor:pointer;background:transparent;color:rgba(255,255,255,.8);font-family:Georgia,serif;font-weight:500}
 .cctg.on{background:var(--green-soft);border-color:var(--green-soft);color:#fff}
 .pnab{width:100%;margin-top:8px;font-size:12px;background:#1a1a2e;color:#fff;padding:8px;border-radius:5px;cursor:pointer;border:none;font-family:Georgia,serif;font-weight:600}
+
+.req-banner{background:#dc2626;color:#fff;padding:7px 16px;font-size:12px;font-family:Georgia,serif;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s}
+.req-banner:hover{background:#b91c1c}
+.req-banner-dot{width:8px;height:8px;border-radius:50%;background:#fff;flex-shrink:0}
 .role-badge{position:fixed;bottom:12px;right:12px;background:rgba(26,26,46,.7);color:rgba(255,255,255,.6);font-size:10px;padding:4px 10px;border-radius:20px;font-family:Georgia,serif;font-style:italic;z-index:50;cursor:pointer}
 </style>
 </head>
@@ -195,6 +199,7 @@ textarea{resize:vertical}
   <button class="tab" id="tab-life" onclick="st('life')" style="display:none">Life</button>
 </div>
 <div id="pto-banner" style="display:none"></div>
+<div id="req-banner" style="display:none" onclick="goToRequests()"></div>
 <div class="app-body">
 <div id="panel-schedule" class="panel active">
   <div class="sh">
@@ -395,7 +400,7 @@ function saveRequest(personId,date){
   save();cm();renderPeople();
 }
 
-function closeRequest(reqId){
+function closeRequest(reqId){updateReqBanner();
   const r=S.requests.find(x=>x.id===reqId);if(!r)return;
   r.closed=true;
   save();
@@ -428,7 +433,7 @@ function mkAllN(day){S.slots.forEach(s=>{if(s.day!==day)return;const st2=ss(s);i
 
 // ── SCHEDULE ──
 function renderSchedule(){
-  renderPTOBanner();
+  renderPTOBanner();updateReqBanner();
   const grid=document.getElementById('schedule-grid');
   const bd={};DAYS.forEach(d=>bd[d]=[]);S.slots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
   const m=role==='mike';
@@ -537,8 +542,15 @@ function svCCH(day){if(role!=='mike')return;if(!S.childcare[day])S.childcare[day
 // ── PEOPLE with search + request button ──
 function renderPeople(){
   if(role!=='mike')return;
+  updateReqBanner();
   const search=(document.getElementById('people-search')?.value||'').toLowerCase();
-  const filtered=S.people.filter(p=>!search||p.name.toLowerCase().includes(search));
+  // Sort: open requests first (alpha), then rest (alpha)
+  const sorted=[...S.people].sort((a,b)=>{
+    const ar=hasOpenReqs(a.id),br=hasOpenReqs(b.id);
+    if(ar&&!br)return -1;if(!ar&&br)return 1;
+    return a.name.localeCompare(b.name);
+  });
+  const filtered=sorted.filter(p=>!search||p.name.toLowerCase().includes(search));
   document.getElementById('people-count').textContent=`${S.people.length} people on roster${search&&filtered.length!==S.people.length?' ('+filtered.length+' shown)':''}`;
   const list=document.getElementById('people-list');
   if(!S.people.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic;padding:8px 0">No people yet.</div>';return;}
@@ -589,6 +601,21 @@ function delAct(id){if(role!=='mike')return;S.activities=S.activities.filter(a=>
 function openAddActivity(){if(role!=='mike')return;const today=new Date().toISOString().slice(0,10);sm(`<h3>Add Activity</h3><div class="f"><label>Date</label><input id="a-d" type="date" value="${today}"></div><div class="f"><label>Time</label><input id="a-t" placeholder="6:00 PM"></div><div class="f"><label>Description</label><input id="a-l"></div><div class="f"><label>Type</label><select id="a-ty"><option value="work">Work</option><option value="camp">Camp</option><option value="personal">Personal</option><option value="life">Life</option></select></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addAct()">Add</button></div>`);}
 function addAct(){if(role!=='mike')return;const a={id:S.nextId++,date:document.getElementById('a-d').value,time:document.getElementById('a-t').value,label:document.getElementById('a-l').value,type:document.getElementById('a-ty').value};S.activities.push(a);save();cm();renderLife();}
 
+
+function goToRequests(){
+  st('people');
+  // Clear search so all people show, requests floated to top
+  const s=document.getElementById('people-search');
+  if(s)s.value='';
+  renderPeople();
+}
+function updateReqBanner(){
+  const bn=document.getElementById('req-banner');if(!bn)return;
+  const total=S.people.reduce((n,p)=>n+openReqs(p.id).length,0);
+  if(total===0){bn.style.display='none';return;}
+  bn.style.display='flex';
+  bn.innerHTML=`<div class="req-banner-dot"></div><span>Requests (${total})</span>`;
+}
 function sm(html){const o=document.getElementById('modal');o.style.display='flex';o.innerHTML=`<div class="md" onclick="event.stopPropagation()">${html}</div>`;}
 function cm(){document.getElementById('modal').style.display='none';_ps=[];}
 </script>
