@@ -16,6 +16,7 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
   --teal:#1a6b6b;--teal-pale:#e0f2f1;--teal-border:#80cbc4;
   --red:#b91c1c;--red-pale:#fef2f2;--red-border:#fca5a5;
 }
+/* PIN */
 #pin-screen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:24px}
 #pin-screen h1{color:#fff;font-size:22px;font-weight:bold;letter-spacing:.06em;text-align:center}
 .pin-dots{display:flex;gap:14px;justify-content:center;margin:8px 0}
@@ -28,9 +29,11 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .pin-btn.zero{grid-column:2}
 .pin-btn.del{font-size:16px}
 #pin-error{color:#fca5a5;font-size:13px;font-style:italic;text-align:center;min-height:20px}
+/* SYNC */
 #sync-bar{background:#2d2d5e;color:rgba(255,255,255,.75);font-size:10px;text-align:center;padding:4px;letter-spacing:.04em;font-style:italic}
 #sync-bar.ok{background:#2d6a4f}
 #sync-bar.err{background:#7f1d1d}
+/* APP */
 .app{max-width:100%;background:var(--cream);min-height:100vh}
 .tabs{display:flex;flex-wrap:wrap;background:var(--navy)}
 .tab{padding:11px 16px;border:none;background:none;cursor:pointer;font-size:11px;font-family:Georgia,serif;letter-spacing:.06em;color:rgba(255,255,255,.55);text-transform:uppercase;font-weight:500;border-bottom:3px solid transparent;transition:color .15s,background .15s}
@@ -39,6 +42,7 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .panel{display:none}.panel.active{display:block}
 .app-body{padding:1rem}
 .grid{display:grid;gap:12px}
+/* DAY BLOCKS */
 .day-block{border:1px solid var(--border);border-radius:6px;overflow:hidden;box-shadow:0 1px 4px rgba(26,26,46,.06)}
 .day-block.pto-day{border-color:#fca5a5}
 .day-block.pto-done{border-color:#86efac}
@@ -47,6 +51,7 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .day-hours{color:rgba(255,255,255,.38);font-size:10px;font-style:italic;margin-left:7px}
 .day-open-count{color:rgba(255,255,255,.6);font-size:11px;font-style:italic}
 .day-slots{padding:10px;background:var(--cream)}
+/* SLOTS */
 .slot{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:4px;margin-bottom:6px;cursor:pointer;border:1px solid transparent;transition:filter .15s}
 .slot:hover{filter:brightness(.93)}
 .slot.available{background:var(--green-pale);border-color:#b7e4c7}
@@ -61,10 +66,12 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .slot.pto-notify-done{background:#f0fdf4;border-color:#86efac}
 .slot.pto-dim{background:var(--gray-pale);border-color:#e5e7eb;opacity:.45;cursor:default}
 .slot.readonly{cursor:default}.slot.readonly:hover{filter:none}
+/* CC BAR */
 .cc-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:4px;border:1px dashed var(--teal-border);background:var(--teal-pale);margin-top:8px}
 .cc-bar-time{font-size:11px;color:var(--teal);min-width:90px;font-style:italic;flex-shrink:0}
 .cc-bar-label{font-size:12px;color:var(--teal);font-weight:500}
 .cc-bar-badge{font-size:10px;padding:1px 8px;border-radius:20px;background:#b2dfdb;color:#004d40;margin-left:auto}
+/* SLOT PARTS */
 .slot-time{font-size:11px;color:var(--gray);min-width:90px;font-style:italic;flex-shrink:0}
 .slot-body{flex:1;min-width:0}
 .slot-lbl{font-size:13px;color:var(--navy);font-weight:600}
@@ -84,6 +91,7 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .fnote{font-size:10px;color:var(--purple);background:#f3e5f5;border-radius:20px;padding:2px 8px;display:inline-flex;align-items:center;gap:4px}
 .send-btn{width:36px;height:36px;border-radius:8px;background:var(--green-soft);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;transition:background .15s,transform .1s;flex-shrink:0}
 .send-btn:hover{background:var(--green);transform:scale(1.08)}
+/* PTO BANNER */
 .pto-banner{background:#7f1d1d;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px}
 .pto-bl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .pto-tag{background:#dc2626;color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
@@ -95,6 +103,22 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .pto-nlbl{font-size:11px;color:rgba(255,255,255,.8);min-width:90px;text-align:center;font-style:italic}
 .pbr{font-size:10px;padding:3px 9px;border-radius:20px;background:#dc2626;color:#fff;font-weight:600;white-space:nowrap}
 .pbg{font-size:10px;padding:3px 9px;border-radius:20px;background:var(--green-soft);color:#fff;font-weight:600;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}
+/* WEEK NAV */
+.week-nav{display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 0 4px;margin-bottom:8px}
+.week-nav-btn{background:var(--navy);color:#fff;border:none;border-radius:5px;padding:5px 13px;font-size:13px;cursor:pointer;font-family:Georgia,serif;transition:background .15s}
+.week-nav-btn:hover{background:var(--navy-hover)}
+.week-nav-lbl{font-size:12px;color:var(--gray);font-style:italic;min-width:180px;text-align:center}
+/* EVENT PILLS on schedule */
+.event-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.pill-camp{background:#d97706;color:#fff;font-size:11px;padding:4px 11px;border-radius:20px;font-weight:600;cursor:pointer;transition:background .15s}
+.pill-camp:hover{background:#b45309}
+.pill-vacation{background:#0e7490;color:#fff;font-size:11px;padding:4px 11px;border-radius:20px;font-weight:600;cursor:pointer;transition:background .15s}
+.pill-vacation:hover{background:#155e75}
+/* REQUEST BANNER */
+.req-banner{background:#dc2626;color:#fff;padding:7px 16px;font-size:12px;font-family:Georgia,serif;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s}
+.req-banner:hover{background:#b91c1c}
+.req-banner-dot{width:8px;height:8px;border-radius:50%;background:#fff;flex-shrink:0}
+/* LAYOUT */
 .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .leg{display:flex;gap:8px;flex-wrap:wrap}
 .li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gray);font-style:italic}
@@ -127,37 +151,29 @@ textarea{resize:vertical}
 .pkc{font-size:16px;color:var(--green-soft);font-weight:bold}
 .pke{padding:12px 14px;font-size:12px;color:#6b7280;font-style:italic}
 .rr{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:30px;align-items:center}
-/* PEOPLE CARD */
+/* PEOPLE */
 .pc{display:flex;align-items:flex-start;gap:12px;padding:12px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;background:#fff}
 .av{width:38px;height:38px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;color:#fff;flex-shrink:0}
 .dp{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .pill{font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);cursor:pointer;user-select:none;font-family:Georgia,serif;background:#fff;color:#6b7280}
 .pill.on{background:var(--navy);color:#fff;border-color:var(--navy)}
-/* REQUEST BUTTON */
 .req-btn{width:30px;height:30px;border-radius:6px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:bold;transition:background .15s,transform .1s;flex-shrink:0}
-.req-btn.none{background:#e5e7eb;color:#6b7280}
-.req-btn.none:hover{background:#d1d5db;transform:scale(1.05)}
-.req-btn.has{background:#dc2626;color:#fff}
-.req-btn.has:hover{background:#b91c1c;transform:scale(1.05)}
-/* REQUEST LIST in modal */
+.req-btn.none{background:#e5e7eb;color:#6b7280}.req-btn.none:hover{background:#d1d5db;transform:scale(1.05)}
+.req-btn.has{background:#dc2626;color:#fff}.req-btn.has:hover{background:#b91c1c;transform:scale(1.05)}
 .req-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;background:#fff}
 .req-item-body{flex:1;min-width:0}
 .req-item-note{font-size:13px;color:var(--navy);line-height:1.5}
 .req-item-date{font-size:10px;color:var(--gray);font-style:italic;margin-top:3px}
-.req-close-btn{width:28px;height:28px;border-radius:5px;border:none;background:#f0fdf4;color:var(--green-soft);cursor:pointer;font-size:16px;font-weight:bold;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.req-close-btn{width:28px;height:28px;border-radius:5px;border:none;background:#f0fdf4;color:var(--green-soft);cursor:pointer;font-size:16px;font-weight:bold;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .req-close-btn:hover{background:#dcfce7}
-/* LESSON CLOSE SUGGESTION */
 .req-suggestion{background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#92400e;display:flex;align-items:center;gap:8px}
 .req-suggestion label{cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px;color:#92400e;font-family:Georgia,serif}
-/* PEOPLE SEARCH */
 .people-search{width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:5px;font-size:13px;font-family:Georgia,serif;background:#fff;color:var(--navy);margin-bottom:12px}
 .people-search:focus{outline:2px solid var(--navy);border-color:var(--navy)}
+/* NOTES / ACTIVITY */
 .nb{border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:10px;background:#fff}
-.ar{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;background:#fff}
-.at{font-size:10px;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em}
-.at-work{background:#e8eaf6;color:#1a237e}.at-life{background:var(--green-pale);color:var(--green)}
-.at-camp{background:#fff3e0;color:#e65100}.at-personal{background:#fce4ec;color:#880e4f}
 .an{background:#f0ece4;border-radius:4px;padding:9px 13px;font-size:11px;color:#6b7280;margin-bottom:14px;border-left:3px solid var(--green-soft);font-style:italic}
+/* CHILDCARE */
 .cd{border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden;background:#fff}
 .cdh{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--navy)}
 .cdt{font-weight:bold;font-size:13px;color:#fff;letter-spacing:.06em;text-transform:uppercase}
@@ -169,10 +185,30 @@ textarea{resize:vertical}
 .cctg{font-size:10px;padding:4px 12px;border-radius:20px;border:1.5px solid rgba(255,255,255,.5);cursor:pointer;background:transparent;color:rgba(255,255,255,.8);font-family:Georgia,serif;font-weight:500}
 .cctg.on{background:var(--green-soft);border-color:var(--green-soft);color:#fff}
 .pnab{width:100%;margin-top:8px;font-size:12px;background:#1a1a2e;color:#fff;padding:8px;border-radius:5px;cursor:pointer;border:none;font-family:Georgia,serif;font-weight:600}
-
-.req-banner{background:#dc2626;color:#fff;padding:7px 16px;font-size:12px;font-family:Georgia,serif;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s}
-.req-banner:hover{background:#b91c1c}
-.req-banner-dot{width:8px;height:8px;border-radius:50%;background:#fff;flex-shrink:0}
+/* LIFE TAB */
+.life-card{border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden;background:#fff;box-shadow:0 1px 4px rgba(26,26,46,.06)}
+.life-card-header{padding:11px 14px;display:flex;align-items:center;justify-content:space-between}
+.life-card-header.camp{background:#fff7ed;border-bottom:1px solid #fed7aa}
+.life-card-header.vacation{background:#ecfeff;border-bottom:1px solid #a5f3fc}
+.life-card-title{font-weight:bold;font-size:14px;color:var(--navy)}
+.life-card-subtitle{font-size:11px;color:var(--gray);font-style:italic;margin-top:2px}
+.life-card-type{font-size:10px;padding:2px 9px;border-radius:20px;font-weight:600;letter-spacing:.04em}
+.life-card-type.camp{background:#d97706;color:#fff}
+.life-card-type.vacation{background:#0e7490;color:#fff}
+.life-card-body{padding:12px 14px;font-size:13px;color:var(--navy);line-height:1.6}
+.life-card-meta{font-size:11px;color:var(--gray);font-style:italic;margin-top:4px}
+.life-card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.kids-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.kid-pill{font-size:11px;padding:3px 11px;border-radius:20px;border:1.5px solid var(--border);cursor:pointer;user-select:none;font-family:Georgia,serif;background:#fff;color:#6b7280;transition:background .15s}
+.kid-pill.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.day-check{display:flex;gap:6px;flex-wrap:wrap}
+.day-check label{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--navy);cursor:pointer;padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:#fff;transition:background .15s}
+.day-check label:hover{background:var(--green-pale)}
+.day-check input[type=checkbox]{width:auto}
+.pto-link-btn{background:#2d6a4f;color:#fff;border:none;border-radius:5px;padding:6px 14px;font-size:12px;font-family:Georgia,serif;cursor:pointer;font-weight:600}
+.pto-link-btn:hover{background:#1a4a35}
+.pto-linked-badge{font-size:11px;padding:3px 10px;border-radius:20px;background:#d1fae5;color:#065f46;font-style:italic}
+.archived-toggle{text-align:center;padding:10px;font-size:12px;color:var(--gray);cursor:pointer;font-style:italic;text-decoration:underline}
 .role-badge{position:fixed;bottom:12px;right:12px;background:rgba(26,26,46,.7);color:rgba(255,255,255,.6);font-size:10px;padding:4px 10px;border-radius:20px;font-family:Georgia,serif;font-style:italic;z-index:50;cursor:pointer}
 </style>
 </head>
@@ -201,6 +237,8 @@ textarea{resize:vertical}
 <div id="pto-banner" style="display:none"></div>
 <div id="req-banner" style="display:none" onclick="goToRequests()"></div>
 <div class="app-body">
+
+<!-- SCHEDULE -->
 <div id="panel-schedule" class="panel active">
   <div class="sh">
     <div class="leg">
@@ -210,27 +248,58 @@ textarea{resize:vertical}
       <div class="li"><div class="ld" style="background:#6b3f9e"></div>Fixed</div>
       <div class="li"><div class="ld" style="background:#1a6b6b"></div>Childcare</div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center" id="sched-controls"></div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="sched-controls"></div>
+  </div>
+  <div id="event-pills" class="event-pills"></div>
+  <div class="week-nav">
+    <button class="week-nav-btn" onclick="changeWeek(-1)">&#8592;</button>
+    <span class="week-nav-lbl" id="week-label"></span>
+    <button class="week-nav-btn" onclick="changeWeek(1)">&#8594;</button>
   </div>
   <div id="schedule-grid" class="grid"></div>
 </div>
-<div id="panel-childcare" class="panel"><div class="an" id="cc-note"></div><div id="cc-grid"></div></div>
+
+<!-- CHILDCARE -->
+<div id="panel-childcare" class="panel">
+  <div id="cc-top-note" class="an"></div>
+  <div id="cc-event-pills" class="event-pills" style="margin-bottom:12px"></div>
+  <div id="cc-grid"></div>
+</div>
+
+<!-- PEOPLE -->
 <div id="panel-people" class="panel">
   <div class="an">Manage your lesson roster, day interests, and follow-up requests.</div>
-  <div class="sh">
-    <span style="font-size:12px;color:var(--gray);font-style:italic" id="people-count"></span>
-    <button class="btn btn-sm" onclick="openAddPerson()">+ Add person</button>
-  </div>
+  <div class="sh"><span style="font-size:12px;color:var(--gray);font-style:italic" id="people-count"></span><button class="btn btn-sm" onclick="openAddPerson()">+ Add person</button></div>
   <input class="people-search" id="people-search" placeholder="Search by name..." oninput="renderPeople()">
   <div id="people-list"></div>
 </div>
-<div id="panel-notes" class="panel"><div class="sh"><span style="font-size:15px;font-weight:bold;color:var(--navy)">Daily Notes</span><button class="btn btn-sm" onclick="openAddNote()">+ New note</button></div><div id="notes-list"></div></div>
-<div id="panel-life" class="panel"><div class="sh"><span style="font-size:15px;font-weight:bold;color:var(--navy)">Activities</span><button class="btn btn-sm" onclick="openAddActivity()">+ Add activity</button></div><div id="activity-list"></div></div>
+
+<!-- NOTES -->
+<div id="panel-notes" class="panel">
+  <div class="sh"><span style="font-size:15px;font-weight:bold;color:var(--navy)">Daily Notes</span><button class="btn btn-sm" onclick="openAddNote()">+ New note</button></div>
+  <div id="notes-list"></div>
+</div>
+
+<!-- LIFE -->
+<div id="panel-life" class="panel">
+  <div class="sh">
+    <span style="font-size:15px;font-weight:bold;color:var(--navy)">Life Events</span>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-sm" style="background:#d97706" onclick="openAddLifeEvent('camp')">+ Camp</button>
+      <button class="btn btn-sm" style="background:#0e7490" onclick="openAddLifeEvent('vacation')">+ Vacation</button>
+    </div>
+  </div>
+  <div id="life-list"></div>
+  <div class="archived-toggle" id="archived-toggle" onclick="toggleArchived()" style="display:none"></div>
+  <div id="archived-list" style="display:none"></div>
+</div>
+
 </div>
 </div>
 <div id="modal" class="mo" style="display:none" onclick="if(event.target===this)cm()"></div>
+
 <script>
-// PIN
+// ── PIN ──
 const PINS={mike:'8613',caregiver:'2370'};
 let role=null,pinEntry='';
 function pinTap(d){if(pinEntry.length>=4)return;pinEntry+=d;updateDots();if(pinEntry.length===4)setTimeout(checkPin,120);}
@@ -242,7 +311,8 @@ function unlockApp(r){
   document.getElementById('pin-screen').style.display='none';
   document.getElementById('main-app').style.display='block';
   document.getElementById('sync-bar').style.display='block';
-  const rb=document.getElementById('role-badge');rb.style.display='block';rb.textContent=(r==='mike'?'👤 Mike':'👶 Caregiver')+' — Lock';
+  const rb=document.getElementById('role-badge');rb.style.display='block';
+  rb.textContent=(r==='mike'?'👤 Mike':'👶 Caregiver')+' — Lock';
   setupRole();boot();
 }
 function lockApp(){role=null;pinEntry='';document.getElementById('pin-screen').style.display='flex';document.getElementById('main-app').style.display='none';document.getElementById('sync-bar').style.display='none';document.getElementById('role-badge').style.display='none';updateDots();}
@@ -251,22 +321,22 @@ function setupRole(){
   document.getElementById('tab-people').style.display=m?'':'none';
   document.getElementById('tab-notes').style.display=m?'':'none';
   document.getElementById('tab-life').style.display=m?'':'none';
-  document.getElementById('sched-controls').innerHTML=m?`<button class="btn btn-sm bpto" onclick="openPTO()" id="pto-btn">PTO</button><button class="btn btn-sm" onclick="openAddSlot()">+ Add slot</button>`:'';
-  document.getElementById('cc-note').textContent=m?'Edit childcare hours and activity notes for your caregiver.':'Here are today\'s childcare hours and notes from Mike.';
+  document.getElementById('cc-top-note').textContent=m?'Edit childcare hours and notes for your caregiver.':'Here are this week\'s childcare hours and notes from Mike.';
   if(!m)st('childcare');
 }
 
-// SUPABASE
+// ── SUPABASE ──
 const SURL='https://vztyrxqdnqzvkfwfnipt.supabase.co';
 const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6dHlyeHFkbnF6dmtmd2ZuaXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODc3NDAsImV4cCI6MjA5NDY2Mzc0MH0.HCVqqQ_i6ETY8EL19Is1pHVn2qj8hFXqMnCd4ifH0E8';
 const TBL='schedule_data';
 const H={'apikey':SKEY,'Authorization':`Bearer ${SKEY}`,'Content-Type':'application/json'};
 async function dbGet(k){try{const r=await fetch(`${SURL}/rest/v1/${TBL}?key=eq.${encodeURIComponent(k)}&select=value`,{headers:H});const d=await r.json();return(d&&d.length)?JSON.parse(d[0].value):null;}catch(e){return null;}}
-async function dbSave(k,v){const body=JSON.stringify({key:k,value:JSON.stringify(v)});try{const patch=await fetch(`${SURL}/rest/v1/${TBL}?key=eq.${encodeURIComponent(k)}`,{method:'PATCH',headers:{...H,'Prefer':'return=minimal'},body});if(patch.ok){const count=patch.headers.get('content-range');if(count&&count!=='*'&&!count.startsWith('0')){syncBar('ok','✓ Synced');return;}}const ins=await fetch(`${SURL}/rest/v1/${TBL}`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body});if(ins.ok){syncBar('ok','✓ Synced');}else{syncBar('err','⚠ Sync error');}}catch(e){syncBar('err','⚠ Sync error');}}
+async function dbSave(k,v){const body=JSON.stringify({key:k,value:JSON.stringify(v)});try{const p=await fetch(`${SURL}/rest/v1/${TBL}?key=eq.${encodeURIComponent(k)}`,{method:'PATCH',headers:{...H,'Prefer':'return=minimal'},body});if(p.ok){const c=p.headers.get('content-range');if(c&&c!=='*'&&!c.startsWith('0')){syncBar('ok','✓ Synced');return;}}const i=await fetch(`${SURL}/rest/v1/${TBL}`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body});if(i.ok)syncBar('ok','✓ Synced');else syncBar('err','⚠ Sync error');}catch(e){syncBar('err','⚠ Sync error');}}
 function syncBar(cls,msg){const b=document.getElementById('sync-bar');b.textContent=msg;b.className=cls;if(cls==='ok')setTimeout(()=>{b.textContent='Live — changes sync automatically';b.className='';},2500);}
 
-// CONSTANTS
+// ── CONSTANTS ──
 const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+const ALLDAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const SHORT=['Mon','Tue','Wed','Thu','Fri'];
 const LT={
   'private':{label:'Private lesson',cap:1,cls:'type-private',fixed:false},
@@ -278,6 +348,8 @@ const LT={
   'blocked':{label:'Blocked',cap:0,cls:'type-blocked',fixed:true},
 };
 const DCC={start:'9:00 AM',end:'12:00 PM',active:true,note:''};
+const KIDS=['Naomi','Luke','Kai'];
+
 const hm=(h,m)=>h*60+m;
 function mtd(m){const h=Math.floor(m/60),mm=m%60,ap=h<12?'AM':'PM',h12=h===0?12:h>12?h-12:h;return mm===0?`${h12} ${ap}`:`${h12}:${String(mm).padStart(2,'0')} ${ap}`;}
 const sdsp=s=>`${mtd(s.startM)}\u2013${mtd(s.endM)}`;
@@ -286,13 +358,25 @@ function pti(str){const s=str.trim(),c=s.indexOf(':');if(c===-1)return parseInt(
 const cp=p=>(p||'').replace(/\D/g,'');
 const pv=p=>cp(p).length===10;
 const gln=n=>{const p=n.trim().split(' ');return p[p.length-1];};
-const fdl=str=>new Date(str+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric'});
-const fds=str=>new Date(str+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
 function fhr(h){if(h===0)return'';const r=Math.round(h*2)/2,w=Math.floor(r);return r%1!==0?`${w}.5 hrs`:`${w} hr${w!==1?'s':''}`;}
-const vmsg=()=>`Hey! I will be on vacation from ${pto.startDate?fdl(pto.startDate):'[start]'} to ${pto.endDate?fdl(pto.endDate):'[end]'}. I'll need to cancel our lesson, but will be back for the next one if that is ok.`;
+
+// Date helpers
+function mondayOf(date){const d=new Date(date);const dow=d.getDay();const diff=dow===0?-6:1-dow;d.setDate(d.getDate()+diff);d.setHours(0,0,0,0);return d;}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function fmtDate(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function fmtDateLong(str){return new Date(str+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric'});}
+function isoDate(d){return d.toISOString().slice(0,10);}
+function dateInRange(dateStr,startStr,endStr){return dateStr>=startStr&&dateStr<=endStr;}
+
+// Current view week offset (0=this week)
+let weekOffset=0;
+function getViewMonday(){return addDays(mondayOf(new Date()),weekOffset*7);}
+function getNextMonday(){return addDays(mondayOf(new Date()),7);}
+
+const vmsg=()=>`Hey! I will be on vacation from ${pto.startDate?fmtDateLong(pto.startDate):'[start]'} to ${pto.endDate?fmtDateLong(pto.endDate):'[end]'}. I'll need to cancel our lesson, but will be back for the next one if that is ok.`;
 const nmsg=(slot,day)=>`Hey! I have an opening this week for a lesson if interested. You can ignore this text if not \u2014 ${day} ${sdsp(slot)}. Reply YES to claim. \u2014 Mike`;
 
-// SEED DATA
+// ── SEED ──
 const SEED=[
   {id:1,day:'Monday',startM:hm(10,0),endM:hm(11,0),label:'Lesson \u2014 Khan',type:'private',status:'booked',roster:['Khan']},
   {id:2,day:'Monday',startM:hm(11,0),endM:hm(12,30),label:'Adult Team \u2014 Scholtz',type:'adult-team',status:'fixed',roster:[]},
@@ -313,20 +397,22 @@ const SEED=[
 ];
 const SCC={Monday:{start:'10:00 AM',end:'12:30 PM',active:true,note:''},Tuesday:{start:'9:00 AM',end:'12:00 PM',active:true,note:''},Wednesday:{start:'9:30 AM',end:'12:00 PM',active:true,note:''},Thursday:{start:'9:30 AM',end:'12:00 PM',active:true,note:''},Friday:{start:'9:00 AM',end:'12:00 PM',active:true,note:''}};
 
-// STATE — requests stored as array of {id, personId, note, date, closed}
-let S={slots:SEED.map(s=>({...s})),childcare:JSON.parse(JSON.stringify(SCC)),people:[],notes:[],activities:[],requests:[],nextId:60};
+// STATE
+// lifeEvents: [{id, type:'camp'|'vacation', title, startDate, endDate, days(camp only), startTime(camp), endTime(camp), kids(camp), notes, ptoLinked, archived}]
+let S={slots:SEED.map(s=>({...s})),childcare:JSON.parse(JSON.stringify(SCC)),people:[],notes:[],activities:[],requests:[],lifeEvents:[],nextId:60};
 let pto={active:false,startDate:null,endDate:null,subs:{},notified:{},viewWeekOffset:0};
-let _ps=[],_st=null;
+let _ps=[],_st=null,_showArchived=false;
 
-// ── HELPERS ──
-function openReqs(personId){return S.requests.filter(r=>r.personId===personId&&!r.closed);}
-function hasOpenReqs(personId){return openReqs(personId).length>0;}
+function openReqs(pid){return S.requests.filter(r=>r.personId===pid&&!r.closed);}
+function hasOpenReqs(pid){return openReqs(pid).length>0;}
 
 function save(){
   clearTimeout(_st);
   _st=setTimeout(async()=>{
     syncBar('','Saving...');
-    const keys=role==='mike'?['people','notes','activities','childcare','nextId','pto','requests']:['childcare'];
+    const keys=role==='mike'
+      ?['people','notes','activities','childcare','nextId','pto','requests','lifeEvents']
+      :['childcare'];
     for(const k of keys){
       const v=k==='pto'?pto:k==='nextId'?S.nextId:S[k];
       await dbSave(k,v);
@@ -337,90 +423,334 @@ function save(){
 async function boot(){
   syncBar('','Loading from cloud...');
   try{
-    const [people,notes,activities,childcare,nextId,ptoD,requests]=await Promise.all([
-      dbGet('people'),dbGet('notes'),dbGet('activities'),
-      dbGet('childcare'),dbGet('nextId'),dbGet('pto'),dbGet('requests')
+    const [people,notes,activities,childcare,nextId,ptoD,requests,lifeEvents]=await Promise.all([
+      dbGet('people'),dbGet('notes'),dbGet('activities'),dbGet('childcare'),
+      dbGet('nextId'),dbGet('pto'),dbGet('requests'),dbGet('lifeEvents')
     ]);
-    if(people)S.people=people;
-    if(notes)S.notes=notes;
-    if(activities)S.activities=activities;
-    if(childcare)S.childcare=childcare;
-    if(nextId)S.nextId=nextId;
-    if(ptoD)Object.assign(pto,ptoD);
-    if(requests)S.requests=requests;
+    if(people)S.people=people;if(notes)S.notes=notes;if(activities)S.activities=activities;
+    if(childcare)S.childcare=childcare;if(nextId)S.nextId=nextId;
+    if(ptoD)Object.assign(pto,ptoD);if(requests)S.requests=requests;
+    if(lifeEvents)S.lifeEvents=lifeEvents;
+    // Auto-archive past life events
+    autoArchiveLifeEvents();
     syncBar('ok','✓ Loaded from cloud');
   }catch(e){syncBar('err','Could not connect — working offline');}
   if(role==='mike')renderSchedule();else renderCC();
 }
 
+function autoArchiveLifeEvents(){
+  const today=isoDate(new Date());
+  let changed=false;
+  S.lifeEvents.forEach(e=>{
+    if(!e.archived&&e.endDate&&e.endDate<today){e.archived=true;changed=true;}
+  });
+  if(changed)save();
+}
+
 const isF=t=>LT[t]?.fixed===true;
 function ss(s){if(isF(s.type))return'fixed';if(s.status==='blocked')return'blocked';if(s.status==='booked')return'booked';const cap=LT[s.type]?.cap||1,f=s.roster.length;if(f===0)return'available';if(f>=cap)return'full';if(f>0)return'partial';return'available';}
-function st(t){const tabs=['schedule','childcare','people','notes','life'];document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',tabs[i]===t));document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));document.getElementById('panel-'+t).classList.add('active');if(t==='schedule')renderSchedule();if(t==='childcare')renderCC();if(t==='people')renderPeople();if(t==='notes')renderNotes();if(t==='life')renderLife();}
+
+function st(t){
+  const tabs=['schedule','childcare','people','notes','life'];
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',tabs[i]===t));
+  document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+  if(t==='schedule')renderSchedule();if(t==='childcare')renderCC();
+  if(t==='people')renderPeople();if(t==='notes')renderNotes();if(t==='life')renderLife();
+}
+
 function rpips(f,c){const s=Math.min(c,8);let h='<div class="pips">';for(let i=0;i<s;i++)h+=`<div class="pip ${i<f?'on':''}"></div>`;if(c>8)h+=`<span style="font-size:10px;color:#6b7280;margin-left:2px">+${c-8}</span>`;return h+'</div>';}
 
-// ── REQUESTS ──
-function openRequestModal(personId){
-  const p=S.people.find(x=>x.id===personId);if(!p)return;
-  const reqs=openReqs(personId);
-  // If no open requests → go straight to new request form (one less tap)
-  if(reqs.length===0){openNewRequestForm(personId);return;}
-  // Has open requests → show list first
-  const list=reqs.map(r=>`
-    <div class="req-item">
-      <div class="req-item-body">
-        <div class="req-item-note">${r.note}</div>
-        <div class="req-item-date">Added ${r.date}</div>
+// ── WEEK NAVIGATION ──
+function changeWeek(dir){weekOffset+=dir;renderSchedule();}
+
+function renderWeekLabel(){
+  const mon=getViewMonday();
+  const sun=addDays(mon,6);
+  const lbl=document.getElementById('week-label');
+  if(lbl){
+    const isThis=weekOffset===0,isNext=weekOffset===1;
+    const prefix=isThis?'This week · ':isNext?'Next week · ':'';
+    lbl.textContent=`${prefix}${fmtDate(mon)} – ${fmtDate(sun)}`;
+  }
+}
+
+// ── LIFE EVENTS HELPERS ──
+function getNextWeekRange(){
+  const mon=getNextMonday();
+  return{start:isoDate(mon),end:isoDate(addDays(mon,6))};
+}
+
+function eventsInWeek(weekMonday){
+  const start=isoDate(weekMonday);
+  const end=isoDate(addDays(weekMonday,6));
+  return S.lifeEvents.filter(e=>!e.archived&&e.startDate&&e.endDate&&e.startDate<=end&&e.endDate>=start);
+}
+
+function eventsNextWeek(){return eventsInWeek(getNextMonday());}
+
+function renderEventPills(containerId,events){
+  const el=document.getElementById(containerId);if(!el)return;
+  if(!events.length){el.innerHTML='';return;}
+  el.innerHTML=events.map(e=>{
+    const cls=e.type==='camp'?'pill-camp':'pill-vacation';
+    const label=e.type==='camp'?'Camp Week!':'Vacation Week!';
+    return`<span class="${cls}" onclick="viewLifeEvent(${e.id})">${label} — ${e.title}</span>`;
+  }).join('');
+}
+
+function viewLifeEvent(id){
+  const e=S.lifeEvents.find(x=>x.id===id);if(!e)return;
+  const isCamp=e.type==='camp';
+  const kidsStr=isCamp&&e.kids?.length?e.kids.join(', '):'';
+  const daysStr=isCamp&&e.days?.length?e.days.join(', '):'';
+  const timesStr=isCamp&&e.startTime?`${e.startTime} \u2013 ${e.endTime}`:'';
+  sm(`<h3>${isCamp?'⛺':'🌴'} ${e.title}</h3>
+    <div class="life-card-body">
+      <div style="margin-bottom:8px"><span class="life-card-type ${e.type}">${e.type}</span></div>
+      ${isCamp?`<div><strong>Days:</strong> ${daysStr||'—'}</div><div><strong>Times:</strong> ${timesStr||'—'}</div><div><strong>Kids:</strong> ${kidsStr||'—'}</div>`:''}
+      ${!isCamp?`<div><strong>Dates:</strong> ${fmtDateLong(e.startDate)} – ${fmtDateLong(e.endDate)}</div>`:''}
+      ${isCamp?`<div><strong>Dates:</strong> ${fmtDateLong(e.startDate)} – ${fmtDateLong(e.endDate)}</div>`:''}
+      ${e.notes?`<div style="margin-top:8px;font-style:italic;color:var(--gray)">${e.notes}</div>`:''}
+      ${!isCamp&&pto.active&&pto.startDate===e.startDate?`<div style="margin-top:8px"><span class="pto-linked-badge">✓ PTO active for these dates</span></div>`:''}
+    </div>
+    <div class="ma">
+      ${!isCamp&&(!pto.active||pto.startDate!==e.startDate)?`<button class="pto-link-btn" onclick="linkVacationToPTO(${e.id})">Activate PTO for these dates</button>`:''}
+      ${role==='mike'?`<button class="btn btn-sm bcx" onclick="cm()">Close</button><button class="btn btn-sm bdg" onclick="deleteLifeEvent(${e.id})">Delete</button>`:'<button class="btn btn-sm bcx" onclick="cm()">Close</button>'}
+    </div>`);
+}
+
+function linkVacationToPTO(id){
+  const e=S.lifeEvents.find(x=>x.id===id);if(!e)return;
+  if(pto.active){
+    if(!confirm(`PTO is already active (${pto.startDate} to ${pto.endDate}). Replace with vacation dates?`))return;
+  }
+  pto.active=true;pto.startDate=e.startDate;pto.endDate=e.endDate;
+  pto.subs={};pto.notified={};pto.viewWeekOffset=0;
+  // Auto-mark vacation days as childcare day off
+  applyVacationToChildcare(e.startDate,e.endDate);
+  save();cm();renderSchedule();renderPTOBanner();
+  alert('PTO activated! Childcare days in this range have been marked as Day Off.');
+}
+
+function applyVacationToChildcare(startStr,endStr){
+  const cur=new Date(startStr+'T12:00:00');
+  const end=new Date(endStr+'T12:00:00');
+  while(cur<=end){
+    const dow=cur.getDay();
+    if(dow>=1&&dow<=5){
+      const dayName=ALLDAYS[dow-1];// Mon=0 in ALLDAYS
+      if(!S.childcare[dayName])S.childcare[dayName]={...DCC};
+      S.childcare[dayName].active=false;
+    }
+    cur.setDate(cur.getDate()+1);
+  }
+}
+
+// ── LIFE TAB ──
+function renderLife(){
+  if(role!=='mike')return;
+  autoArchiveLifeEvents();
+  const active=S.lifeEvents.filter(e=>!e.archived).sort((a,b)=>a.startDate>b.startDate?1:-1);
+  const archived=S.lifeEvents.filter(e=>e.archived).sort((a,b)=>b.startDate>a.startDate?1:-1);
+  const list=document.getElementById('life-list');
+  const archToggle=document.getElementById('archived-toggle');
+  const archList=document.getElementById('archived-list');
+
+  if(!active.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic;padding:8px 0">No upcoming events. Add a camp or vacation above.</div>';}
+  else{list.innerHTML=active.map(e=>lifeCard(e)).join('');}
+
+  if(archived.length){
+    archToggle.style.display='block';
+    archToggle.textContent=_showArchived?'Hide past events ▲':`Show past events (${archived.length}) ▼`;
+    archList.style.display=_showArchived?'block':'none';
+    archList.innerHTML=_showArchived?archived.map(e=>lifeCard(e,true)).join(''):'';
+  }else{archToggle.style.display='none';}
+}
+
+function lifeCard(e,isArchived=false){
+  const isCamp=e.type==='camp';
+  const kidsStr=isCamp&&e.kids?.length?e.kids.join(', '):'';
+  const daysStr=isCamp&&e.days?.length?e.days.join(', '):'';
+  const timesStr=isCamp&&e.startTime?`${e.startTime} – ${e.endTime}`:'';
+  const dateStr=`${fmtDateLong(e.startDate)}${e.endDate&&e.endDate!==e.startDate?' – '+fmtDateLong(e.endDate):''}`;
+  const ptoLinked=!isCamp&&pto.active&&pto.startDate===e.startDate;
+  return`<div class="life-card" style="${isArchived?'opacity:.6':''}">
+    <div class="life-card-header ${e.type}">
+      <div>
+        <div class="life-card-title">${e.title}</div>
+        <div class="life-card-subtitle">${dateStr}</div>
       </div>
-      <button class="req-close-btn" title="Mark resolved" onclick="closeRequest(${r.id})">&#10003;</button>
-    </div>`).join('');
-  sm(`<h3>&#10067; Requests \u2014 ${p.name}</h3>
-    ${list}
-    <div class="ma">
-      <button class="btn btn-sm bcx" onclick="cm()">Close</button>
-      <button class="btn btn-sm" onclick="openNewRequestForm(${personId})">+ New request</button>
-    </div>`);
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="life-card-type ${e.type}">${e.type}</span>
+        ${ptoLinked?'<span class="pto-linked-badge">PTO active</span>':''}
+      </div>
+    </div>
+    <div class="life-card-body">
+      ${isCamp?`<div class="life-card-meta">Days: ${daysStr||'—'} &nbsp;·&nbsp; Times: ${timesStr||'—'} &nbsp;·&nbsp; Kids: ${kidsStr||'—'}</div>`:''}
+      ${e.notes?`<div style="margin-top:6px;font-style:italic;color:var(--gray);font-size:12px">${e.notes}</div>`:''}
+      <div class="life-card-actions">
+        ${!isCamp&&!ptoLinked&&!isArchived?`<button class="pto-link-btn" onclick="linkVacationToPTO(${e.id})">Activate PTO for these dates</button>`:''}
+        <button class="btn btn-sm bcx" onclick="openEditLifeEvent(${e.id})">Edit</button>
+        <button class="btn btn-sm bdg" onclick="deleteLifeEvent(${e.id})">Delete</button>
+      </div>
+    </div>
+  </div>`;
 }
 
-function openNewRequestForm(personId){
-  const p=S.people.find(x=>x.id===personId);if(!p)return;
-  const today=new Date().toISOString().slice(0,10);
-  sm(`<h3>&#10067; New Request \u2014 ${p.name}</h3>
-    <div class="f"><label>Request / follow-up note</label><textarea id="req-note" rows="3" placeholder="e.g. Looking for Mon/Wed mornings, or asking about summer leagues..."></textarea></div>
-    <div class="ma">
-      <button class="btn btn-sm bcx" onclick="openRequestModal(${personId})">Back</button>
-      <button class="btn btn-sm" onclick="saveRequest(${personId},'${today}')">Save request</button>
-    </div>`);
-  setTimeout(()=>document.getElementById('req-note')?.focus(),100);
+function toggleArchived(){_showArchived=!_showArchived;renderLife();}
+
+function openAddLifeEvent(type){
+  const today=isoDate(new Date());
+  if(type==='camp'){
+    sm(`<h3>⛺ Add Camp</h3>
+      <div class="f"><label>Camp name</label><input id="le-title" placeholder="e.g. Sunrise Tennis Camp"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <div style="flex:1"><div class="fl">Start date</div><input id="le-start" type="date" value="${today}"></div>
+        <div style="flex:1"><div class="fl">End date</div><input id="le-end" type="date" value="${today}"></div>
+      </div>
+      <div class="f"><label>Days attending</label>
+        <div class="day-check">
+          ${ALLDAYS.map(d=>`<label><input type="checkbox" value="${d}" class="le-day"> ${d.slice(0,3)}</label>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <div style="flex:1"><div class="fl">Drop-off time</div><input id="le-stime" placeholder="8:30 AM"></div>
+        <div style="flex:1"><div class="fl">Pick-up time</div><input id="le-etime" placeholder="3:00 PM"></div>
+      </div>
+      <div class="f"><label>Kids attending</label>
+        <div class="kids-pills" id="le-kids">
+          ${KIDS.map(k=>`<span class="kid-pill on" onclick="toggleKidPill(this)">${k}</span>`).join('')}
+        </div>
+      </div>
+      <div class="f"><label>Notes</label><textarea id="le-notes" rows="3" placeholder="What to bring, special instructions..."></textarea></div>
+      <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#d97706" onclick="saveLifeEvent('camp')">Save camp</button></div>`);
+  } else {
+    sm(`<h3>🌴 Add Vacation</h3>
+      <div class="f"><label>Destination / name</label><input id="le-title" placeholder="e.g. Beach Trip — Kiawah"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <div style="flex:1"><div class="fl">Start date</div><input id="le-start" type="date" value="${today}"></div>
+        <div style="flex:1"><div class="fl">End date</div><input id="le-end" type="date" value="${today}"></div>
+      </div>
+      <div class="f"><label>Notes</label><textarea id="le-notes" rows="3" placeholder="Where staying, travel details..."></textarea></div>
+      <div style="background:#f0fdf4;border-radius:6px;padding:10px 12px;font-size:12px;color:#065f46;margin-bottom:14px;border:1px solid #86efac">
+        ✓ Childcare will automatically be marked Day Off for these dates when you activate PTO.
+      </div>
+      <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#0e7490" onclick="saveLifeEvent('vacation')">Save vacation</button></div>`);
+  }
 }
 
-function saveRequest(personId,date){
-  const note=document.getElementById('req-note')?.value?.trim();
-  if(!note){alert('Please enter a note for this request.');return;}
-  S.requests.push({id:S.nextId++,personId,note,date,closed:false});
-  save();cm();renderPeople();
+function toggleKidPill(el){el.classList.toggle('on');}
+
+function saveLifeEvent(type){
+  const title=document.getElementById('le-title')?.value?.trim();
+  const start=document.getElementById('le-start')?.value;
+  const end=document.getElementById('le-end')?.value;
+  if(!title){alert('Please enter a name.');return;}
+  if(!start||!end||start>end){alert('Please enter valid dates.');return;}
+  const e={id:S.nextId++,type,title,startDate:start,endDate:end,notes:document.getElementById('le-notes')?.value?.trim()||'',archived:false};
+  if(type==='camp'){
+    e.days=[...document.querySelectorAll('.le-day:checked')].map(x=>x.value);
+    e.startTime=document.getElementById('le-stime')?.value?.trim()||'';
+    e.endTime=document.getElementById('le-etime')?.value?.trim()||'';
+    e.kids=[...document.querySelectorAll('#le-kids .kid-pill.on')].map(x=>x.textContent);
+  }
+  S.lifeEvents.push(e);save();cm();renderLife();renderSchedule();
+  if(type==='vacation'){
+    setTimeout(()=>{
+      if(confirm(`Activate PTO for ${fmtDateLong(start)} – ${fmtDateLong(end)}?\n\nThis will flag those weeks for subs and mark childcare as Day Off.`)){
+        linkVacationToPTO(e.id);
+      }
+    },300);
+  }
 }
 
-function closeRequest(reqId){updateReqBanner();
-  const r=S.requests.find(x=>x.id===reqId);if(!r)return;
-  r.closed=true;
-  save();
-  // Refresh modal if still open — find person
-  const p=S.people.find(x=>x.id===r.personId);
-  const remaining=openReqs(r.personId);
-  if(remaining.length>0){openRequestModal(r.personId);}
-  else{cm();}
-  renderPeople();
+function openEditLifeEvent(id){
+  const e=S.lifeEvents.find(x=>x.id===id);if(!e)return;
+  const isCamp=e.type==='camp';
+  if(isCamp){
+    sm(`<h3>⛺ Edit Camp</h3>
+      <div class="f"><label>Camp name</label><input id="le-title" value="${e.title}"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <div style="flex:1"><div class="fl">Start date</div><input id="le-start" type="date" value="${e.startDate}"></div>
+        <div style="flex:1"><div class="fl">End date</div><input id="le-end" type="date" value="${e.endDate}"></div>
+      </div>
+      <div class="f"><label>Days attending</label>
+        <div class="day-check">
+          ${ALLDAYS.map(d=>`<label><input type="checkbox" value="${d}" class="le-day" ${e.days?.includes(d)?'checked':''}> ${d.slice(0,3)}</label>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <div style="flex:1"><div class="fl">Drop-off time</div><input id="le-stime" value="${e.startTime||''}"></div>
+        <div style="flex:1"><div class="fl">Pick-up time</div><input id="le-etime" value="${e.endTime||''}"></div>
+      </div>
+      <div class="f"><label>Kids attending</label>
+        <div class="kids-pills" id="le-kids">
+          ${KIDS.map(k=>`<span class="kid-pill ${e.kids?.includes(k)?'on':''}" onclick="toggleKidPill(this)">${k}</span>`).join('')}
+        </div>
+      </div>
+      <div class="f"><label>Notes</label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
+      <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#d97706" onclick="updateLifeEvent(${id},'camp')">Save</button></div>`);
+  } else {
+    sm(`<h3>🌴 Edit Vacation</h3>
+      <div class="f"><label>Destination / name</label><input id="le-title" value="${e.title}"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <div style="flex:1"><div class="fl">Start date</div><input id="le-start" type="date" value="${e.startDate}"></div>
+        <div style="flex:1"><div class="fl">End date</div><input id="le-end" type="date" value="${e.endDate}"></div>
+      </div>
+      <div class="f"><label>Notes</label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
+      <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#0e7490" onclick="updateLifeEvent(${id},'vacation')">Save</button></div>`);
+  }
+}
+
+function updateLifeEvent(id,type){
+  const e=S.lifeEvents.find(x=>x.id===id);if(!e)return;
+  e.title=document.getElementById('le-title')?.value?.trim()||e.title;
+  e.startDate=document.getElementById('le-start')?.value||e.startDate;
+  e.endDate=document.getElementById('le-end')?.value||e.endDate;
+  e.notes=document.getElementById('le-notes')?.value?.trim()||'';
+  if(type==='camp'){
+    e.days=[...document.querySelectorAll('.le-day:checked')].map(x=>x.value);
+    e.startTime=document.getElementById('le-stime')?.value?.trim()||'';
+    e.endTime=document.getElementById('le-etime')?.value?.trim()||'';
+    e.kids=[...document.querySelectorAll('#le-kids .kid-pill.on')].map(x=>x.textContent);
+  }
+  save();cm();renderLife();renderSchedule();
+}
+
+function deleteLifeEvent(id){
+  if(!confirm('Delete this event?'))return;
+  S.lifeEvents=S.lifeEvents.filter(e=>e.id!==id);
+  save();cm();renderLife();renderSchedule();
 }
 
 // ── PTO ──
 function ptoDates(){if(!pto.active||!pto.startDate||!pto.endDate)return[];const dates=[],cur=new Date(pto.startDate+'T12:00:00'),end=new Date(pto.endDate+'T12:00:00');while(cur<=end){const dow=cur.getDay();if(dow>=1&&dow<=5)dates.push(cur.toISOString().slice(0,10));cur.setDate(cur.getDate()+1);}return dates;}
 function ptoWeeks(){const dates=ptoDates();if(!dates.length)return[];const weeks=[];let cur=[],lastM=null;dates.forEach(d=>{const dt=new Date(d+'T12:00:00'),dow=dt.getDay(),m=new Date(dt);m.setDate(dt.getDate()-(dow-1));const ms=m.toISOString().slice(0,10);if(ms!==lastM){if(cur.length)weeks.push(cur);cur=[];lastM=ms;}cur.push(d);});if(cur.length)weeks.push(cur);return weeks;}
 const DN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-function dayInPTO(day){if(!pto.active)return false;const wk=ptoWeeks();if(!wk.length)return false;const wi=Math.min(pto.viewWeekOffset,wk.length-1);return wk[wi].some(d=>DN[new Date(d+'T12:00:00').getDay()]===day);}
+function dayInPTOForWeek(day,weekMonday){
+  if(!pto.active)return false;
+  const dates=ptoDates();
+  return dates.some(d=>{
+    const dt=new Date(d+'T12:00:00');
+    const mon=mondayOf(dt);
+    return isoDate(mon)===isoDate(weekMonday)&&DN[dt.getDay()]===day;
+  });
+}
 function ptoProg(){const dates=ptoDates();let total=0,done=0;S.slots.forEach(s=>{const inP=dates.some(d=>DN[new Date(d+'T12:00:00').getDay()]===s.day);if(!inP)return;const st2=ss(s),l=LT[s.type];if(l&&l.fixed){total++;if(pto.subs[s.id])done++;}else if(st2==='booked'||st2==='partial'||st2==='full'){total++;if(pto.notified[s.id])done++;}});return{total,done};}
-function renderPTOBanner(){const bn=document.getElementById('pto-banner');if(role!=='mike'){bn.style.display='none';return;}const btn=document.getElementById('pto-btn');if(!pto.active){bn.style.display='none';if(btn){btn.textContent='PTO';btn.className='btn btn-sm bpto';btn.onclick=openPTO;}return;}const wks=ptoWeeks(),nw=wks.length,{total,done}=ptoProg(),wi=Math.min(pto.viewWeekOffset,nw-1),wd=wks[wi]||[];const ws=wd[0]?fds(wd[0]):'',we=wd[wd.length-1]?fds(wd[wd.length-1]):'';bn.style.display='flex';if(btn){btn.textContent='Clear PTO';btn.className='btn btn-sm bptoc';btn.onclick=clearPTO;}bn.innerHTML=`<div class="pto-bl"><span class="pto-tag">PTO ACTIVE</span><span class="pto-dates">${fdl(pto.startDate)} \u2013 ${fdl(pto.endDate)}</span><span class="pto-prog">${done}/${total} handled</span></div><div class="pto-nav"><button class="pto-nb" onclick="ptoNav(-1)" ${wi===0?'disabled':''}>&#8592;</button><span class="pto-nlbl">Week ${wi+1}/${nw}<br><span style="font-size:10px">${ws}${we&&we!==ws?' \u2013 '+we:''}</span></span><button class="pto-nb" onclick="ptoNav(1)" ${wi>=nw-1?'disabled':''}>&#8594;</button></div>`;}
+function renderPTOBanner(){
+  const bn=document.getElementById('pto-banner');
+  if(role!=='mike'){bn.style.display='none';return;}
+  const btn=document.getElementById('pto-btn');
+  if(!pto.active){bn.style.display='none';if(btn){btn.textContent='PTO';btn.className='btn btn-sm bpto';btn.onclick=openPTO;}return;}
+  const wks=ptoWeeks(),nw=wks.length,{total,done}=ptoProg(),wi=Math.min(pto.viewWeekOffset,nw-1),wd=wks[wi]||[];
+  const ws=wd[0]?fmtDate(new Date(wd[0]+'T12:00:00')):'',we=wd[wd.length-1]?fmtDate(new Date(wd[wd.length-1]+'T12:00:00')):'';
+  bn.style.display='flex';
+  if(btn){btn.textContent='Clear PTO';btn.className='btn btn-sm bptoc';btn.onclick=clearPTO;}
+  bn.innerHTML=`<div class="pto-bl"><span class="pto-tag">PTO ACTIVE</span><span class="pto-dates">${fmtDateLong(pto.startDate)} \u2013 ${fmtDateLong(pto.endDate)}</span><span class="pto-prog">${done}/${total} handled</span></div><div class="pto-nav"><button class="pto-nb" onclick="ptoNav(-1)" ${wi===0?'disabled':''}>&#8592;</button><span class="pto-nlbl">Week ${wi+1}/${nw}<br><span style="font-size:10px">${ws}${we&&we!==ws?' \u2013 '+we:''}</span></span><button class="pto-nb" onclick="ptoNav(1)" ${wi>=nw-1?'disabled':''}>&#8594;</button></div>`;
+}
 function ptoNav(d){const wks=ptoWeeks();pto.viewWeekOffset=Math.max(0,Math.min(wks.length-1,pto.viewWeekOffset+d));save();renderSchedule();renderPTOBanner();}
-function openPTO(){if(pto.active){clearPTO();return;}const today=new Date().toISOString().slice(0,10);sm(`<h3>&#127774; Set PTO Dates</h3><p style="font-size:13px;color:#6b7280;font-style:italic;margin-bottom:16px">Mon\u2013Fri in this range get flagged. Weekends ignored.</p><div class="f"><label>Start date</label><input id="ps" type="date" value="${today}"></div><div class="f"><label>End date</label><input id="pe" type="date" value="${today}"></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm bpto" onclick="actPTO()">Activate PTO</button></div>`);}
+function openPTO(){if(pto.active){clearPTO();return;}const today=isoDate(new Date());sm(`<h3>&#127774; Set PTO Dates</h3><p style="font-size:13px;color:#6b7280;font-style:italic;margin-bottom:16px">Mon\u2013Fri in this range get flagged. Weekends ignored.</p><div class="f"><label>Start date</label><input id="ps" type="date" value="${today}"></div><div class="f"><label>End date</label><input id="pe" type="date" value="${today}"></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm bpto" onclick="actPTO()">Activate PTO</button></div>`);}
 function actPTO(){const s=document.getElementById('ps').value,e=document.getElementById('pe').value;if(!s||!e||s>e){alert('Please enter a valid date range.');return;}pto.active=true;pto.startDate=s;pto.endDate=e;pto.subs={};pto.notified={};pto.viewWeekOffset=0;save();cm();renderSchedule();renderPTOBanner();}
 function clearPTO(){pto.active=false;pto.startDate=null;pto.endDate=null;pto.subs={};pto.notified={};pto.viewWeekOffset=0;save();renderSchedule();renderPTOBanner();}
 function openSubModal(sid){const s=S.slots.find(x=>x.id===sid);if(!s)return;const cur=pto.subs[sid]||'',last=Object.values(pto.subs).filter(Boolean).pop()||'';const po=S.people.length?`<div class="ppk" style="max-height:180px;overflow-y:auto">${S.people.map(p=>`<div class="pki" onclick="subSel(${sid},'${p.name.replace(/'/g,"\\'")}')">${p.name}</div>`).join('')}</div>`:'';sm(`<h3>&#128101; Assign Sub</h3><p style="font-size:13px;color:#6b7280;font-style:italic;margin-bottom:14px">${s.label} \u2014 ${s.day}</p>${last&&last!==cur?`<button class="btn btn-sm" style="width:100%;background:#2d6a4f;margin-bottom:10px" onclick="subSel(${sid},'${last.replace(/'/g,"\\'")}')">Use last sub: ${last}</button>`:''}${po}<div class="f" style="margin-top:8px"><label>Or type a name</label><input id="sub-in" placeholder="Coach name" value="${cur}"></div><div class="ma">${cur?`<button class="btn btn-sm bdg" onclick="clrSub(${sid})">Remove sub</button>`:''}<button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSub(${sid})">Save</button></div>`);}
@@ -431,21 +761,48 @@ function openNotifyModal(sid){const s=S.slots.find(x=>x.id===sid);if(!s)return;c
 function mkN(sid){pto.notified[sid]=true;save();cm();renderSchedule();renderPTOBanner();}
 function mkAllN(day){S.slots.forEach(s=>{if(s.day!==day)return;const st2=ss(s);if(!isF(s.type)&&(st2==='booked'||st2==='partial'||st2==='full'))pto.notified[s.id]=true;});save();renderSchedule();renderPTOBanner();}
 
-// ── SCHEDULE ──
+// ── REQUEST BANNER ──
+function updateReqBanner(){
+  const bn=document.getElementById('req-banner');if(!bn)return;
+  const total=S.people.reduce((n,p)=>n+openReqs(p.id).length,0);
+  if(total===0){bn.style.display='none';return;}
+  bn.style.display='flex';
+  bn.innerHTML=`<div class="req-banner-dot"></div><span>Requests (${total})</span>`;
+}
+function goToRequests(){st('people');const s=document.getElementById('people-search');if(s)s.value='';renderPeople();}
+
+// ── SCHEDULE RENDER ──
 function renderSchedule(){
   renderPTOBanner();updateReqBanner();
+  renderWeekLabel();
+  // Event pills for NEXT week (always, regardless of view)
+  renderEventPills('event-pills',eventsNextWeek());
+  // Setup controls
+  if(role==='mike'){
+    document.getElementById('sched-controls').innerHTML=`<button class="btn btn-sm bpto" onclick="openPTO()" id="pto-btn">PTO</button><button class="btn btn-sm" onclick="openAddSlot()">+ Add slot</button>`;
+    renderPTOBanner();// re-run to wire pto-btn if just created
+  }
   const grid=document.getElementById('schedule-grid');
+  const viewMon=getViewMonday();
   const bd={};DAYS.forEach(d=>bd[d]=[]);S.slots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
   const m=role==='mike';
   grid.innerHTML=DAYS.map(day=>{
     const slots=bd[day],open=slots.filter(s=>ss(s)==='available').length,hrs=fhr(slots.reduce((a,s)=>a+shr(s),0));
-    const cc=S.childcare[day],ccb=cc&&cc.active?`<div class="cc-bar"><span class="cc-bar-time">${cc.start} \u2013 ${cc.end}</span><span class="cc-bar-label">Childcare</span><span class="cc-bar-badge">Coverage</span></div>`:'';
-    const isPTO=pto.active&&dayInPTO(day)&&m;
+    const cc=S.childcare[day];
+    // Check if this day has a camp event this view week
+    const viewDayDate=isoDate(addDays(viewMon,DAYS.indexOf(day)));
+    const campToday=S.lifeEvents.find(e=>e.type==='camp'&&!e.archived&&e.days?.includes(day)&&e.startDate<=viewDayDate&&e.endDate>=viewDayDate);
+    const campBadge=campToday?`<span style="font-size:10px;background:#d97706;color:#fff;padding:1px 7px;border-radius:20px;margin-left:6px">⛺ ${campToday.title}</span>`:'';
+    const ccb=cc&&cc.active?`<div class="cc-bar"><span class="cc-bar-time">${cc.start} \u2013 ${cc.end}</span><span class="cc-bar-label">Childcare${campBadge}</span><span class="cc-bar-badge">Coverage</span></div>`:'';
+    const isPTO=pto.active&&dayInPTOForWeek(day,viewMon)&&m;
     const acts=slots.filter(s=>{const st2=ss(s),l=LT[s.type];return(l&&l.fixed)||(st2==='booked'||st2==='partial'||st2==='full');});
     const allDone=isPTO&&acts.length>0&&acts.every(s=>{const l=LT[s.type];return l&&l.fixed?!!pto.subs[s.id]:!!pto.notified[s.id];});
     const hasPL=isPTO&&slots.some(s=>{const st2=ss(s);return!isF(s.type)&&(st2==='booked'||st2==='partial'||st2==='full')&&!pto.notified[s.id];});
     return`<div class="day-block${isPTO?(allDone?' pto-done':' pto-day'):''}">
-      <div class="day-header"><div style="display:flex;align-items:baseline"><span class="day-name">${day}</span>${hrs&&!isPTO?`<span class="day-hours">(${hrs})</span>`:''}</div><span class="day-open-count">${isPTO?'<span style="color:#fca5a5;font-size:11px;font-style:italic">PTO</span>':open?open+' open':''}</span></div>
+      <div class="day-header">
+        <div style="display:flex;align-items:baseline"><span class="day-name">${day}</span>${hrs&&!isPTO?`<span class="day-hours">(${hrs})</span>`:''}</div>
+        <span class="day-open-count">${isPTO?'<span style="color:#fca5a5;font-size:11px;font-style:italic">PTO</span>':open?open+' open':''}</span>
+      </div>
       <div class="day-slots">
         ${slots.map(s=>{
           const st2=ss(s),l=LT[s.type]||LT.blocked,cap=l.cap,fil=s.roster.length,av=st2==='available';
@@ -472,60 +829,15 @@ function renderSchedule(){
   }).join('');
 }
 
-// ── PEOPLE PICKER with request suggestion ──
+// ── PEOPLE PICKER ──
 function autoLbl(){const e=document.getElementById('e-label');if(!e)return;if(_ps.length===0){if(e.value.includes('\u2014')||e.value==='Lesson')e.value='Lesson';return;}const n=_ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return p?gln(p.name):'';}).filter(Boolean);e.value=`Lesson \u2014 ${n.join(', ')}`;}
-
-function buildReqSuggestion(){
-  // Find any selected person with open requests
-  const suggestions=_ps.map(pid=>{
-    const p=S.people.find(x=>x.id===pid);
-    if(!p)return null;
-    const reqs=openReqs(pid);
-    if(!reqs.length)return null;
-    return{pid,name:p.name,reqs};
-  }).filter(Boolean);
-  if(!suggestions.length)return'';
-  return suggestions.map(sg=>`
-    <div class="req-suggestion">
-      <span>&#10067;</span>
-      <label>
-        <input type="checkbox" id="close-req-${sg.pid}" checked style="width:auto;margin-right:4px">
-        Close ${sg.name}'s open request${sg.reqs.length>1?'s':''}?
-      </label>
-    </div>`).join('');
-}
-
+function buildReqSuggestion(){const suggestions=_ps.map(pid=>{const p=S.people.find(x=>x.id===pid);if(!p)return null;const reqs=openReqs(pid);if(!reqs.length)return null;return{pid,name:p.name,reqs};}).filter(Boolean);if(!suggestions.length)return'';return suggestions.map(sg=>`<div class="req-suggestion"><span>&#10067;</span><label><input type="checkbox" id="close-req-${sg.pid}" checked style="width:auto;margin-right:4px">Close ${sg.name}'s open request${sg.reqs.length>1?'s':''}?</label></div>`).join('');}
 function bPPk(sid){const s=S.slots.find(x=>x.id===sid);if(!s)return'';const cap=LT[s.type]?.cap||1,ac=_ps.length>=cap;if(!S.people.length)return`<div class="pke">No people yet.</div>`;return`<div class="ppk">${S.people.map(p=>{const sel=_ps.includes(p.id),dis=!sel&&ac;return`<div class="pki ${sel?'sel':''} ${dis?'dis':''}" onclick="togPP(${sid},${p.id})"><span class="pkn">${p.name}</span>${sel?'<span class="pkc">\u2713</span>':''}</div>`;}).join('')}</div>`;}
 function bRC(sid){if(!_ps.length)return`<span style="font-size:11px;color:var(--gray);font-style:italic">No one selected yet</span>`;return _ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return`<span class="rchip">${p?p.name:'?'} <button onclick="togPP(${sid},${pid})">\u2715</button></span>`;}).join('');}
-function togPP(sid,pid){const s=S.slots.find(x=>x.id===sid);if(!s)return;const cap=LT[s.type]?.cap||1,idx=_ps.indexOf(pid);if(idx>=0)_ps.splice(idx,1);else{if(_ps.length>=cap)return;_ps.push(pid);}const pe=document.getElementById('slot-ppk');if(pe)pe.innerHTML=bPPk(sid);const ce=document.getElementById('slot-rc');if(ce)ce.innerHTML=bRC(sid);autoLbl();// Update request suggestion
-const rs=document.getElementById('req-suggestion-area');if(rs)rs.innerHTML=buildReqSuggestion();}
-
-function editSlot(id){
-  if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;
-  const l=LT[s.type]||LT.blocked,cap=l.cap;_ps=[];
-  s.roster.forEach(n=>{const p=S.people.find(x=>x.name===n||gln(x.name)===n);if(p&&!_ps.includes(p.id))_ps.push(p.id);});
-  const ss2=`${Math.floor(s.startM/60)}:${String(s.startM%60).padStart(2,'0')}`,es=`${Math.floor(s.endM/60)}:${String(s.endM%60).padStart(2,'0')}`;
-  const rs=l.fixed?`<div style="font-size:11px;color:#6b3f9e;font-style:italic;padding:6px 0">Fixed \u2014 no roster needed</div>`:`<div class="f"><div class="fl">Roster (${cap} spot${cap!==1?'s':''})</div><div id="slot-rc" class="rr">${bRC(id)}</div><div id="slot-ppk">${bPPk(id)}</div></div><div id="req-suggestion-area">${buildReqSuggestion()}</div>`;
-  const stSec=l.fixed?'':`<div class="f"><label>Status</label><select id="e-status"><option value="auto" ${s.status!=='blocked'&&s.status!=='booked'?'selected':''}>Auto</option><option value="booked" ${s.status==='booked'?'selected':''}>Booked</option><option value="blocked" ${s.status==='blocked'?'selected':''}>Blocked</option></select></div>`;
-  sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma"><button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);
-}
+function togPP(sid,pid){const s=S.slots.find(x=>x.id===sid);if(!s)return;const cap=LT[s.type]?.cap||1,idx=_ps.indexOf(pid);if(idx>=0)_ps.splice(idx,1);else{if(_ps.length>=cap)return;_ps.push(pid);}const pe=document.getElementById('slot-ppk');if(pe)pe.innerHTML=bPPk(sid);const ce=document.getElementById('slot-rc');if(ce)ce.innerHTML=bRC(sid);autoLbl();const rs=document.getElementById('req-suggestion-area');if(rs)rs.innerHTML=buildReqSuggestion();}
+function editSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;const l=LT[s.type]||LT.blocked,cap=l.cap;_ps=[];s.roster.forEach(n=>{const p=S.people.find(x=>x.name===n||gln(x.name)===n);if(p&&!_ps.includes(p.id))_ps.push(p.id);});const ss2=`${Math.floor(s.startM/60)}:${String(s.startM%60).padStart(2,'0')}`,es=`${Math.floor(s.endM/60)}:${String(s.endM%60).padStart(2,'0')}`;const rs=l.fixed?`<div style="font-size:11px;color:#6b3f9e;font-style:italic;padding:6px 0">Fixed \u2014 no roster needed</div>`:`<div class="f"><div class="fl">Roster (${cap} spot${cap!==1?'s':''})</div><div id="slot-rc" class="rr">${bRC(id)}</div><div id="slot-ppk">${bPPk(id)}</div></div><div id="req-suggestion-area">${buildReqSuggestion()}</div>`;const stSec=l.fixed?'':`<div class="f"><label>Status</label><select id="e-status"><option value="auto" ${s.status!=='blocked'&&s.status!=='booked'?'selected':''}>Auto</option><option value="booked" ${s.status==='booked'?'selected':''}>Booked</option><option value="blocked" ${s.status==='blocked'?'selected':''}>Blocked</option></select></div>`;sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma"><button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);}
 function uch(){const t=document.getElementById('e-type')?.value,l=LT[t],el=document.getElementById('cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
-function svSlot(id){
-  if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;
-  s.label=document.getElementById('e-label').value;s.startM=pti(document.getElementById('e-start').value);s.endM=pti(document.getElementById('e-end').value);
-  const nt=document.getElementById('e-type').value;
-  if(nt!==s.type){s.type=nt;if(isF(nt)){s.roster=[];s.status='fixed';}else{const nc=LT[nt]?.cap||1;_ps=_ps.slice(0,nc);s.status='auto';}}
-  if(!isF(s.type)){
-    s.roster=_ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return p?gln(p.name):'';}).filter(Boolean);
-    const se=document.getElementById('e-status');if(se){const v=se.value;s.status=v==='auto'?'auto':v;}
-    // Close requests if checkboxes checked
-    _ps.forEach(pid=>{
-      const cb=document.getElementById(`close-req-${pid}`);
-      if(cb&&cb.checked){openReqs(pid).forEach(r=>{r.closed=true;});}
-    });
-  }
-  save();cm();renderSchedule();renderPeople();
-}
+function svSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;s.label=document.getElementById('e-label').value;s.startM=pti(document.getElementById('e-start').value);s.endM=pti(document.getElementById('e-end').value);const nt=document.getElementById('e-type').value;if(nt!==s.type){s.type=nt;if(isF(nt)){s.roster=[];s.status='fixed';}else{const nc=LT[nt]?.cap||1;_ps=_ps.slice(0,nc);s.status='auto';}}if(!isF(s.type)){s.roster=_ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return p?gln(p.name):'';}).filter(Boolean);const se=document.getElementById('e-status');if(se){const v=se.value;s.status=v==='auto'?'auto':v;}_ps.forEach(pid=>{const cb=document.getElementById(`close-req-${pid}`);if(cb&&cb.checked){openReqs(pid).forEach(r=>{r.closed=true;});}});}save();cm();renderSchedule();renderPeople();}
 function delSlot(id){if(role!=='mike')return;S.slots=S.slots.filter(s=>s.id!==id);save();cm();renderSchedule();}
 function openAddSlot(def='Monday'){if(role!=='mike')return;sm(`<h3>Add Slot</h3><div class="f"><label>Day</label><select id="n-day">${DAYS.map(d=>`<option value="${d}" ${d===def?'selected':''}>${d}</option>`).join('')}</select></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="n-start" placeholder="10:00"></div><div style="flex:1"><div class="fl">End</div><input id="n-end" placeholder="11:30"></div></div><div class="f"><label>Label</label><input id="n-label" placeholder="e.g. Lesson \u2014 Smith"></div><div class="f"><label>Type</label><select id="n-type" onchange="ach()">${Object.entries(LT).map(([k,v])=>`<option value="${k}">${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="add-cap-hint">Capacity: 1</div></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addSlot()">Add</button></div>`);}
 function ach(){const t=document.getElementById('n-type')?.value,l=LT[t],el=document.getElementById('add-cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
@@ -533,53 +845,39 @@ function addSlot(){if(role!=='mike')return;const type=document.getElementById('n
 function notifySlot(day,sid){if(role!=='mike')return;const slot=S.slots.find(s=>s.id===sid);if(!slot)return;const interested=S.people.filter(p=>p.notifyAll||p.days.includes(day));if(!interested.length){sm(`<h3>No One to Notify</h3><p style="font-size:13px;color:#6b7280;margin-bottom:12px">No people marked as interested in ${day}.</p><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Close</button></div>`);return;}const msg=nmsg(slot,day),enc=encodeURIComponent(msg);const links=interested.map(p=>`<a href="sms:${cp(p.phone)}?body=${enc}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border:1.5px solid #ddd8d0;border-radius:6px;font-size:13px;font-family:Georgia,serif;margin-bottom:8px;color:#1a1a2e;text-decoration:none;background:#faf8f4"><span>${p.name}</span><span style="color:#6b7280;font-size:11px;font-style:italic">${cp(p.phone)} \u203a</span></a>`).join('');sm(`<h3>&#x2708; Notify \u2014 ${day}</h3><div class="mp">${msg}</div><p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:10px">Tap a name to open in Messages:</p>${links}<div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Done</button></div>`);}
 
 // ── CHILDCARE ──
-function renderCC(){document.getElementById('cc-grid').innerHTML=DAYS.map(day=>{const cc=S.childcare[day]||{...DCC},m=role==='mike';return`<div class="cd ${!cc.active?'cdo':''}"><div class="cdh"><span class="cdt">${day}</span><div style="display:flex;align-items:center;gap:8px">${cc.active?`<span class="cdhr">&#x1F552; ${cc.start} \u2013 ${cc.end}</span>`:'<span style="font-size:12px;color:rgba(255,255,255,.5);font-style:italic">Day off</span>'}<button class="cctg ${cc.active?'on':''}" onclick="togCC('${day}')">${cc.active?'On':'Off'}</button>${m&&cc.active?`<button class="btn btn-sm" onclick="editCCH('${day}')" style="font-size:10px;padding:4px 10px">Edit hours</button>`:''}</div></div>${cc.active?`<div class="cdb"><div class="cdnl"><span>Activity notes</span><span>${m?'Visible to caregiver':''}</span></div><textarea rows="3" placeholder="e.g. Pool in the morning...">${cc.note||''}</textarea><div class="cdsr"><button class="btn btn-sm" onclick="svCCN('${day}',this.closest('.cdb').querySelector('textarea').value,this)">Save note</button></div></div>`:''}</div>`;}).join('');}
+function renderCC(){
+  updateReqBanner();
+  // Event pills for next week — visible to caregiver too
+  renderEventPills('cc-event-pills',eventsNextWeek());
+  document.getElementById('cc-grid').innerHTML=DAYS.map(day=>{
+    const cc=S.childcare[day]||{...DCC},m=role==='mike';
+    return`<div class="cd ${!cc.active?'cdo':''}"><div class="cdh"><span class="cdt">${day}</span><div style="display:flex;align-items:center;gap:8px">${cc.active?`<span class="cdhr">&#x1F552; ${cc.start} \u2013 ${cc.end}</span>`:'<span style="font-size:12px;color:rgba(255,255,255,.5);font-style:italic">Day off</span>'}<button class="cctg ${cc.active?'on':''}" onclick="togCC('${day}')">${cc.active?'On':'Off'}</button>${m&&cc.active?`<button class="btn btn-sm" onclick="editCCH('${day}')" style="font-size:10px;padding:4px 10px">Edit hours</button>`:''}</div></div>${cc.active?`<div class="cdb"><div class="cdnl"><span>Activity notes</span><span>${m?'Visible to caregiver':''}</span></div><textarea rows="3" placeholder="e.g. Pool in the morning...">${cc.note||''}</textarea><div class="cdsr"><button class="btn btn-sm" onclick="svCCN('${day}',this.closest('.cdb').querySelector('textarea').value,this)">Save note</button></div></div>`:''}</div>`;
+  }).join('');
+}
 function togCC(day){if(!S.childcare[day])S.childcare[day]={...DCC};S.childcare[day].active=!S.childcare[day].active;save();renderCC();if(role==='mike')renderSchedule();}
 function svCCN(day,val,btn){if(!S.childcare[day])S.childcare[day]={...DCC};S.childcare[day].note=val;save();btn.textContent='Saved \u2713';setTimeout(()=>{btn.textContent='Save note';},1500);}
 function editCCH(day){if(role!=='mike')return;const cc=S.childcare[day]||{...DCC};sm(`<h3>Edit Hours \u2014 ${day}</h3><div class="f"><label>Start</label><input id="cc-s" value="${cc.start}"></div><div class="f"><label>End</label><input id="cc-e" value="${cc.end}"></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svCCH('${day}')">Save</button></div>`);}
 function svCCH(day){if(role!=='mike')return;if(!S.childcare[day])S.childcare[day]={...DCC};S.childcare[day].start=document.getElementById('cc-s').value;S.childcare[day].end=document.getElementById('cc-e').value;save();cm();renderCC();renderSchedule();}
 
-// ── PEOPLE with search + request button ──
+// ── PEOPLE ──
 function renderPeople(){
-  if(role!=='mike')return;
-  updateReqBanner();
+  if(role!=='mike')return;updateReqBanner();
   const search=(document.getElementById('people-search')?.value||'').toLowerCase();
-  // Sort: open requests first (alpha), then rest (alpha)
-  const sorted=[...S.people].sort((a,b)=>{
-    const ar=hasOpenReqs(a.id),br=hasOpenReqs(b.id);
-    if(ar&&!br)return -1;if(!ar&&br)return 1;
-    return a.name.localeCompare(b.name);
-  });
+  const sorted=[...S.people].sort((a,b)=>{const ar=hasOpenReqs(a.id),br=hasOpenReqs(b.id);if(ar&&!br)return -1;if(!ar&&br)return 1;return a.name.localeCompare(b.name);});
   const filtered=sorted.filter(p=>!search||p.name.toLowerCase().includes(search));
   document.getElementById('people-count').textContent=`${S.people.length} people on roster${search&&filtered.length!==S.people.length?' ('+filtered.length+' shown)':''}`;
   const list=document.getElementById('people-list');
   if(!S.people.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic;padding:8px 0">No people yet.</div>';return;}
-  if(filtered.length===0){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic;padding:8px 0">No matches found.</div>';return;}
+  if(!filtered.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic;padding:8px 0">No matches found.</div>';return;}
   list.innerHTML=filtered.map(p=>{
-    const bad=p.phone&&!pv(p.phone);
-    const hasReq=hasOpenReqs(p.id);
-    const reqCount=openReqs(p.id).length;
-    return`<div class="pc">
-      <div class="av">${p.initials}</div>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          <span style="font-weight:bold;font-size:14px">${p.name}</span>
-          ${p.notifyAll?'<span class="pill on" style="font-size:10px">All slots</span>':''}
-          ${hasReq?`<span style="font-size:10px;color:#dc2626;font-style:italic">${reqCount} open request${reqCount>1?'s':''}</span>`:''}
-        </div>
-        <div style="font-size:12px;color:${bad?'#b5510a':'#6b7280'};margin:2px 0;font-style:italic">${p.phone||'No phone'}${bad?' \u26a0\ufe0f':''}</div>
-        <div class="dp">${SHORT.map((d,i)=>`<span class="pill ${p.days.includes(DAYS[i])?'on':''}" onclick="togDay(${p.id},'${DAYS[i]}')">${d}</span>`).join('')}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;align-items:flex-end">
-        <div style="display:flex;gap:5px">
-          <button class="req-btn ${hasReq?'has':'none'}" onclick="openRequestModal(${p.id})" title="${hasReq?reqCount+' open request'+( reqCount>1?'s':'')+' — tap to view':'No requests — tap to add'}">?</button>
-          <button class="btn btn-sm bcx" onclick="openEP(${p.id})">Edit</button>
-          <button class="btn btn-sm bdg" onclick="delP(${p.id})">\u2715</button>
-        </div>
-      </div>
-    </div>`;
+    const bad=p.phone&&!pv(p.phone),hasReq=hasOpenReqs(p.id),reqCount=openReqs(p.id).length;
+    return`<div class="pc"><div class="av">${p.initials}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:bold;font-size:14px">${p.name}</span>${p.notifyAll?'<span class="pill on" style="font-size:10px">All slots</span>':''}${hasReq?`<span style="font-size:10px;color:#dc2626;font-style:italic">${reqCount} open request${reqCount>1?'s':''}</span>`:''}</div><div style="font-size:12px;color:${bad?'#b5510a':'#6b7280'};margin:2px 0;font-style:italic">${p.phone||'No phone'}${bad?' \u26a0\ufe0f':''}</div><div class="dp">${SHORT.map((d,i)=>`<span class="pill ${p.days.includes(DAYS[i])?'on':''}" onclick="togDay(${p.id},'${DAYS[i]}')">${d}</span>`).join('')}</div></div><div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;align-items:flex-end"><div style="display:flex;gap:5px"><button class="req-btn ${hasReq?'has':'none'}" onclick="openRequestModal(${p.id})" title="${hasReq?reqCount+' open request(s)':'No requests — tap to add'}">?</button><button class="btn btn-sm bcx" onclick="openEP(${p.id})">Edit</button><button class="btn btn-sm bdg" onclick="delP(${p.id})">\u2715</button></div></div></div>`;
   }).join('');
 }
+function openRequestModal(pid){const p=S.people.find(x=>x.id===pid);if(!p)return;const reqs=openReqs(pid);if(reqs.length===0){openNewRequestForm(pid);return;}const list=reqs.map(r=>`<div class="req-item"><div class="req-item-body"><div class="req-item-note">${r.note}</div><div class="req-item-date">Added ${r.date}</div></div><button class="req-close-btn" onclick="closeRequest(${r.id})">&#10003;</button></div>`).join('');sm(`<h3>&#10067; Requests \u2014 ${p.name}</h3>${list}<div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Close</button><button class="btn btn-sm" onclick="openNewRequestForm(${pid})">+ New request</button></div>`);}
+function openNewRequestForm(pid){const p=S.people.find(x=>x.id===pid);if(!p)return;const today=isoDate(new Date());sm(`<h3>&#10067; New Request \u2014 ${p.name}</h3><div class="f"><label>Request / follow-up note</label><textarea id="req-note" rows="3" placeholder="e.g. Looking for Mon/Wed mornings, asking about summer leagues..."></textarea></div><div class="ma"><button class="btn btn-sm bcx" onclick="openRequestModal(${pid})">Back</button><button class="btn btn-sm" onclick="saveRequest(${pid},'${today}')">Save request</button></div>`);setTimeout(()=>document.getElementById('req-note')?.focus(),100);}
+function saveRequest(pid,date){const note=document.getElementById('req-note')?.value?.trim();if(!note){alert('Please enter a note.');return;}S.requests.push({id:S.nextId++,personId:pid,note,date,closed:false});save();cm();renderPeople();}
+function closeRequest(reqId){const r=S.requests.find(x=>x.id===reqId);if(!r)return;r.closed=true;save();const remaining=openReqs(r.personId);if(remaining.length>0)openRequestModal(r.personId);else cm();renderPeople();}
 function togDay(pid,day){if(role!=='mike')return;const p=S.people.find(x=>x.id===pid);if(!p)return;const i=p.days.indexOf(day);if(i>=0)p.days.splice(i,1);else p.days.push(day);save();renderPeople();}
 function delP(id){if(role!=='mike')return;S.people=S.people.filter(p=>p.id!==id);save();renderPeople();}
 function openEP(id){if(role!=='mike')return;const p=S.people.find(x=>x.id===id);if(!p)return;sm(`<h3>Edit Person</h3><div class="f"><label>Full name</label><input id="ep-n" value="${p.name}"></div><div class="f"><label>Phone</label><input id="ep-p" type="tel" value="${p.phone}" placeholder="5025551234" oninput="chph()"><div id="ep-ph" class="ph" style="${p.phone&&!pv(p.phone)?'display:block':''}">Digits only</div></div><div class="f"><label>Initials</label><input id="ep-i" value="${p.initials}" maxlength="3"></div><div class="f"><label><input type="checkbox" id="ep-a" style="width:auto;margin-right:6px" ${p.notifyAll?'checked':''}>Notify for all open slots</label></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svEP(${id})">Save</button></div>`);}
@@ -592,30 +890,9 @@ function addP(){if(role!=='mike')return;const n=document.getElementById('p-n').v
 // ── NOTES ──
 function renderNotes(){if(role!=='mike')return;const list=document.getElementById('notes-list');if(!S.notes.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic">No notes yet.</div>';return;}list.innerHTML=S.notes.slice().reverse().map(n=>`<div class="nb"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:11px;color:#6b7280;font-style:italic">${n.date}</div><button class="btn btn-sm bdg" onclick="delNote(${n.id})" style="padding:4px 10px">\u2715</button></div><div style="font-size:13px;line-height:1.7;margin-top:6px">${n.text}</div></div>`).join('');}
 function delNote(id){if(role!=='mike')return;S.notes=S.notes.filter(n=>n.id!==id);save();renderNotes();}
-function openAddNote(){if(role!=='mike')return;const today=new Date().toISOString().slice(0,10);sm(`<h3>Add Note</h3><div class="f"><label>Date</label><input id="nn-d" type="date" value="${today}"></div><div class="f"><label>Note</label><textarea id="nn-t" rows="4"></textarea></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addNote()">Save</button></div>`);}
+function openAddNote(){if(role!=='mike')return;const today=isoDate(new Date());sm(`<h3>Add Note</h3><div class="f"><label>Date</label><input id="nn-d" type="date" value="${today}"></div><div class="f"><label>Note</label><textarea id="nn-t" rows="4"></textarea></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addNote()">Save</button></div>`);}
 function addNote(){if(role!=='mike')return;const n={id:S.nextId++,date:document.getElementById('nn-d').value,text:document.getElementById('nn-t').value};S.notes.push(n);save();cm();renderNotes();}
 
-// ── LIFE ──
-function renderLife(){if(role!=='mike')return;const list=document.getElementById('activity-list');const sorted=[...S.activities].sort((a,b)=>a.date>b.date?1:-1);if(!sorted.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic">No activities yet.</div>';return;}list.innerHTML=sorted.map(a=>`<div class="ar"><span class="at at-${a.type}">${a.type}</span><span style="font-size:12px;color:#6b7280;min-width:80px;font-style:italic">${a.date}</span><span style="font-size:12px;color:#6b7280;min-width:58px">${a.time}</span><span style="flex:1;font-size:13px">${a.label}</span><button class="btn btn-sm bdg" onclick="delAct(${a.id})" style="padding:4px 10px">\u2715</button></div>`).join('');}
-function delAct(id){if(role!=='mike')return;S.activities=S.activities.filter(a=>a.id!==id);save();renderLife();}
-function openAddActivity(){if(role!=='mike')return;const today=new Date().toISOString().slice(0,10);sm(`<h3>Add Activity</h3><div class="f"><label>Date</label><input id="a-d" type="date" value="${today}"></div><div class="f"><label>Time</label><input id="a-t" placeholder="6:00 PM"></div><div class="f"><label>Description</label><input id="a-l"></div><div class="f"><label>Type</label><select id="a-ty"><option value="work">Work</option><option value="camp">Camp</option><option value="personal">Personal</option><option value="life">Life</option></select></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addAct()">Add</button></div>`);}
-function addAct(){if(role!=='mike')return;const a={id:S.nextId++,date:document.getElementById('a-d').value,time:document.getElementById('a-t').value,label:document.getElementById('a-l').value,type:document.getElementById('a-ty').value};S.activities.push(a);save();cm();renderLife();}
-
-
-function goToRequests(){
-  st('people');
-  // Clear search so all people show, requests floated to top
-  const s=document.getElementById('people-search');
-  if(s)s.value='';
-  renderPeople();
-}
-function updateReqBanner(){
-  const bn=document.getElementById('req-banner');if(!bn)return;
-  const total=S.people.reduce((n,p)=>n+openReqs(p.id).length,0);
-  if(total===0){bn.style.display='none';return;}
-  bn.style.display='flex';
-  bn.innerHTML=`<div class="req-banner-dot"></div><span>Requests (${total})</span>`;
-}
 function sm(html){const o=document.getElementById('modal');o.style.display='flex';o.innerHTML=`<div class="md" onclick="event.stopPropagation()">${html}</div>`;}
 function cm(){document.getElementById('modal').style.display='none';_ps=[];}
 </script>
