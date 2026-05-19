@@ -331,7 +331,26 @@ const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI
 const TBL='schedule_data';
 const H={'apikey':SKEY,'Authorization':`Bearer ${SKEY}`,'Content-Type':'application/json'};
 async function dbGet(k){try{const r=await fetch(`${SURL}/rest/v1/${TBL}?key=eq.${encodeURIComponent(k)}&select=value`,{headers:H});const d=await r.json();return(d&&d.length)?JSON.parse(d[0].value):null;}catch(e){return null;}}
-async function dbSave(k,v){const body=JSON.stringify({key:k,value:JSON.stringify(v)});try{const p=await fetch(`${SURL}/rest/v1/${TBL}?key=eq.${encodeURIComponent(k)}`,{method:'PATCH',headers:{...H,'Prefer':'return=minimal'},body});if(p.ok){const c=p.headers.get('content-range');if(c&&c!=='*'&&!c.startsWith('0')){syncBar('ok','✓ Synced');return;}}const i=await fetch(`${SURL}/rest/v1/${TBL}`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body});if(i.ok)syncBar('ok','✓ Synced');else syncBar('err','⚠ Sync error');}catch(e){syncBar('err','⚠ Sync error');}}
+async function dbSave(k,v){
+  const body=JSON.stringify({key:k,value:JSON.stringify(v)});
+  try{
+    // Use upsert via POST with merge-duplicates — most reliable approach
+    const r=await fetch(`${SURL}/rest/v1/${TBL}`,{
+      method:'POST',
+      headers:{...H,'Prefer':'resolution=merge-duplicates,return=minimal'},
+      body
+    });
+    if(r.ok){syncBar('ok','✓ Synced');}
+    else{
+      const errText=await r.text();
+      console.error('dbSave failed for key:',k,'status:',r.status,'error:',errText);
+      syncBar('err','⚠ Save failed ('+r.status+')');
+    }
+  }catch(e){
+    console.error('dbSave exception:',e);
+    syncBar('err','⚠ Network error');
+  }
+}
 function syncBar(cls,msg){const b=document.getElementById('sync-bar');b.textContent=msg;b.className=cls;if(cls==='ok')setTimeout(()=>{b.textContent='Live — changes sync automatically';b.className='';},2500);}
 
 // ── CONSTANTS ──
