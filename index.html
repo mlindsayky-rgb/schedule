@@ -127,11 +127,31 @@ textarea{resize:vertical}
 .pkc{font-size:16px;color:var(--green-soft);font-weight:bold}
 .pke{padding:12px 14px;font-size:12px;color:#6b7280;font-style:italic}
 .rr{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:30px;align-items:center}
+/* PEOPLE CARD */
 .pc{display:flex;align-items:flex-start;gap:12px;padding:12px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;background:#fff}
 .av{width:38px;height:38px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;color:#fff;flex-shrink:0}
 .dp{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .pill{font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);cursor:pointer;user-select:none;font-family:Georgia,serif;background:#fff;color:#6b7280}
 .pill.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+/* REQUEST BUTTON */
+.req-btn{width:30px;height:30px;border-radius:6px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:bold;transition:background .15s,transform .1s;flex-shrink:0}
+.req-btn.none{background:#e5e7eb;color:#6b7280}
+.req-btn.none:hover{background:#d1d5db;transform:scale(1.05)}
+.req-btn.has{background:#dc2626;color:#fff}
+.req-btn.has:hover{background:#b91c1c;transform:scale(1.05)}
+/* REQUEST LIST in modal */
+.req-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;background:#fff}
+.req-item-body{flex:1;min-width:0}
+.req-item-note{font-size:13px;color:var(--navy);line-height:1.5}
+.req-item-date{font-size:10px;color:var(--gray);font-style:italic;margin-top:3px}
+.req-close-btn{width:28px;height:28px;border-radius:5px;border:none;background:#f0fdf4;color:var(--green-soft);cursor:pointer;font-size:16px;font-weight:bold;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.req-close-btn:hover{background:#dcfce7}
+/* LESSON CLOSE SUGGESTION */
+.req-suggestion{background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#92400e;display:flex;align-items:center;gap:8px}
+.req-suggestion label{cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px;color:#92400e;font-family:Georgia,serif}
+/* PEOPLE SEARCH */
+.people-search{width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:5px;font-size:13px;font-family:Georgia,serif;background:#fff;color:var(--navy);margin-bottom:12px}
+.people-search:focus{outline:2px solid var(--navy);border-color:var(--navy)}
 .nb{border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:10px;background:#fff}
 .ar{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;background:#fff}
 .at{font-size:10px;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em}
@@ -167,7 +187,7 @@ textarea{resize:vertical}
 <div class="role-badge" id="role-badge" style="display:none" onclick="lockApp()">Lock</div>
 <div id="sync-bar" style="display:none">Connecting...</div>
 <div class="app" id="main-app" style="display:none">
-<div class="tabs" id="tab-bar">
+<div class="tabs">
   <button class="tab active" id="tab-schedule" onclick="st('schedule')">Schedule</button>
   <button class="tab" id="tab-childcare" onclick="st('childcare')">Childcare</button>
   <button class="tab" id="tab-people" onclick="st('people')" style="display:none">People</button>
@@ -190,7 +210,15 @@ textarea{resize:vertical}
   <div id="schedule-grid" class="grid"></div>
 </div>
 <div id="panel-childcare" class="panel"><div class="an" id="cc-note"></div><div id="cc-grid"></div></div>
-<div id="panel-people" class="panel"><div class="an">Manage your lesson roster and notification preferences.</div><div class="sh"><span style="font-size:12px;color:var(--gray);font-style:italic" id="people-count"></span><button class="btn btn-sm" onclick="openAddPerson()">+ Add person</button></div><div id="people-list"></div></div>
+<div id="panel-people" class="panel">
+  <div class="an">Manage your lesson roster, day interests, and follow-up requests.</div>
+  <div class="sh">
+    <span style="font-size:12px;color:var(--gray);font-style:italic" id="people-count"></span>
+    <button class="btn btn-sm" onclick="openAddPerson()">+ Add person</button>
+  </div>
+  <input class="people-search" id="people-search" placeholder="Search by name..." oninput="renderPeople()">
+  <div id="people-list"></div>
+</div>
 <div id="panel-notes" class="panel"><div class="sh"><span style="font-size:15px;font-weight:bold;color:var(--navy)">Daily Notes</span><button class="btn btn-sm" onclick="openAddNote()">+ New note</button></div><div id="notes-list"></div></div>
 <div id="panel-life" class="panel"><div class="sh"><span style="font-size:15px;font-weight:bold;color:var(--navy)">Activities</span><button class="btn btn-sm" onclick="openAddActivity()">+ Add activity</button></div><div id="activity-list"></div></div>
 </div>
@@ -223,45 +251,13 @@ function setupRole(){
   if(!m)st('childcare');
 }
 
-// SUPABASE — fixed upsert using PATCH then POST fallback
+// SUPABASE
 const SURL='https://vztyrxqdnqzvkfwfnipt.supabase.co';
 const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6dHlyeHFkbnF6dmtmd2ZuaXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODc3NDAsImV4cCI6MjA5NDY2Mzc0MH0.HCVqqQ_i6ETY8EL19Is1pHVn2qj8hFXqMnCd4ifH0E8';
 const TBL='schedule_data';
 const H={'apikey':SKEY,'Authorization':`Bearer ${SKEY}`,'Content-Type':'application/json'};
-
-async function dbGet(k){
-  try{
-    const r=await fetch(`${SURL}/rest/v1/${TBL}?key=eq.${encodeURIComponent(k)}&select=value`,{headers:H});
-    const d=await r.json();
-    return(d&&d.length)?JSON.parse(d[0].value):null;
-  }catch(e){return null;}
-}
-
-async function dbSave(k,v){
-  const body=JSON.stringify({key:k,value:JSON.stringify(v)});
-  try{
-    // Try PATCH first (update existing row)
-    const patch=await fetch(`${SURL}/rest/v1/${TBL}?key=eq.${encodeURIComponent(k)}`,{
-      method:'PATCH',
-      headers:{...H,'Prefer':'return=minimal'},
-      body
-    });
-    if(patch.ok){
-      // Check if anything was actually updated
-      const count=patch.headers.get('content-range');
-      if(count&&count!=='*'&&!count.startsWith('0')){syncBar('ok','✓ Synced');return;}
-    }
-    // If PATCH found nothing or failed, INSERT
-    const ins=await fetch(`${SURL}/rest/v1/${TBL}`,{
-      method:'POST',
-      headers:{...H,'Prefer':'return=minimal'},
-      body
-    });
-    if(ins.ok){syncBar('ok','✓ Synced');}
-    else{const err=await ins.text();console.error('INSERT failed:',err);syncBar('err','⚠ Sync error');}
-  }catch(e){console.error('dbSave error:',e);syncBar('err','⚠ Sync error');}
-}
-
+async function dbGet(k){try{const r=await fetch(`${SURL}/rest/v1/${TBL}?key=eq.${encodeURIComponent(k)}&select=value`,{headers:H});const d=await r.json();return(d&&d.length)?JSON.parse(d[0].value):null;}catch(e){return null;}}
+async function dbSave(k,v){const body=JSON.stringify({key:k,value:JSON.stringify(v)});try{const patch=await fetch(`${SURL}/rest/v1/${TBL}?key=eq.${encodeURIComponent(k)}`,{method:'PATCH',headers:{...H,'Prefer':'return=minimal'},body});if(patch.ok){const count=patch.headers.get('content-range');if(count&&count!=='*'&&!count.startsWith('0')){syncBar('ok','✓ Synced');return;}}const ins=await fetch(`${SURL}/rest/v1/${TBL}`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body});if(ins.ok){syncBar('ok','✓ Synced');}else{syncBar('err','⚠ Sync error');}}catch(e){syncBar('err','⚠ Sync error');}}
 function syncBar(cls,msg){const b=document.getElementById('sync-bar');b.textContent=msg;b.className=cls;if(cls==='ok')setTimeout(()=>{b.textContent='Live — changes sync automatically';b.className='';},2500);}
 
 // CONSTANTS
@@ -291,6 +287,7 @@ function fhr(h){if(h===0)return'';const r=Math.round(h*2)/2,w=Math.floor(r);retu
 const vmsg=()=>`Hey! I will be on vacation from ${pto.startDate?fdl(pto.startDate):'[start]'} to ${pto.endDate?fdl(pto.endDate):'[end]'}. I'll need to cancel our lesson, but will be back for the next one if that is ok.`;
 const nmsg=(slot,day)=>`Hey! I have an opening this week for a lesson if interested. You can ignore this text if not \u2014 ${day} ${sdsp(slot)}. Reply YES to claim. \u2014 Mike`;
 
+// SEED DATA
 const SEED=[
   {id:1,day:'Monday',startM:hm(10,0),endM:hm(11,0),label:'Lesson \u2014 Khan',type:'private',status:'booked',roster:['Khan']},
   {id:2,day:'Monday',startM:hm(11,0),endM:hm(12,30),label:'Adult Team \u2014 Scholtz',type:'adult-team',status:'fixed',roster:[]},
@@ -311,15 +308,20 @@ const SEED=[
 ];
 const SCC={Monday:{start:'10:00 AM',end:'12:30 PM',active:true,note:''},Tuesday:{start:'9:00 AM',end:'12:00 PM',active:true,note:''},Wednesday:{start:'9:30 AM',end:'12:00 PM',active:true,note:''},Thursday:{start:'9:30 AM',end:'12:00 PM',active:true,note:''},Friday:{start:'9:00 AM',end:'12:00 PM',active:true,note:''}};
 
-let S={slots:SEED.map(s=>({...s})),childcare:JSON.parse(JSON.stringify(SCC)),people:[],notes:[],activities:[],nextId:60};
+// STATE — requests stored as array of {id, personId, note, date, closed}
+let S={slots:SEED.map(s=>({...s})),childcare:JSON.parse(JSON.stringify(SCC)),people:[],notes:[],activities:[],requests:[],nextId:60};
 let pto={active:false,startDate:null,endDate:null,subs:{},notified:{},viewWeekOffset:0};
 let _ps=[],_st=null;
+
+// ── HELPERS ──
+function openReqs(personId){return S.requests.filter(r=>r.personId===personId&&!r.closed);}
+function hasOpenReqs(personId){return openReqs(personId).length>0;}
 
 function save(){
   clearTimeout(_st);
   _st=setTimeout(async()=>{
     syncBar('','Saving...');
-    const keys=role==='mike'?['people','notes','activities','childcare','nextId','pto']:['childcare'];
+    const keys=role==='mike'?['people','notes','activities','childcare','nextId','pto','requests']:['childcare'];
     for(const k of keys){
       const v=k==='pto'?pto:k==='nextId'?S.nextId:S[k];
       await dbSave(k,v);
@@ -330,9 +332,9 @@ function save(){
 async function boot(){
   syncBar('','Loading from cloud...');
   try{
-    const [people,notes,activities,childcare,nextId,ptoD]=await Promise.all([
+    const [people,notes,activities,childcare,nextId,ptoD,requests]=await Promise.all([
       dbGet('people'),dbGet('notes'),dbGet('activities'),
-      dbGet('childcare'),dbGet('nextId'),dbGet('pto')
+      dbGet('childcare'),dbGet('nextId'),dbGet('pto'),dbGet('requests')
     ]);
     if(people)S.people=people;
     if(notes)S.notes=notes;
@@ -340,6 +342,7 @@ async function boot(){
     if(childcare)S.childcare=childcare;
     if(nextId)S.nextId=nextId;
     if(ptoD)Object.assign(pto,ptoD);
+    if(requests)S.requests=requests;
     syncBar('ok','✓ Loaded from cloud');
   }catch(e){syncBar('err','Could not connect — working offline');}
   if(role==='mike')renderSchedule();else renderCC();
@@ -350,7 +353,61 @@ function ss(s){if(isF(s.type))return'fixed';if(s.status==='blocked')return'block
 function st(t){const tabs=['schedule','childcare','people','notes','life'];document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',tabs[i]===t));document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));document.getElementById('panel-'+t).classList.add('active');if(t==='schedule')renderSchedule();if(t==='childcare')renderCC();if(t==='people')renderPeople();if(t==='notes')renderNotes();if(t==='life')renderLife();}
 function rpips(f,c){const s=Math.min(c,8);let h='<div class="pips">';for(let i=0;i<s;i++)h+=`<div class="pip ${i<f?'on':''}"></div>`;if(c>8)h+=`<span style="font-size:10px;color:#6b7280;margin-left:2px">+${c-8}</span>`;return h+'</div>';}
 
-// PTO
+// ── REQUESTS ──
+function openRequestModal(personId){
+  const p=S.people.find(x=>x.id===personId);if(!p)return;
+  const reqs=openReqs(personId);
+  // If no open requests → go straight to new request form (one less tap)
+  if(reqs.length===0){openNewRequestForm(personId);return;}
+  // Has open requests → show list first
+  const list=reqs.map(r=>`
+    <div class="req-item">
+      <div class="req-item-body">
+        <div class="req-item-note">${r.note}</div>
+        <div class="req-item-date">Added ${r.date}</div>
+      </div>
+      <button class="req-close-btn" title="Mark resolved" onclick="closeRequest(${r.id})">&#10003;</button>
+    </div>`).join('');
+  sm(`<h3>&#10067; Requests \u2014 ${p.name}</h3>
+    ${list}
+    <div class="ma">
+      <button class="btn btn-sm bcx" onclick="cm()">Close</button>
+      <button class="btn btn-sm" onclick="openNewRequestForm(${personId})">+ New request</button>
+    </div>`);
+}
+
+function openNewRequestForm(personId){
+  const p=S.people.find(x=>x.id===personId);if(!p)return;
+  const today=new Date().toISOString().slice(0,10);
+  sm(`<h3>&#10067; New Request \u2014 ${p.name}</h3>
+    <div class="f"><label>Request / follow-up note</label><textarea id="req-note" rows="3" placeholder="e.g. Looking for Mon/Wed mornings, or asking about summer leagues..."></textarea></div>
+    <div class="ma">
+      <button class="btn btn-sm bcx" onclick="openRequestModal(${personId})">Back</button>
+      <button class="btn btn-sm" onclick="saveRequest(${personId},'${today}')">Save request</button>
+    </div>`);
+  setTimeout(()=>document.getElementById('req-note')?.focus(),100);
+}
+
+function saveRequest(personId,date){
+  const note=document.getElementById('req-note')?.value?.trim();
+  if(!note){alert('Please enter a note for this request.');return;}
+  S.requests.push({id:S.nextId++,personId,note,date,closed:false});
+  save();cm();renderPeople();
+}
+
+function closeRequest(reqId){
+  const r=S.requests.find(x=>x.id===reqId);if(!r)return;
+  r.closed=true;
+  save();
+  // Refresh modal if still open — find person
+  const p=S.people.find(x=>x.id===r.personId);
+  const remaining=openReqs(r.personId);
+  if(remaining.length>0){openRequestModal(r.personId);}
+  else{cm();}
+  renderPeople();
+}
+
+// ── PTO ──
 function ptoDates(){if(!pto.active||!pto.startDate||!pto.endDate)return[];const dates=[],cur=new Date(pto.startDate+'T12:00:00'),end=new Date(pto.endDate+'T12:00:00');while(cur<=end){const dow=cur.getDay();if(dow>=1&&dow<=5)dates.push(cur.toISOString().slice(0,10));cur.setDate(cur.getDate()+1);}return dates;}
 function ptoWeeks(){const dates=ptoDates();if(!dates.length)return[];const weeks=[];let cur=[],lastM=null;dates.forEach(d=>{const dt=new Date(d+'T12:00:00'),dow=dt.getDay(),m=new Date(dt);m.setDate(dt.getDate()-(dow-1));const ms=m.toISOString().slice(0,10);if(ms!==lastM){if(cur.length)weeks.push(cur);cur=[];lastM=ms;}cur.push(d);});if(cur.length)weeks.push(cur);return weeks;}
 const DN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -369,6 +426,7 @@ function openNotifyModal(sid){const s=S.slots.find(x=>x.id===sid);if(!s)return;c
 function mkN(sid){pto.notified[sid]=true;save();cm();renderSchedule();renderPTOBanner();}
 function mkAllN(day){S.slots.forEach(s=>{if(s.day!==day)return;const st2=ss(s);if(!isF(s.type)&&(st2==='booked'||st2==='partial'||st2==='full'))pto.notified[s.id]=true;});save();renderSchedule();renderPTOBanner();}
 
+// ── SCHEDULE ──
 function renderSchedule(){
   renderPTOBanner();
   const grid=document.getElementById('schedule-grid');
@@ -409,26 +467,107 @@ function renderSchedule(){
   }).join('');
 }
 
+// ── PEOPLE PICKER with request suggestion ──
 function autoLbl(){const e=document.getElementById('e-label');if(!e)return;if(_ps.length===0){if(e.value.includes('\u2014')||e.value==='Lesson')e.value='Lesson';return;}const n=_ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return p?gln(p.name):'';}).filter(Boolean);e.value=`Lesson \u2014 ${n.join(', ')}`;}
+
+function buildReqSuggestion(){
+  // Find any selected person with open requests
+  const suggestions=_ps.map(pid=>{
+    const p=S.people.find(x=>x.id===pid);
+    if(!p)return null;
+    const reqs=openReqs(pid);
+    if(!reqs.length)return null;
+    return{pid,name:p.name,reqs};
+  }).filter(Boolean);
+  if(!suggestions.length)return'';
+  return suggestions.map(sg=>`
+    <div class="req-suggestion">
+      <span>&#10067;</span>
+      <label>
+        <input type="checkbox" id="close-req-${sg.pid}" checked style="width:auto;margin-right:4px">
+        Close ${sg.name}'s open request${sg.reqs.length>1?'s':''}?
+      </label>
+    </div>`).join('');
+}
+
 function bPPk(sid){const s=S.slots.find(x=>x.id===sid);if(!s)return'';const cap=LT[s.type]?.cap||1,ac=_ps.length>=cap;if(!S.people.length)return`<div class="pke">No people yet.</div>`;return`<div class="ppk">${S.people.map(p=>{const sel=_ps.includes(p.id),dis=!sel&&ac;return`<div class="pki ${sel?'sel':''} ${dis?'dis':''}" onclick="togPP(${sid},${p.id})"><span class="pkn">${p.name}</span>${sel?'<span class="pkc">\u2713</span>':''}</div>`;}).join('')}</div>`;}
 function bRC(sid){if(!_ps.length)return`<span style="font-size:11px;color:var(--gray);font-style:italic">No one selected yet</span>`;return _ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return`<span class="rchip">${p?p.name:'?'} <button onclick="togPP(${sid},${pid})">\u2715</button></span>`;}).join('');}
-function togPP(sid,pid){const s=S.slots.find(x=>x.id===sid);if(!s)return;const cap=LT[s.type]?.cap||1,idx=_ps.indexOf(pid);if(idx>=0)_ps.splice(idx,1);else{if(_ps.length>=cap)return;_ps.push(pid);}const pe=document.getElementById('slot-ppk');if(pe)pe.innerHTML=bPPk(sid);const ce=document.getElementById('slot-rc');if(ce)ce.innerHTML=bRC(sid);autoLbl();}
-function editSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;const l=LT[s.type]||LT.blocked,cap=l.cap;_ps=[];s.roster.forEach(n=>{const p=S.people.find(x=>x.name===n||gln(x.name)===n);if(p&&!_ps.includes(p.id))_ps.push(p.id);});const ss2=`${Math.floor(s.startM/60)}:${String(s.startM%60).padStart(2,'0')}`,es=`${Math.floor(s.endM/60)}:${String(s.endM%60).padStart(2,'0')}`;const rs=l.fixed?`<div style="font-size:11px;color:#6b3f9e;font-style:italic;padding:6px 0">Fixed \u2014 no roster needed</div>`:`<div class="f"><div class="fl">Roster (${cap} spot${cap!==1?'s':''})</div><div id="slot-rc" class="rr">${bRC(id)}</div><div id="slot-ppk">${bPPk(id)}</div></div>`;const stSec=l.fixed?'':`<div class="f"><label>Status</label><select id="e-status"><option value="auto" ${s.status!=='blocked'&&s.status!=='booked'?'selected':''}>Auto</option><option value="booked" ${s.status==='booked'?'selected':''}>Booked</option><option value="blocked" ${s.status==='blocked'?'selected':''}>Blocked</option></select></div>`;sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma"><button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);}
+function togPP(sid,pid){const s=S.slots.find(x=>x.id===sid);if(!s)return;const cap=LT[s.type]?.cap||1,idx=_ps.indexOf(pid);if(idx>=0)_ps.splice(idx,1);else{if(_ps.length>=cap)return;_ps.push(pid);}const pe=document.getElementById('slot-ppk');if(pe)pe.innerHTML=bPPk(sid);const ce=document.getElementById('slot-rc');if(ce)ce.innerHTML=bRC(sid);autoLbl();// Update request suggestion
+const rs=document.getElementById('req-suggestion-area');if(rs)rs.innerHTML=buildReqSuggestion();}
+
+function editSlot(id){
+  if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;
+  const l=LT[s.type]||LT.blocked,cap=l.cap;_ps=[];
+  s.roster.forEach(n=>{const p=S.people.find(x=>x.name===n||gln(x.name)===n);if(p&&!_ps.includes(p.id))_ps.push(p.id);});
+  const ss2=`${Math.floor(s.startM/60)}:${String(s.startM%60).padStart(2,'0')}`,es=`${Math.floor(s.endM/60)}:${String(s.endM%60).padStart(2,'0')}`;
+  const rs=l.fixed?`<div style="font-size:11px;color:#6b3f9e;font-style:italic;padding:6px 0">Fixed \u2014 no roster needed</div>`:`<div class="f"><div class="fl">Roster (${cap} spot${cap!==1?'s':''})</div><div id="slot-rc" class="rr">${bRC(id)}</div><div id="slot-ppk">${bPPk(id)}</div></div><div id="req-suggestion-area">${buildReqSuggestion()}</div>`;
+  const stSec=l.fixed?'':`<div class="f"><label>Status</label><select id="e-status"><option value="auto" ${s.status!=='blocked'&&s.status!=='booked'?'selected':''}>Auto</option><option value="booked" ${s.status==='booked'?'selected':''}>Booked</option><option value="blocked" ${s.status==='blocked'?'selected':''}>Blocked</option></select></div>`;
+  sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma"><button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);
+}
 function uch(){const t=document.getElementById('e-type')?.value,l=LT[t],el=document.getElementById('cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
-function svSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;s.label=document.getElementById('e-label').value;s.startM=pti(document.getElementById('e-start').value);s.endM=pti(document.getElementById('e-end').value);const nt=document.getElementById('e-type').value;if(nt!==s.type){s.type=nt;if(isF(nt)){s.roster=[];s.status='fixed';}else{const nc=LT[nt]?.cap||1;_ps=_ps.slice(0,nc);s.status='auto';}}if(!isF(s.type)){s.roster=_ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return p?gln(p.name):'';}).filter(Boolean);const se=document.getElementById('e-status');if(se){const v=se.value;s.status=v==='auto'?'auto':v;}}save();cm();renderSchedule();}
+function svSlot(id){
+  if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;
+  s.label=document.getElementById('e-label').value;s.startM=pti(document.getElementById('e-start').value);s.endM=pti(document.getElementById('e-end').value);
+  const nt=document.getElementById('e-type').value;
+  if(nt!==s.type){s.type=nt;if(isF(nt)){s.roster=[];s.status='fixed';}else{const nc=LT[nt]?.cap||1;_ps=_ps.slice(0,nc);s.status='auto';}}
+  if(!isF(s.type)){
+    s.roster=_ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return p?gln(p.name):'';}).filter(Boolean);
+    const se=document.getElementById('e-status');if(se){const v=se.value;s.status=v==='auto'?'auto':v;}
+    // Close requests if checkboxes checked
+    _ps.forEach(pid=>{
+      const cb=document.getElementById(`close-req-${pid}`);
+      if(cb&&cb.checked){openReqs(pid).forEach(r=>{r.closed=true;});}
+    });
+  }
+  save();cm();renderSchedule();renderPeople();
+}
 function delSlot(id){if(role!=='mike')return;S.slots=S.slots.filter(s=>s.id!==id);save();cm();renderSchedule();}
 function openAddSlot(def='Monday'){if(role!=='mike')return;sm(`<h3>Add Slot</h3><div class="f"><label>Day</label><select id="n-day">${DAYS.map(d=>`<option value="${d}" ${d===def?'selected':''}>${d}</option>`).join('')}</select></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="n-start" placeholder="10:00"></div><div style="flex:1"><div class="fl">End</div><input id="n-end" placeholder="11:30"></div></div><div class="f"><label>Label</label><input id="n-label" placeholder="e.g. Lesson \u2014 Smith"></div><div class="f"><label>Type</label><select id="n-type" onchange="ach()">${Object.entries(LT).map(([k,v])=>`<option value="${k}">${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="add-cap-hint">Capacity: 1</div></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addSlot()">Add</button></div>`);}
 function ach(){const t=document.getElementById('n-type')?.value,l=LT[t],el=document.getElementById('add-cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
 function addSlot(){if(role!=='mike')return;const type=document.getElementById('n-type').value;const s={id:S.nextId++,day:document.getElementById('n-day').value,startM:pti(document.getElementById('n-start').value),endM:pti(document.getElementById('n-end').value),label:document.getElementById('n-label').value,type,status:isF(type)?'fixed':'auto',roster:[]};S.slots.push(s);save();cm();renderSchedule();}
 function notifySlot(day,sid){if(role!=='mike')return;const slot=S.slots.find(s=>s.id===sid);if(!slot)return;const interested=S.people.filter(p=>p.notifyAll||p.days.includes(day));if(!interested.length){sm(`<h3>No One to Notify</h3><p style="font-size:13px;color:#6b7280;margin-bottom:12px">No people marked as interested in ${day}.</p><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Close</button></div>`);return;}const msg=nmsg(slot,day),enc=encodeURIComponent(msg);const links=interested.map(p=>`<a href="sms:${cp(p.phone)}?body=${enc}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border:1.5px solid #ddd8d0;border-radius:6px;font-size:13px;font-family:Georgia,serif;margin-bottom:8px;color:#1a1a2e;text-decoration:none;background:#faf8f4"><span>${p.name}</span><span style="color:#6b7280;font-size:11px;font-style:italic">${cp(p.phone)} \u203a</span></a>`).join('');sm(`<h3>&#x2708; Notify \u2014 ${day}</h3><div class="mp">${msg}</div><p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:10px">Tap a name to open in Messages:</p>${links}<div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Done</button></div>`);}
 
+// ── CHILDCARE ──
 function renderCC(){document.getElementById('cc-grid').innerHTML=DAYS.map(day=>{const cc=S.childcare[day]||{...DCC},m=role==='mike';return`<div class="cd ${!cc.active?'cdo':''}"><div class="cdh"><span class="cdt">${day}</span><div style="display:flex;align-items:center;gap:8px">${cc.active?`<span class="cdhr">&#x1F552; ${cc.start} \u2013 ${cc.end}</span>`:'<span style="font-size:12px;color:rgba(255,255,255,.5);font-style:italic">Day off</span>'}<button class="cctg ${cc.active?'on':''}" onclick="togCC('${day}')">${cc.active?'On':'Off'}</button>${m&&cc.active?`<button class="btn btn-sm" onclick="editCCH('${day}')" style="font-size:10px;padding:4px 10px">Edit hours</button>`:''}</div></div>${cc.active?`<div class="cdb"><div class="cdnl"><span>Activity notes</span><span>${m?'Visible to caregiver':''}</span></div><textarea rows="3" placeholder="e.g. Pool in the morning...">${cc.note||''}</textarea><div class="cdsr"><button class="btn btn-sm" onclick="svCCN('${day}',this.closest('.cdb').querySelector('textarea').value,this)">Save note</button></div></div>`:''}</div>`;}).join('');}
 function togCC(day){if(!S.childcare[day])S.childcare[day]={...DCC};S.childcare[day].active=!S.childcare[day].active;save();renderCC();if(role==='mike')renderSchedule();}
 function svCCN(day,val,btn){if(!S.childcare[day])S.childcare[day]={...DCC};S.childcare[day].note=val;save();btn.textContent='Saved \u2713';setTimeout(()=>{btn.textContent='Save note';},1500);}
 function editCCH(day){if(role!=='mike')return;const cc=S.childcare[day]||{...DCC};sm(`<h3>Edit Hours \u2014 ${day}</h3><div class="f"><label>Start</label><input id="cc-s" value="${cc.start}"></div><div class="f"><label>End</label><input id="cc-e" value="${cc.end}"></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svCCH('${day}')">Save</button></div>`);}
 function svCCH(day){if(role!=='mike')return;if(!S.childcare[day])S.childcare[day]={...DCC};S.childcare[day].start=document.getElementById('cc-s').value;S.childcare[day].end=document.getElementById('cc-e').value;save();cm();renderCC();renderSchedule();}
 
-function renderPeople(){if(role!=='mike')return;document.getElementById('people-count').textContent=S.people.length+' people on roster';const list=document.getElementById('people-list');if(!S.people.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic;padding:8px 0">No people yet.</div>';return;}list.innerHTML=S.people.map(p=>{const bad=p.phone&&!pv(p.phone);return`<div class="pc"><div class="av">${p.initials}</div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-weight:bold;font-size:14px">${p.name}</span>${p.notifyAll?'<span class="pill on" style="font-size:10px">All slots</span>':''}</div><div style="font-size:12px;color:${bad?'#b5510a':'#6b7280'};margin:2px 0;font-style:italic">${p.phone||'No phone'}${bad?' \u26a0\ufe0f':''}</div><div class="dp">${SHORT.map((d,i)=>`<span class="pill ${p.days.includes(DAYS[i])?'on':''}" onclick="togDay(${p.id},'${DAYS[i]}')">${d}</span>`).join('')}</div></div><div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0"><button class="btn btn-sm bcx" onclick="openEP(${p.id})">Edit</button><button class="btn btn-sm bdg" onclick="delP(${p.id})">\u2715</button></div></div>`;}).join('');}
+// ── PEOPLE with search + request button ──
+function renderPeople(){
+  if(role!=='mike')return;
+  const search=(document.getElementById('people-search')?.value||'').toLowerCase();
+  const filtered=S.people.filter(p=>!search||p.name.toLowerCase().includes(search));
+  document.getElementById('people-count').textContent=`${S.people.length} people on roster${search&&filtered.length!==S.people.length?' ('+filtered.length+' shown)':''}`;
+  const list=document.getElementById('people-list');
+  if(!S.people.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic;padding:8px 0">No people yet.</div>';return;}
+  if(filtered.length===0){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic;padding:8px 0">No matches found.</div>';return;}
+  list.innerHTML=filtered.map(p=>{
+    const bad=p.phone&&!pv(p.phone);
+    const hasReq=hasOpenReqs(p.id);
+    const reqCount=openReqs(p.id).length;
+    return`<div class="pc">
+      <div class="av">${p.initials}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-weight:bold;font-size:14px">${p.name}</span>
+          ${p.notifyAll?'<span class="pill on" style="font-size:10px">All slots</span>':''}
+          ${hasReq?`<span style="font-size:10px;color:#dc2626;font-style:italic">${reqCount} open request${reqCount>1?'s':''}</span>`:''}
+        </div>
+        <div style="font-size:12px;color:${bad?'#b5510a':'#6b7280'};margin:2px 0;font-style:italic">${p.phone||'No phone'}${bad?' \u26a0\ufe0f':''}</div>
+        <div class="dp">${SHORT.map((d,i)=>`<span class="pill ${p.days.includes(DAYS[i])?'on':''}" onclick="togDay(${p.id},'${DAYS[i]}')">${d}</span>`).join('')}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;align-items:flex-end">
+        <div style="display:flex;gap:5px">
+          <button class="req-btn ${hasReq?'has':'none'}" onclick="openRequestModal(${p.id})" title="${hasReq?reqCount+' open request'+( reqCount>1?'s':'')+' — tap to view':'No requests — tap to add'}">?</button>
+          <button class="btn btn-sm bcx" onclick="openEP(${p.id})">Edit</button>
+          <button class="btn btn-sm bdg" onclick="delP(${p.id})">\u2715</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
 function togDay(pid,day){if(role!=='mike')return;const p=S.people.find(x=>x.id===pid);if(!p)return;const i=p.days.indexOf(day);if(i>=0)p.days.splice(i,1);else p.days.push(day);save();renderPeople();}
 function delP(id){if(role!=='mike')return;S.people=S.people.filter(p=>p.id!==id);save();renderPeople();}
 function openEP(id){if(role!=='mike')return;const p=S.people.find(x=>x.id===id);if(!p)return;sm(`<h3>Edit Person</h3><div class="f"><label>Full name</label><input id="ep-n" value="${p.name}"></div><div class="f"><label>Phone</label><input id="ep-p" type="tel" value="${p.phone}" placeholder="5025551234" oninput="chph()"><div id="ep-ph" class="ph" style="${p.phone&&!pv(p.phone)?'display:block':''}">Digits only</div></div><div class="f"><label>Initials</label><input id="ep-i" value="${p.initials}" maxlength="3"></div><div class="f"><label><input type="checkbox" id="ep-a" style="width:auto;margin-right:6px" ${p.notifyAll?'checked':''}>Notify for all open slots</label></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svEP(${id})">Save</button></div>`);}
@@ -438,11 +577,13 @@ function openAddPerson(){if(role!=='mike')return;sm(`<h3>Add Person</h3><div cla
 function chphn(){const i=document.getElementById('p-p'),h=document.getElementById('p-ph');if(i&&h)h.style.display=i.value&&!pv(i.value)?'block':'none';}
 function addP(){if(role!=='mike')return;const n=document.getElementById('p-n').value.trim();if(!n)return;const p={id:S.nextId++,name:n,phone:cp(document.getElementById('p-p').value),initials:document.getElementById('p-i').value.trim()||n.split(' ').map(w=>w[0]).join('').toUpperCase(),days:[],notifyAll:document.getElementById('p-a').checked};S.people.push(p);save();cm();renderPeople();}
 
+// ── NOTES ──
 function renderNotes(){if(role!=='mike')return;const list=document.getElementById('notes-list');if(!S.notes.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic">No notes yet.</div>';return;}list.innerHTML=S.notes.slice().reverse().map(n=>`<div class="nb"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:11px;color:#6b7280;font-style:italic">${n.date}</div><button class="btn btn-sm bdg" onclick="delNote(${n.id})" style="padding:4px 10px">\u2715</button></div><div style="font-size:13px;line-height:1.7;margin-top:6px">${n.text}</div></div>`).join('');}
 function delNote(id){if(role!=='mike')return;S.notes=S.notes.filter(n=>n.id!==id);save();renderNotes();}
 function openAddNote(){if(role!=='mike')return;const today=new Date().toISOString().slice(0,10);sm(`<h3>Add Note</h3><div class="f"><label>Date</label><input id="nn-d" type="date" value="${today}"></div><div class="f"><label>Note</label><textarea id="nn-t" rows="4"></textarea></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addNote()">Save</button></div>`);}
 function addNote(){if(role!=='mike')return;const n={id:S.nextId++,date:document.getElementById('nn-d').value,text:document.getElementById('nn-t').value};S.notes.push(n);save();cm();renderNotes();}
 
+// ── LIFE ──
 function renderLife(){if(role!=='mike')return;const list=document.getElementById('activity-list');const sorted=[...S.activities].sort((a,b)=>a.date>b.date?1:-1);if(!sorted.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic">No activities yet.</div>';return;}list.innerHTML=sorted.map(a=>`<div class="ar"><span class="at at-${a.type}">${a.type}</span><span style="font-size:12px;color:#6b7280;min-width:80px;font-style:italic">${a.date}</span><span style="font-size:12px;color:#6b7280;min-width:58px">${a.time}</span><span style="flex:1;font-size:13px">${a.label}</span><button class="btn btn-sm bdg" onclick="delAct(${a.id})" style="padding:4px 10px">\u2715</button></div>`).join('');}
 function delAct(id){if(role!=='mike')return;S.activities=S.activities.filter(a=>a.id!==id);save();renderLife();}
 function openAddActivity(){if(role!=='mike')return;const today=new Date().toISOString().slice(0,10);sm(`<h3>Add Activity</h3><div class="f"><label>Date</label><input id="a-d" type="date" value="${today}"></div><div class="f"><label>Time</label><input id="a-t" placeholder="6:00 PM"></div><div class="f"><label>Description</label><input id="a-l"></div><div class="f"><label>Type</label><select id="a-ty"><option value="work">Work</option><option value="camp">Camp</option><option value="personal">Personal</option><option value="life">Life</option></select></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addAct()">Add</button></div>`);}
