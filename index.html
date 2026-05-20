@@ -240,8 +240,7 @@ textarea{resize:vertical}
 
 <!-- SCHEDULE -->
 <div id="panel-schedule" class="panel active">
-  <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:6px" id="share-btn-wrap" style="display:none"><button class="btn btn-sm" onclick="shareOpenSlots()" style="background:#1a6b6b">&#128279; Availability</button></div>
-  <div class="sh" style="flex-wrap:wrap;gap:8px">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
     <div class="leg">
       <div class="li"><div class="ld" style="background:#40916c"></div>Open</div>
       <div class="li"><div class="ld" style="background:#2d2d5e"></div>Booked</div>
@@ -249,8 +248,11 @@ textarea{resize:vertical}
       <div class="li"><div class="ld" style="background:#6b3f9e"></div>Fixed</div>
       <div class="li"><div class="ld" style="background:#1a6b6b"></div>Childcare</div>
     </div>
-    <div id="event-pills" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex:1;justify-content:center"></div>
-    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="sched-controls"></div>
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      <div id="event-pills" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"></div>
+      <div id="pto-active-lbl" style="display:none;font-size:11px;color:#dc2626;font-weight:bold;font-style:italic;letter-spacing:.04em">PTO Active</div>
+      <div id="sched-controls" style="display:flex;gap:6px;align-items:center"></div>
+    </div>
   </div>
   <div class="week-nav">
     <button class="week-nav-btn" onclick="changeWeek(-1)">&#8592;</button>
@@ -779,11 +781,18 @@ function renderPTOBanner(){
   const bn=document.getElementById('pto-banner');
   if(role!=='mike'){bn.style.display='none';return;}
   const btn=document.getElementById('pto-btn');
-  if(!pto.active){bn.style.display='none';if(btn){btn.textContent='PTO';btn.className='btn btn-sm bpto';btn.onclick=openPTO;}return;}
+  const lbl=document.getElementById('pto-active-lbl');
+  if(!pto.active){
+    bn.style.display='none';
+    if(btn){btn.textContent='PTO';btn.className='btn btn-sm bpto';btn.style.minWidth='60px';btn.onclick=openPTO;}
+    if(lbl)lbl.style.display='none';
+    return;
+  }
   const wks=ptoWeeks(),nw=wks.length,{total,done}=ptoProg(),wi=Math.min(pto.viewWeekOffset,nw-1),wd=wks[wi]||[];
   const ws=wd[0]?fmtDate(new Date(wd[0]+'T12:00:00')):'',we=wd[wd.length-1]?fmtDate(new Date(wd[wd.length-1]+'T12:00:00')):'';
   bn.style.display='flex';
-  if(btn){btn.textContent='Clear PTO';btn.className='btn btn-sm bptoc';btn.onclick=clearPTO;}
+  if(btn){btn.textContent='Clear PTO';btn.className='btn btn-sm bptoc';btn.style.minWidth='80px';btn.onclick=clearPTO;}
+  if(lbl)lbl.style.display='block';
   bn.innerHTML=`<div class="pto-bl"><span class="pto-tag">PTO ACTIVE</span><span class="pto-dates">${fmtDateLong(pto.startDate)} \u2013 ${fmtDateLong(pto.endDate)}</span><span class="pto-prog">${done}/${total} handled</span></div><div class="pto-nav"><button class="pto-nb" onclick="ptoNav(-1)" ${wi===0?'disabled':''}>&#8592;</button><span class="pto-nlbl">Week ${wi+1}/${nw}<br><span style="font-size:10px">${ws}${we&&we!==ws?' \u2013 '+we:''}</span></span><button class="pto-nb" onclick="ptoNav(1)" ${wi>=nw-1?'disabled':''}>&#8594;</button></div>`;
 }
 function ptoNav(d){const wks=ptoWeeks();pto.viewWeekOffset=Math.max(0,Math.min(wks.length-1,pto.viewWeekOffset+d));save();renderSchedule();renderPTOBanner();}
