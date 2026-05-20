@@ -243,19 +243,10 @@ textarea{resize:vertical}
 
 <!-- SCHEDULE -->
 <div id="panel-schedule" class="panel active">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
-    <div class="leg">
-      <div class="li"><div class="ld" style="background:#40916c"></div>Open</div>
-      <div class="li"><div class="ld" style="background:#2d2d5e"></div>Booked</div>
-      <div class="li"><div class="ld" style="background:#b5510a"></div>Partial</div>
-      <div class="li"><div class="ld" style="background:#6b3f9e"></div>Fixed</div>
-      <div class="li"><div class="ld" style="background:#1a6b6b"></div>KIDS</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-      <div id="event-pills" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"></div>
-      <div id="pto-active-lbl" style="display:none;font-size:11px;color:#dc2626;font-weight:bold;font-style:italic;letter-spacing:.04em">PTO Active</div>
-      <div id="sched-controls" style="display:flex;gap:6px;align-items:center"></div>
-    </div>
+  <div style="display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+    <div id="event-pills" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-right:auto"></div>
+    <div id="pto-active-lbl" style="display:none;font-size:11px;color:#dc2626;font-weight:bold;font-style:italic;letter-spacing:.04em">PTO Active</div>
+    <div id="sched-controls" style="display:flex;gap:6px;align-items:center"></div>
   </div>
   <div class="week-nav" style="margin-bottom:6px;padding:4px 0">
     <button class="week-nav-btn" onclick="changeWeek(-1)">&#8592;</button>
@@ -831,7 +822,7 @@ function renderSchedule(){
   renderEventPills('event-pills',allPills);
   // Setup controls
   if(role==='mike'){
-    document.getElementById('sched-controls').innerHTML=`<button class="btn btn-sm bpto" onclick="openPTO()" id="pto-btn">PTO</button><button class="btn btn-sm" onclick="openAddSlot()">+ Add slot</button>`;
+    document.getElementById('sched-controls').innerHTML=`<button class="btn btn-sm" onclick="shareOpenSlots()" style="background:#1a6b6b;min-width:76px">&#128279; Share</button><button class="btn btn-sm" onclick="openAddSlot()" style="min-width:76px">+ Add slot</button><button class="btn btn-sm bpto" onclick="openPTO()" id="pto-btn" style="min-width:76px">PTO</button>`;
     renderPTOBanner();// re-run to wire pto-btn if just created
   }
   const grid=document.getElementById('schedule-grid');
