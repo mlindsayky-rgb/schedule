@@ -15,6 +15,9 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
   --white:#ffffff;--border:#ddd8d0;
   --teal:#1a6b6b;--teal-pale:#e0f2f1;--teal-border:#80cbc4;
   --red:#b91c1c;--red-pale:#fef2f2;--red-border:#fca5a5;
+  --tennis:#d8f3dc;--tennis-border:#b7e4c7;--tennis-text:#1b4332;
+  --cc-bg:#f3e8ff;--cc-border:#d8b4fe;--cc-text:#581c87;
+  --life-bg:#dbeafe;--life-border:#93c5fd;--life-text:#1e3a5f;
 }
 /* PIN */
 #pin-screen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:24px}
@@ -36,12 +39,12 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 /* APP */
 .app{max-width:100%;background:var(--cream);min-height:100vh}
 .tabs{display:flex;flex-wrap:wrap;background:var(--navy)}
-.tab{padding:11px 16px;border:none;background:none;cursor:pointer;font-size:11px;font-family:Georgia,serif;letter-spacing:.06em;color:rgba(255,255,255,.55);text-transform:uppercase;font-weight:500;border-bottom:3px solid transparent;transition:color .15s,background .15s}
+.tab{padding:9px 12px;border:none;background:none;cursor:pointer;font-size:10px;font-family:Georgia,serif;letter-spacing:.05em;color:rgba(255,255,255,.55);text-transform:uppercase;font-weight:600;border-bottom:3px solid transparent;transition:color .15s,background .15s;white-space:nowrap}
 .tab:hover{color:#fff;background:var(--navy-hover)}
 .tab.active{color:#fff;font-weight:bold;border-bottom:3px solid rgba(255,255,255,.5);background:var(--navy-mid)}
 .panel{display:none}.panel.active{display:block}
-.app-body{padding:1rem}
-.grid{display:grid;gap:12px}
+.app-body{padding:10px 12px}
+.grid{display:grid;gap:8px}
 /* DAY BLOCKS */
 .day-block{border:1px solid var(--border);border-radius:6px;overflow:hidden;box-shadow:0 1px 4px rgba(26,26,46,.06)}
 .day-block.pto-day{border-color:#fca5a5}
@@ -52,14 +55,14 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .day-open-count{color:rgba(255,255,255,.6);font-size:11px;font-style:italic}
 .day-slots{padding:10px;background:var(--cream)}
 /* SLOTS */
-.slot{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:4px;margin-bottom:6px;cursor:pointer;border:1px solid transparent;transition:filter .15s}
+.slot{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:4px;margin-bottom:5px;cursor:pointer;border:1px solid transparent;transition:filter .15s}
 .slot:hover{filter:brightness(.93)}
-.slot.available{background:var(--green-pale);border-color:#b7e4c7}
-.slot.booked{background:#e8eaf6;border-color:#c5cae9}
-.slot.partial{background:var(--amber-pale);border-color:#fcd9a8}
-.slot.full{background:#fff0d6;border-color:var(--amber-mid)}
-.slot.fixed{background:#ede7f6;border-color:#ce93d8}
-.slot.blocked{background:var(--gray-pale);border-color:#d1d5db}
+.slot.available{background:var(--tennis);border-color:var(--tennis-border)}
+.slot.booked{background:var(--tennis);border-color:var(--tennis-border)}
+.slot.partial{background:var(--tennis);border-color:var(--tennis-border)}
+.slot.full{background:var(--tennis);border-color:var(--tennis-border)}
+.slot.fixed{background:var(--tennis);border-color:var(--tennis-border)}
+.slot.blocked{background:#f1f0ee;border-color:#d1d5db}
 .slot.pto-sub-needed{background:var(--red-pale);border-color:var(--red-border)}
 .slot.pto-sub-done{background:#f0fdf4;border-color:#86efac}
 .slot.pto-notify-needed{background:var(--red-pale);border-color:var(--red-border)}
@@ -67,10 +70,10 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .slot.pto-dim{background:var(--gray-pale);border-color:#e5e7eb;opacity:.45;cursor:default}
 .slot.readonly{cursor:default}.slot.readonly:hover{filter:none}
 /* CC BAR */
-.cc-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:4px;border:1px dashed var(--teal-border);background:var(--teal-pale);margin-top:8px}
-.cc-bar-time{font-size:11px;color:var(--teal);min-width:90px;font-style:italic;flex-shrink:0}
-.cc-bar-label{font-size:12px;color:var(--teal);font-weight:500}
-.cc-bar-badge{font-size:10px;padding:1px 8px;border-radius:20px;background:#b2dfdb;color:#004d40;margin-left:auto}
+.cc-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:4px;border:1px dashed var(--cc-border);background:var(--cc-bg);margin-top:8px}
+.cc-bar-time{font-size:11px;color:var(--cc-text);min-width:90px;font-style:italic;flex-shrink:0}
+.cc-bar-label{font-size:12px;color:var(--cc-text);font-weight:500}
+.cc-bar-badge{font-size:10px;padding:1px 8px;border-radius:20px;background:#e9d5ff;color:#581c87;margin-left:auto}
 /* SLOT PARTS */
 .slot-time{font-size:11px;color:var(--gray);min-width:90px;font-style:italic;flex-shrink:0}
 .slot-body{flex:1;min-width:0}
@@ -88,7 +91,7 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .slot-right{display:flex;align-items:center;flex-shrink:0;gap:5px}
 .rchip{font-size:10px;padding:2px 9px;border-radius:20px;background:#fff8e1;color:#5d4037;border:1px solid #ffe082;display:inline-flex;align-items:center;gap:5px}
 .rchip button{background:none;border:none;cursor:pointer;color:#9b1c1c;font-size:11px;padding:0}
-.fnote{font-size:10px;color:var(--purple);background:#f3e5f5;border-radius:20px;padding:2px 8px;display:inline-flex;align-items:center;gap:4px}
+.fnote{font-size:10px;color:var(--tennis-text);background:rgba(45,106,79,.12);border-radius:20px;padding:2px 8px;display:inline-flex;align-items:center;gap:4px}
 .send-btn{width:36px;height:36px;border-radius:8px;background:var(--green-soft);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;transition:background .15s,transform .1s;flex-shrink:0}
 .send-btn:hover{background:var(--green);transform:scale(1.08)}
 /* PTO BANNER */
@@ -110,10 +113,10 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .week-nav-lbl{font-size:12px;color:var(--gray);font-style:italic;min-width:180px;text-align:center}
 /* EVENT PILLS on schedule */
 .event-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-.pill-camp{background:#d97706;color:#fff;font-size:11px;padding:4px 11px;border-radius:20px;font-weight:600;cursor:pointer;transition:background .15s}
-.pill-camp:hover{background:#b45309}
-.pill-vacation{background:#0e7490;color:#fff;font-size:11px;padding:4px 11px;border-radius:20px;font-weight:600;cursor:pointer;transition:background .15s}
-.pill-vacation:hover{background:#155e75}
+.pill-camp{background:var(--life-bg);color:var(--life-text);border:1px solid var(--life-border);font-size:11px;padding:4px 11px;border-radius:20px;font-weight:600;cursor:pointer;transition:background .15s}
+.pill-camp:hover{background:#bfdbfe}
+.pill-vacation{background:var(--life-bg);color:var(--life-text);border:1px solid var(--life-border);font-size:11px;padding:4px 11px;border-radius:20px;font-weight:600;cursor:pointer;transition:background .15s}
+.pill-vacation:hover{background:#bfdbfe}
 /* REQUEST BANNER */
 .req-banner{background:#dc2626;color:#fff;padding:7px 16px;font-size:12px;font-family:Georgia,serif;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s}
 .req-banner:hover{background:#b91c1c}
@@ -125,7 +128,7 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .ld{width:9px;height:9px;border-radius:50%}
 .btn{display:inline-flex;align-items:center;justify-content:center;padding:9px 20px;border-radius:5px;cursor:pointer;font-size:13px;font-family:Georgia,serif;font-weight:600;border:none;transition:background .15s;background:#1a1a2e;color:#fff}
 .btn:hover{background:#3a3a6e}
-.btn-sm{padding:7px 14px;font-size:12px}
+.btn-sm{padding:7px 14px;font-size:12px;min-width:76px;text-align:center}
 .bcx{background:#4b5563;color:#fff}.bcx:hover{background:#374151}
 .bdg{background:#9b1c1c;color:#fff}.bdg:hover{background:#7a1515}
 .bpto{background:#7f1d1d;color:#fff}.bpto:hover{background:#991b1b}
@@ -175,7 +178,7 @@ textarea{resize:vertical}
 .an{background:#f0ece4;border-radius:4px;padding:9px 13px;font-size:11px;color:#6b7280;margin-bottom:14px;border-left:3px solid var(--green-soft);font-style:italic}
 /* CHILDCARE */
 .cd{border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden;background:#fff}
-.cdh{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--navy)}
+.cdh{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--navy)}
 .cdt{font-weight:bold;font-size:13px;color:#fff;letter-spacing:.06em;text-transform:uppercase}
 .cdhr{font-size:12px;color:rgba(255,255,255,.6);font-style:italic}
 .cdb{padding:12px}
@@ -228,11 +231,11 @@ textarea{resize:vertical}
 <div id="sync-bar" style="display:none">Connecting...</div>
 <div class="app" id="main-app" style="display:none">
 <div class="tabs">
-  <button class="tab active" id="tab-schedule" onclick="st('schedule')">Schedule</button>
-  <button class="tab" id="tab-childcare" onclick="st('childcare')">Childcare</button>
-  <button class="tab" id="tab-people" onclick="st('people')" style="display:none">People</button>
-  <button class="tab" id="tab-notes" onclick="st('notes')" style="display:none">Notes</button>
-  <button class="tab" id="tab-life" onclick="st('life')" style="display:none">Life</button>
+  <button class="tab active" id="tab-schedule" onclick="st('schedule')">TENNIS</button>
+  <button class="tab" id="tab-childcare" onclick="st('childcare')">KIDS</button>
+  <button class="tab" id="tab-people" onclick="st('people')" style="display:none">CLIENTS</button>
+  <button class="tab" id="tab-notes" onclick="st('notes')" style="display:none">NOTES</button>
+  <button class="tab" id="tab-life" onclick="st('life')" style="display:none">LIFE</button>
 </div>
 <div id="pto-banner" style="display:none"></div>
 <div id="req-banner" style="display:none" onclick="goToRequests()"></div>
@@ -246,7 +249,7 @@ textarea{resize:vertical}
       <div class="li"><div class="ld" style="background:#2d2d5e"></div>Booked</div>
       <div class="li"><div class="ld" style="background:#b5510a"></div>Partial</div>
       <div class="li"><div class="ld" style="background:#6b3f9e"></div>Fixed</div>
-      <div class="li"><div class="ld" style="background:#1a6b6b"></div>Childcare</div>
+      <div class="li"><div class="ld" style="background:#1a6b6b"></div>KIDS</div>
     </div>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
       <div id="event-pills" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"></div>
@@ -254,7 +257,7 @@ textarea{resize:vertical}
       <div id="sched-controls" style="display:flex;gap:6px;align-items:center"></div>
     </div>
   </div>
-  <div class="week-nav">
+  <div class="week-nav" style="margin-bottom:6px;padding:4px 0">
     <button class="week-nav-btn" onclick="changeWeek(-1)">&#8592;</button>
     <span class="week-nav-lbl" id="week-label"></span>
     <button class="week-nav-btn" onclick="changeWeek(1)">&#8594;</button>
@@ -662,7 +665,7 @@ function openAddLifeEvent(type){
           ${KIDS.map(k=>`<span class="kid-pill on" onclick="toggleKidPill(this)">${k}</span>`).join('')}
         </div>
       </div>
-      <div class="f"><label>Notes</label><textarea id="le-notes" rows="3" placeholder="What to bring, special instructions..."></textarea></div>
+      <div class="f"><label>NOTES</label><textarea id="le-notes" rows="3" placeholder="What to bring, special instructions..."></textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#d97706" onclick="saveLifeEvent('camp')">Save camp</button></div>`);
   } else {
     sm(`<h3>🌴 Add Vacation</h3>
@@ -671,7 +674,7 @@ function openAddLifeEvent(type){
         <div style="flex:1"><div class="fl">Start date</div><input id="le-start" type="date" value="${today}"></div>
         <div style="flex:1"><div class="fl">End date</div><input id="le-end" type="date" value="${today}"></div>
       </div>
-      <div class="f"><label>Notes</label><textarea id="le-notes" rows="3" placeholder="Where staying, travel details..."></textarea></div>
+      <div class="f"><label>NOTES</label><textarea id="le-notes" rows="3" placeholder="Where staying, travel details..."></textarea></div>
       <div style="background:#f0fdf4;border-radius:6px;padding:10px 12px;font-size:12px;color:#065f46;margin-bottom:14px;border:1px solid #86efac">
         ✓ Childcare will automatically be marked Day Off for these dates when you activate PTO.
       </div>
@@ -728,7 +731,7 @@ function openEditLifeEvent(id){
           ${KIDS.map(k=>`<span class="kid-pill ${e.kids?.includes(k)?'on':''}" onclick="toggleKidPill(this)">${k}</span>`).join('')}
         </div>
       </div>
-      <div class="f"><label>Notes</label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
+      <div class="f"><label>NOTES</label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#d97706" onclick="updateLifeEvent(${id},'camp')">Save</button></div>`);
   } else {
     sm(`<h3>🌴 Edit Vacation</h3>
@@ -737,7 +740,7 @@ function openEditLifeEvent(id){
         <div style="flex:1"><div class="fl">Start date</div><input id="le-start" type="date" value="${e.startDate}"></div>
         <div style="flex:1"><div class="fl">End date</div><input id="le-end" type="date" value="${e.endDate}"></div>
       </div>
-      <div class="f"><label>Notes</label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
+      <div class="f"><label>NOTES</label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#0e7490" onclick="updateLifeEvent(${id},'vacation')">Save</button></div>`);
   }
 }
