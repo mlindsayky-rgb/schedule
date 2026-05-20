@@ -102,6 +102,7 @@ function isoDate(d){return d.toISOString().slice(0,10);}
 let slots=[];
 let pendingClaims={};
 let lifeEvents=[];
+let pto={};
 let claimingSlotId=null;
 
 async function dbGet(k){
@@ -135,6 +136,13 @@ function isVacationDay(dateStr){
     dateStr <= e.endDate
   );
 }
+
+function isPTODay(dateStr){
+  if(!pto||!pto.active||!pto.startDate||!pto.endDate)return false;
+  return dateStr >= pto.startDate && dateStr <= pto.endDate &&
+    new Date(dateStr+'T12:00:00').getDay()>=1 &&
+    new Date(dateStr+'T12:00:00').getDay()<=5;
+}
 function slotStatus(s){
   if(['adult-team','hp-clinic','blocked'].includes(s.type))return'fixed';
   if(s.status==='blocked')return'blocked';
@@ -155,22 +163,24 @@ function getWeekDays(mondayDate){
 }
 
 async function load(){
-  const [slotsData, claimsData, lifeEventsData] = await Promise.all([
+  const [slotsData, claimsData, lifeEventsData, ptoData] = await Promise.all([
     dbGet('slots'),
     dbGet('pendingClaims'),
-    dbGet('lifeEvents')
+    dbGet('lifeEvents'),
+    dbGet('pto')
   ]);
 
   slots = slotsData || [];
   pendingClaims = claimsData || {};
   lifeEvents = lifeEventsData || [];
+  pto = ptoData || {active:false,startDate:null,endDate:null};
 
   render();
 }
 
 function getOpenSlotsForWeek(weekDays){
   return weekDays.flatMap(({name,date})=>{
-    if(isVacationDay(date))return[]; // skip vacation days entirely
+    if(isVacationDay(date)||isPTODay(date))return[]; // skip vacation and PTO days
     return slots
       .filter(s=>s.day===name&&slotStatus(s)==='available')
       .map(s=>({...s,date,dayName:name}));
