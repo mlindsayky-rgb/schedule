@@ -182,7 +182,7 @@ function getOpenSlotsForWeek(weekDays){
   return weekDays.flatMap(({name,date})=>{
     if(isVacationDay(date)||isPTODay(date))return[]; // skip vacation and PTO days
     return slots
-      .filter(s=>s.day===name&&slotStatus(s)==='available')
+      .filter(s=>s.day===name&&s.type==='private'&&slotStatus(s)==='available')
       .map(s=>({...s,date,dayName:name}));
   }).sort((a,b)=>{
     if(a.date!==b.date)return a.date>b.date?1:-1;
