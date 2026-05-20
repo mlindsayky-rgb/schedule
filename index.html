@@ -406,7 +406,7 @@ function getCCViewMonday(){return addDays(mondayOf(new Date()),ccWeekOffset*7);}
 function getNextMonday(){return addDays(mondayOf(new Date()),7);}
 
 const vmsg=()=>`Hey! I will be on vacation from ${pto.startDate?fmtDateLong(pto.startDate):'[start]'} to ${pto.endDate?fmtDateLong(pto.endDate):'[end]'}. I'll need to cancel our lesson, but will be back for the next one if that is ok.`;
-const nmsg=(slot,day)=>`Hey! I have an opening this week for a lesson if interested. You can ignore this text if not \u2014 ${day} ${sdsp(slot)}. Reply YES to claim. \u2014 Mike`;
+const nmsg=(slot,day)=>`Hey! I have an opening this ${day} at ${sdsp(slot)}, let me know if interested. No need to respond if not.`;
 
 // ── SEED ──
 const SEED=[
@@ -431,7 +431,7 @@ const SCC={Monday:{start:'10:00 AM',end:'12:30 PM',active:true,note:''},Tuesday:
 
 // STATE
 // lifeEvents: [{id, type:'camp'|'vacation', title, startDate, endDate, days(camp only), startTime(camp), endTime(camp), kids(camp), notes, ptoLinked, archived}]
-let S={slots:SEED.map(s=>({...s})),childcare:JSON.parse(JSON.stringify(SCC)),childcareDateNotes:{},people:[],notes:[],activities:[],requests:[],lifeEvents:[],nextId:60};
+let S={slots:SEED.map(s=>({...s})),childcare:JSON.parse(JSON.stringify(SCC)),childcareDateNotes:{},people:[],notes:[],activities:[],requests:[],lifeEvents:[],pendingClaims:{},nextId:60};
 let pto={active:false,startDate:null,endDate:null,subs:{},notified:{},viewWeekOffset:0};
 let _ps=[],_st=null,_showArchived=false;
 
@@ -443,7 +443,7 @@ function save(){
   _st=setTimeout(async()=>{
     syncBar('','Saving...');
     const keys=role==='mike'
-      ?['people','notes','activities','childcare','childcareDateNotes','nextId','pto','requests','lifeEvents','slots']
+      ?['people','notes','activities','childcare','childcareDateNotes','nextId','pto','requests','lifeEvents','slots','pendingClaims']
       :['childcare'];
     for(const k of keys){
       const v=k==='pto'?pto:k==='nextId'?S.nextId:S[k];
@@ -455,9 +455,9 @@ function save(){
 async function boot(){
   syncBar('','Loading from cloud...');
   try{
-    const [people,notes,activities,childcare,nextId,ptoD,requests,lifeEvents,slots,cdNotes]=await Promise.all([
+    const [people,notes,activities,childcare,nextId,ptoD,requests,lifeEvents,slots,cdNotes,pendingClaims]=await Promise.all([
       dbGet('people'),dbGet('notes'),dbGet('activities'),dbGet('childcare'),
-      dbGet('nextId'),dbGet('pto'),dbGet('requests'),dbGet('lifeEvents'),dbGet('slots'),dbGet('childcareDateNotes')
+      dbGet('nextId'),dbGet('pto'),dbGet('requests'),dbGet('lifeEvents'),dbGet('slots'),dbGet('childcareDateNotes'),dbGet('pendingClaims')
     ]);
     if(people)S.people=people;if(notes)S.notes=notes;if(activities)S.activities=activities;
     if(childcare)S.childcare=childcare;if(nextId)S.nextId=nextId;
@@ -465,6 +465,7 @@ async function boot(){
     if(lifeEvents)S.lifeEvents=lifeEvents;
     if(slots)S.slots=slots;else S.slots=SEED.map(s=>({...s}));
     if(cdNotes)S.childcareDateNotes=cdNotes;else S.childcareDateNotes={};
+    if(pendingClaims)S.pendingClaims=pendingClaims;else S.pendingClaims={};
     // Auto-archive past life events
     autoArchiveLifeEvents();
     syncBar('ok','✓ Loaded from cloud');
@@ -849,6 +850,17 @@ function renderSchedule(){
             if(st2==='booked'||st2==='partial'||st2==='full'){const nt=pto.notified[s.id];return`<div class="slot ${nt?'pto-notify-done':'pto-notify-needed'}" onclick="openNotifyModal(${s.id})"><span class="slot-time">${sdsp(s)}</span><div class="slot-body"><div class="slot-lbl">${s.label}</div><div class="slot-meta"><span class="tbadge ${l.cls}">${l.label}</span></div></div><div class="slot-right">${nt?`<span class="pbg">&#10003; Notified</span>`:`<span class="pbr">Cancel lesson</span>`}</div></div>`;}
             return`<div class="slot pto-dim"><span class="slot-time">${sdsp(s)}</span><div class="slot-body"><div class="slot-lbl" style="color:#9ca3af">${s.label}</div></div></div>`;
           }
+          const claim=S.pendingClaims&&S.pendingClaims[s.id];
+          if(claim&&m){
+            return`<div class="slot" style="background:#fff7ed;border-color:#fed7aa;cursor:pointer" onclick="openClaimModal(${s.id})">
+              <span class="slot-time">${sdsp(s)}</span>
+              <div class="slot-body">
+                <div class="slot-lbl">${s.label}</div>
+                <div class="slot-meta"><span class="tbadge ${l.cls}">${l.label}</span><span style="font-size:11px;color:#d97706;font-style:italic;margin-left:4px">Claimed by ${claim.name}</span></div>
+              </div>
+              <div class="slot-right"><span style="font-size:10px;background:#d97706;color:#fff;padding:3px 9px;border-radius:20px;font-weight:600">Pending</span></div>
+            </div>`;
+          }
           return`<div class="slot ${st2}${m?'':' readonly'}"${m?` onclick="editSlot(${s.id})"`:''}>
             <span class="slot-time">${sdsp(s)}</span>
             <div class="slot-body"><div class="slot-lbl">${s.label}</div>
@@ -928,7 +940,7 @@ function delP(id){if(role!=='mike')return;S.people=S.people.filter(p=>p.id!==id)
 function openEP(id){if(role!=='mike')return;const p=S.people.find(x=>x.id===id);if(!p)return;sm(`<h3>Edit Person</h3><div class="f"><label>Full name</label><input id="ep-n" value="${p.name}"></div><div class="f"><label>Phone</label><input id="ep-p" type="tel" value="${p.phone}" placeholder="5025551234" oninput="chph()"><div id="ep-ph" class="ph" style="${p.phone&&!pv(p.phone)?'display:block':''}">Digits only</div></div><div class="f"><label>Initials</label><input id="ep-i" value="${p.initials}" maxlength="3"></div><div class="f"><label><input type="checkbox" id="ep-a" style="width:auto;margin-right:6px" ${p.notifyAll?'checked':''}>Notify for all open slots</label></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svEP(${id})">Save</button></div>`);}
 function chph(){const i=document.getElementById('ep-p'),h=document.getElementById('ep-ph');if(i&&h)h.style.display=i.value&&!pv(i.value)?'block':'none';}
 function svEP(id){if(role!=='mike')return;const p=S.people.find(x=>x.id===id);if(!p)return;p.name=document.getElementById('ep-n').value.trim();p.phone=cp(document.getElementById('ep-p').value);p.initials=document.getElementById('ep-i').value.trim()||p.name.split(' ').map(w=>w[0]).join('').toUpperCase();p.notifyAll=document.getElementById('ep-a').checked;save();cm();renderPeople();}
-function openAddPerson(){if(role!=='mike')return;sm(`<h3>Add Person</h3><div class="f"><label>Full name</label><input id="p-n" placeholder="First Last"></div><div class="f"><label>Phone</label><input id="p-p" type="tel" placeholder="5025551234" oninput="chphn()"><div id="p-ph" class="ph">Digits only</div></div><div class="f"><label>Initials (auto-filled if blank)</label><input id="p-i" maxlength="3" placeholder="JT"></div><div class="f"><label><input type="checkbox" id="p-a" style="width:auto;margin-right:6px">Notify for all open slots</label></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addP()">Add</button></div>`);}
+function openAddPerson(prefill=''){if(role!=='mike')return;sm(`<h3>Add Person</h3><div class="f"><label>Full name</label><input id="p-n" placeholder="First Last" value="${prefill}"></div><div class="f"><label>Phone</label><input id="p-p" type="tel" placeholder="5025551234" oninput="chphn()"><div id="p-ph" class="ph">Digits only</div></div><div class="f"><label>Initials (auto-filled if blank)</label><input id="p-i" maxlength="3" placeholder="JT"></div><div class="f"><label><input type="checkbox" id="p-a" style="width:auto;margin-right:6px">Notify for all open slots</label></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addP()">Add</button></div>`);}
 function chphn(){const i=document.getElementById('p-p'),h=document.getElementById('p-ph');if(i&&h)h.style.display=i.value&&!pv(i.value)?'block':'none';}
 function addP(){if(role!=='mike')return;const n=document.getElementById('p-n').value.trim();if(!n)return;const p={id:S.nextId++,name:n,phone:cp(document.getElementById('p-p').value),initials:document.getElementById('p-i').value.trim()||n.split(' ').map(w=>w[0]).join('').toUpperCase(),days:[],notifyAll:document.getElementById('p-a').checked};S.people.push(p);save();cm();renderPeople();}
 
@@ -938,6 +950,48 @@ function delNote(id){if(role!=='mike')return;S.notes=S.notes.filter(n=>n.id!==id
 function openAddNote(){if(role!=='mike')return;const today=isoDate(new Date());sm(`<h3>Add Note</h3><div class="f"><label>Date</label><input id="nn-d" type="date" value="${today}"></div><div class="f"><label>Note</label><textarea id="nn-t" rows="4"></textarea></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addNote()">Save</button></div>`);}
 function addNote(){if(role!=='mike')return;const n={id:S.nextId++,date:document.getElementById('nn-d').value,text:document.getElementById('nn-t').value};S.notes.push(n);save();cm();renderNotes();}
 
+
+
+function openClaimModal(slotId){
+  const claim=S.pendingClaims[slotId];if(!claim)return;
+  const s=S.slots.find(x=>x.id===slotId);if(!s)return;
+  sm(`<h3>&#128338; Pending Claim</h3>
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:12px 14px;margin-bottom:16px">
+      <div style="font-weight:bold;font-size:15px;color:#92400e">${claim.name}</div>
+      <div style="font-size:12px;color:#d97706;margin-top:2px">${s.day} &nbsp;·&nbsp; ${sdsp(s)}</div>
+      <div style="font-size:11px;color:#6b7280;margin-top:4px;font-style:italic">Claimed ${new Date(claim.claimedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</div>
+    </div>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:16px">Confirm to book this slot for ${claim.name}. Release to put it back as open.</p>
+    <div class="ma">
+      <button class="btn btn-sm bdg" onclick="releaseClaim(${slotId})">Release</button>
+      <button class="btn btn-sm bcx" onclick="cm()">Later</button>
+      <button class="btn btn-sm" style="background:#2d6a4f" onclick="confirmClaim(${slotId})">Confirm</button>
+    </div>`);
+}
+function confirmClaim(slotId){
+  const claim=S.pendingClaims[slotId];if(!claim)return;
+  const s=S.slots.find(x=>x.id===slotId);if(!s)return;
+  // Book the slot with their first name
+  s.status='booked';
+  s.roster=[claim.name];
+  s.label=`Lesson — ${claim.name}`;
+  // Remove from pending
+  delete S.pendingClaims[slotId];
+  // Prompt to add to people
+  save();cm();renderSchedule();
+  setTimeout(()=>{
+    if(confirm(`Add ${claim.name} to your People roster?\nYou can fill in their details (last name, phone) there.`)){
+      // Pre-open add person modal with first name filled
+      openAddPerson(claim.name);
+    }
+  },200);
+}
+
+function releaseClaim(slotId){
+  if(!confirm('Release this claim and return the slot to open?'))return;
+  delete S.pendingClaims[slotId];
+  save();cm();renderSchedule();
+}
 function sm(html){const o=document.getElementById('modal');o.style.display='flex';o.innerHTML=`<div class="md" onclick="event.stopPropagation()">${html}</div>`;}
 function cm(){document.getElementById('modal').style.display='none';_ps=[];}
 </script>
