@@ -240,7 +240,7 @@ textarea{resize:vertical}
 
 <!-- SCHEDULE -->
 <div id="panel-schedule" class="panel active">
-  <div class="sh">
+  <div class="sh" style="flex-wrap:wrap;gap:8px">
     <div class="leg">
       <div class="li"><div class="ld" style="background:#40916c"></div>Open</div>
       <div class="li"><div class="ld" style="background:#2d2d5e"></div>Booked</div>
@@ -248,9 +248,9 @@ textarea{resize:vertical}
       <div class="li"><div class="ld" style="background:#6b3f9e"></div>Fixed</div>
       <div class="li"><div class="ld" style="background:#1a6b6b"></div>Childcare</div>
     </div>
+    <div id="event-pills" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex:1;justify-content:center"></div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="sched-controls"></div>
   </div>
-  <div id="event-pills" class="event-pills"></div>
   <div class="week-nav">
     <button class="week-nav-btn" onclick="changeWeek(-1)">&#8592;</button>
     <span class="week-nav-lbl" id="week-label"></span>
