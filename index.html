@@ -960,6 +960,7 @@ function openClaimModal(slotId){
       <div style="font-weight:bold;font-size:15px;color:#92400e">${claim.name}</div>
       <div style="font-size:12px;color:#d97706;margin-top:2px">${s.day} &nbsp;·&nbsp; ${sdsp(s)}</div>
       <div style="font-size:11px;color:#6b7280;margin-top:4px;font-style:italic">Claimed ${new Date(claim.claimedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</div>
+      ${claim.note?`<div style="margin-top:8px;font-size:13px;color:#92400e;background:#fff;border-radius:4px;padding:7px 10px;border:1px solid #fed7aa">"${claim.note}"</div>`:''}
     </div>
     <p style="font-size:13px;color:#6b7280;margin-bottom:16px">Confirm to book this slot for ${claim.name}. Release to put it back as open.</p>
     <div class="ma">
@@ -991,6 +992,37 @@ function releaseClaim(slotId){
   if(!confirm('Release this claim and return the slot to open?'))return;
   delete S.pendingClaims[slotId];
   save();cm();renderSchedule();
+}
+
+function shareOpenSlots(){
+  const thisMonday=mondayOf(new Date());
+  const nextMonday=addDays(thisMonday,7);
+  // Check for open slots this week and next
+  const hasOpen=S.slots.some(s=>{
+    if(ss(s)!=='available')return false;
+    // Check not on vacation
+    const dayIdx=DAYS.indexOf(s.day);
+    if(dayIdx===-1)return false;
+    const thisDate=isoDate(addDays(thisMonday,dayIdx));
+    const nextDate=isoDate(addDays(nextMonday,dayIdx));
+    const thisVac=S.lifeEvents.some(e=>e.type==='vacation'&&!e.archived&&thisDate>=e.startDate&&thisDate<=e.endDate);
+    const nextVac=S.lifeEvents.some(e=>e.type==='vacation'&&!e.archived&&nextDate>=e.startDate&&nextDate<=e.endDate);
+    return !thisVac||!nextVac;
+  });
+  if(!hasOpen){
+    sm(`<h3>No Open Slots</h3>
+      <p style="font-size:13px;color:#6b7280;margin-bottom:16px;font-style:italic">There are no open lesson slots for this week or next — nothing to share right now.</p>
+      <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">OK</button></div>`);
+    return;
+  }
+  const link='https://mlindsayky-rgb.github.io/schedule/open.html';
+  const msg=`It's Mike Lindsay, I have some open lesson slots available this week and next. Click the link to see what works for you: ${link}`;
+  const enc=encodeURIComponent(msg);
+  sm(`<h3>&#128279; Share Availability</h3>
+    <div class="mp">${msg}</div>
+    <p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:14px">Opens in Messages — pick who to send to:</p>
+    <a href="sms:?body=${enc}" style="display:block;text-align:center;background:#2d6a4f;color:#fff;padding:12px;border-radius:6px;font-family:Georgia,serif;font-weight:600;font-size:14px;text-decoration:none;margin-bottom:8px">Open in Messages &#8250;</a>
+    <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button></div>`);
 }
 function sm(html){const o=document.getElementById('modal');o.style.display='flex';o.innerHTML=`<div class="md" onclick="event.stopPropagation()">${html}</div>`;}
 function cm(){document.getElementById('modal').style.display='none';_ps=[];}
