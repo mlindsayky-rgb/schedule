@@ -434,7 +434,7 @@ const SCC={Monday:{start:'10:00 AM',end:'12:30 PM',active:true,note:''},Tuesday:
 
 // STATE
 // lifeEvents: [{id, type:'camp'|'vacation', title, startDate, endDate, days(camp only), startTime(camp), endTime(camp), kids(camp), notes, ptoLinked, archived}]
-let S={slots:SEED.map(s=>({...s})),childcare:JSON.parse(JSON.stringify(SCC)),childcareDateNotes:{},people:[],notes:[],activities:[],requests:[],lifeEvents:[],pendingClaims:{},weekHistory:[],nextId:60};
+let S={slots:SEED.map(s=>({...s})),weekSlots:{},childcare:JSON.parse(JSON.stringify(SCC)),childcareDateNotes:{},people:[],notes:[],activities:[],requests:[],lifeEvents:[],pendingClaims:{},weekHistory:[],nextId:60};
 let pto={active:false,startDate:null,endDate:null,subs:{},notified:{},viewWeekOffset:0};
 let _ps=[],_st=null,_showArchived=false;
 
@@ -446,7 +446,7 @@ function save(){
   _st=setTimeout(async()=>{
     syncBar('','Saving...');
     const keys=role==='mike'
-      ?['people','notes','activities','childcare','childcareDateNotes','nextId','pto','requests','lifeEvents','slots','pendingClaims','weekHistory']
+      ?['people','notes','activities','childcare','childcareDateNotes','nextId','pto','requests','lifeEvents','slots','weekSlots','pendingClaims','weekHistory']
       :['childcare'];
     for(const k of keys){
       const v=k==='pto'?pto:k==='nextId'?S.nextId:S[k];
@@ -458,15 +458,16 @@ function save(){
 async function boot(){
   syncBar('','Loading from cloud...');
   try{
-    const [people,notes,activities,childcare,nextId,ptoD,requests,lifeEvents,slots,cdNotes,pendingClaims,weekHistory]=await Promise.all([
+    const [people,notes,activities,childcare,nextId,ptoD,requests,lifeEvents,slots,weekSlots,cdNotes,pendingClaims,weekHistory]=await Promise.all([
       dbGet('people'),dbGet('notes'),dbGet('activities'),dbGet('childcare'),
-      dbGet('nextId'),dbGet('pto'),dbGet('requests'),dbGet('lifeEvents'),dbGet('slots'),dbGet('childcareDateNotes'),dbGet('pendingClaims'),dbGet('weekHistory')
+      dbGet('nextId'),dbGet('pto'),dbGet('requests'),dbGet('lifeEvents'),dbGet('slots'),dbGet('weekSlots'),dbGet('childcareDateNotes'),dbGet('pendingClaims'),dbGet('weekHistory')
     ]);
     if(people)S.people=people;if(notes)S.notes=notes;if(activities)S.activities=activities;
     if(childcare)S.childcare=childcare;if(nextId)S.nextId=nextId;
     if(ptoD)Object.assign(pto,ptoD);if(requests)S.requests=requests;
     if(lifeEvents)S.lifeEvents=lifeEvents;
     if(slots)S.slots=slots;else S.slots=SEED.map(s=>({...s}));
+    if(weekSlots)S.weekSlots=weekSlots;else S.weekSlots={};
     if(cdNotes)S.childcareDateNotes=cdNotes;else S.childcareDateNotes={};
     if(pendingClaims)S.pendingClaims=pendingClaims;else S.pendingClaims={};
     if(weekHistory)S.weekHistory=weekHistory;else S.weekHistory=[];
@@ -829,12 +830,12 @@ function renderSchedule(){
   renderEventPills('event-pills',allPills);
   // Setup controls
   if(role==='mike'){
-    document.getElementById('sched-controls').innerHTML=`<button class="btn btn-sm" onclick="shareOpenSlots()" style="background:#1a6b6b;min-width:76px">&#128279; Share</button><button class="btn btn-sm" onclick="openAddSlot()" style="min-width:76px">+ Add slot</button><button class="btn btn-sm bpto" onclick="openPTO()" id="pto-btn" style="min-width:76px">PTO</button>`;
+    document.getElementById('sched-controls').innerHTML=`<button class="btn btn-sm" onclick="shareOpenSlots()" style="background:#1a6b6b;min-width:76px">&#128279; Share</button><button class="btn btn-sm" onclick="openAddSlot()" style="min-width:76px">+ Add slot</button><button class="btn btn-sm bpto" onclick="openPTO()" id="pto-btn" style="min-width:76px">PTO</button><button class="btn btn-sm" onclick="openTemplateManager()" style="background:#4b5563;min-width:76px;font-size:10px">&#128736; Template</button>`;
     renderPTOBanner();// re-run to wire pto-btn if just created
   }
   const grid=document.getElementById('schedule-grid');
   const viewMon=getViewMonday();
-  const bd={};DAYS.forEach(d=>bd[d]=[]);S.slots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
+  const viewMon=getViewMonday();seedWeekWithExceptions(viewMon);const viewSlots=getWeekSlots(viewMon);const bd={};DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
   const m=role==='mike';
   grid.innerHTML=DAYS.map(day=>{
     const slots=bd[day],open=slots.filter(s=>ss(s)==='available').length,hrs=fhr(slots.reduce((a,s)=>a+shr(s),0));
@@ -860,6 +861,16 @@ function renderSchedule(){
             if(l.fixed){const sub=pto.subs[s.id];return`<div class="slot ${sub?'pto-sub-done':'pto-sub-needed'}" onclick="openSubModal(${s.id})"><span class="slot-time">${sdsp(s)}</span><div class="slot-body"><div class="slot-lbl">${s.label}</div><div class="slot-meta"><span class="tbadge ${l.cls}">${l.label}</span></div></div><div class="slot-right">${sub?`<span class="pbg">&#10003; ${sub}</span>`:`<span class="pbr">Sub needed</span>`}</div></div>`;}
             if(st2==='booked'||st2==='partial'||st2==='full'){const nt=pto.notified[s.id];return`<div class="slot ${nt?'pto-notify-done':'pto-notify-needed'}" onclick="openNotifyModal(${s.id})"><span class="slot-time">${sdsp(s)}</span><div class="slot-body"><div class="slot-lbl">${s.label}</div><div class="slot-meta"><span class="tbadge ${l.cls}">${l.label}</span></div></div><div class="slot-right">${nt?`<span class="pbg">&#10003; Notified</span>`:`<span class="pbr">Cancel lesson</span>`}</div></div>`;}
             return`<div class="slot pto-dim"><span class="slot-time">${sdsp(s)}</span><div class="slot-body"><div class="slot-lbl" style="color:#9ca3af">${s.label}</div></div></div>`;
+          }
+          // Exception slot
+          if(s.status==='exception'){
+            return`<div class="slot" style="background:#f3e8ff;border-color:#d8b4fe;opacity:.75">
+              <span class="slot-time">${sdsp(s)}</span>
+              <div class="slot-body"><div class="slot-lbl" style="color:#7c3aed">${s.label}</div>
+                <div class="slot-meta"><span style="font-size:10px;color:#7c3aed;font-style:italic">&#128683; ${s.exceptionNote||'Cancelled this week'}</span></div>
+              </div>
+              ${m?`<button class="btn btn-sm" style="font-size:10px;padding:3px 8px;background:#6b3f9e" onclick="editSlot(${s.id})">Edit</button>`:''}
+            </div>`;
           }
           const claim=S.pendingClaims&&S.pendingClaims[s.id];
           if(claim&&m){
@@ -899,8 +910,8 @@ function togPP(sid,pid){const s=S.slots.find(x=>x.id===sid);if(!s)return;const c
 function editSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;const l=LT[s.type]||LT.blocked,cap=l.cap;_ps=[];s.roster.forEach(n=>{const p=S.people.find(x=>x.name===n||gln(x.name)===n);if(p&&!_ps.includes(p.id))_ps.push(p.id);});const ss2=`${Math.floor(s.startM/60)}:${String(s.startM%60).padStart(2,'0')}`,es=`${Math.floor(s.endM/60)}:${String(s.endM%60).padStart(2,'0')}`;const rs=l.fixed?`<div style="font-size:11px;color:#6b3f9e;font-style:italic;padding:6px 0">Fixed \u2014 no roster needed</div>`:`<div class="f"><div class="fl">Roster (${cap} spot${cap!==1?'s':''})</div><div id="slot-rc" class="rr">${bRC(id)}</div><div id="slot-ppk">${bPPk(id)}</div></div><div id="req-suggestion-area">${buildReqSuggestion()}</div>`;const stSec=l.fixed?'':`<div class="f"><label>Status</label><select id="e-status"><option value="auto" ${s.status!=='blocked'&&s.status!=='booked'?'selected':''}>Auto</option><option value="booked" ${s.status==='booked'?'selected':''}>Booked</option><option value="blocked" ${s.status==='blocked'?'selected':''}>Blocked</option></select></div>`;sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma"><button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);}
 function uch(){const t=document.getElementById('e-type')?.value,l=LT[t],el=document.getElementById('cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
 function svSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;s.label=document.getElementById('e-label').value;s.startM=pti(document.getElementById('e-start').value);s.endM=pti(document.getElementById('e-end').value);const nt=document.getElementById('e-type').value;if(nt!==s.type){s.type=nt;if(isF(nt)){s.roster=[];s.status='fixed';}else{const nc=LT[nt]?.cap||1;_ps=_ps.slice(0,nc);s.status='auto';}}if(!isF(s.type)){s.roster=_ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return p?gln(p.name):'';}).filter(Boolean);const se=document.getElementById('e-status');if(se){const v=se.value;s.status=v==='auto'?'auto':v;}_ps.forEach(pid=>{const cb=document.getElementById(`close-req-${pid}`);if(cb&&cb.checked){openReqs(pid).forEach(r=>{r.closed=true;});}});}save();cm();renderSchedule();renderPeople();}
-function delSlot(id){if(role!=='mike')return;S.slots=S.slots.filter(s=>s.id!==id);save();cm();renderSchedule();}
-function openAddSlot(def='Monday'){if(role!=='mike')return;sm(`<h3>Add Slot</h3><div class="f"><label>Day</label><select id="n-day">${DAYS.map(d=>`<option value="${d}" ${d===def?'selected':''}>${d}</option>`).join('')}</select></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="n-start" placeholder="10:00"></div><div style="flex:1"><div class="fl">End</div><input id="n-end" placeholder="11:30"></div></div><div class="f"><label>Label</label><input id="n-label" placeholder="e.g. Lesson \u2014 Smith"></div><div class="f"><label>Type</label><select id="n-type" onchange="ach()">${Object.entries(LT).map(([k,v])=>`<option value="${k}">${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="add-cap-hint">Capacity: 1</div></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addSlot()">Add</button></div>`);}
+function delSlot(id){if(role!=='mike')return;const vMon=getViewMonday();const wSlots=getWeekSlots(vMon).filter(s=>s.id!==id);saveWeekSlots(vMon,wSlots);cm();renderSchedule();}
+function openAddSlot(def='Monday'){if(role!=='mike')return;sm(`<h3>Add Slot <span style='font-size:11px;color:var(--gray);font-weight:normal;font-style:italic'>— ${fmtDate(getViewMonday())} week</span></h3><div class="f"><label>Day</label><select id="n-day">${DAYS.map(d=>`<option value="${d}" ${d===def?'selected':''}>${d}</option>`).join('')}</select></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="n-start" placeholder="10:00"></div><div style="flex:1"><div class="fl">End</div><input id="n-end" placeholder="11:30"></div></div><div class="f"><label>Label</label><input id="n-label" placeholder="e.g. Lesson \u2014 Smith"></div><div class="f"><label>Type</label><select id="n-type" onchange="ach()">${Object.entries(LT).map(([k,v])=>`<option value="${k}">${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="add-cap-hint">Capacity: 1</div></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addSlot()">Add</button></div>`);}
 function ach(){const t=document.getElementById('n-type')?.value,l=LT[t],el=document.getElementById('add-cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
 function addSlot(){if(role!=='mike')return;const type=document.getElementById('n-type').value;const s={id:S.nextId++,day:document.getElementById('n-day').value,startM:pti(document.getElementById('n-start').value),endM:pti(document.getElementById('n-end').value),label:document.getElementById('n-label').value,type,status:isF(type)?'fixed':'auto',roster:[]};S.slots.push(s);save();cm();renderSchedule();}
 function notifySlot(day,sid){if(role!=='mike')return;const slot=S.slots.find(s=>s.id===sid);if(!slot)return;const interested=S.people.filter(p=>p.notifyAll||p.days.includes(day));if(!interested.length){sm(`<h3>No One to Notify</h3><p style="font-size:13px;color:#6b7280;margin-bottom:12px">No people marked as interested in ${day}.</p><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Close</button></div>`);return;}const msg=nmsg(slot,day),enc=encodeURIComponent(msg);const links=interested.map(p=>`<a href="sms:${cp(p.phone)}?body=${enc}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border:1.5px solid #ddd8d0;border-radius:6px;font-size:13px;font-family:Georgia,serif;margin-bottom:8px;color:#1a1a2e;text-decoration:none;background:#faf8f4"><span>${p.name}</span><span style="color:#6b7280;font-size:11px;font-style:italic">${cp(p.phone)} \u203a</span></a>`).join('');sm(`<h3>&#x2708; Notify \u2014 ${day}</h3><div class="mp">${msg}</div><p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:10px">Tap a name to open in Messages:</p>${links}<div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Done</button></div>`);}
@@ -1036,6 +1047,75 @@ function shareOpenSlots(){
     <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button></div>`);
 }
 
+
+// ── V2 WEEK ENGINE ──
+
+// Get slots for a specific week — seeds from template if not yet customized
+function getWeekSlots(weekMondayDate){
+  const key=isoDate(weekMondayDate);
+  if(S.weekSlots[key])return S.weekSlots[key];
+  // Seed from template — deep copy
+  return S.slots.map(s=>({...s,_seeded:true}));
+}
+
+// Save edits to a specific week's slots
+function saveWeekSlots(weekMondayDate,slots){
+  const key=isoDate(weekMondayDate);
+  // Strip _seeded flag, mark as customized
+  S.weekSlots[key]=slots.map(s=>{const c={...s};delete c._seeded;return c;});
+  // Purge week slots older than 28 days
+  const cutoff=isoDate(addDays(new Date(),-28));
+  Object.keys(S.weekSlots).forEach(k=>{if(k<cutoff)delete S.weekSlots[k];});
+  save();
+}
+
+// Get template slot by id for a given week (used in edit modal)
+function getViewSlots(){return getWeekSlots(getViewMonday());}
+
+// Check if current view week has been customized
+function isWeekCustomized(){return !!S.weekSlots[isoDate(getViewMonday())];}
+
+// Add exception to a slot across a date range
+// exceptions stored on template slot as: s.exceptions = [{startDate, endDate, note, status}]
+function addSlotException(slotId, startDate, endDate, note){
+  const s=S.slots.find(x=>x.id===slotId);if(!s)return;
+  if(!s.exceptions)s.exceptions=[];
+  s.exceptions.push({id:S.nextId++, startDate, endDate, note, status:'cancelled'});
+  save();
+}
+
+function removeSlotException(slotId, exId){
+  const s=S.slots.find(x=>x.id===slotId);if(!s||!s.exceptions)return;
+  s.exceptions=s.exceptions.filter(e=>e.id!==exId);
+  save();
+}
+
+function getSlotException(templateSlot, dateStr){
+  if(!templateSlot||!templateSlot.exceptions)return null;
+  return templateSlot.exceptions.find(e=>dateStr>=e.startDate&&dateStr<=e.endDate)||null;
+}
+
+// When seeding a week, apply exceptions
+function seedWeekWithExceptions(weekMondayDate){
+  const key=isoDate(weekMondayDate);
+  if(S.weekSlots[key])return; // already customized
+  const weekSlots=S.slots.map(s=>{
+    const dayIdx=DAYS.indexOf(s.day);
+    if(dayIdx===-1)return{...s};
+    const slotDate=isoDate(addDays(weekMondayDate,dayIdx));
+    const exc=getSlotException(s,slotDate);
+    if(exc){
+      return{...s,status:'exception',exceptionNote:exc.note,exceptionId:exc.id,roster:[],label:s.label+' (cancelled)'};
+    }
+    return{...s};
+  });
+  // Only auto-seed if there are exceptions — otherwise stay lazy
+  const hasExceptions=weekSlots.some(s=>s.status==='exception');
+  if(hasExceptions){
+    S.weekSlots[key]=weekSlots;
+    save();
+  }
+}
 // ── AUTO CLOSE WEEK ──
 function getWeekDates(mondayDate){
   const dates=[];
@@ -1056,7 +1136,7 @@ function autoCloseWeek(silent=true){
   const weekDates=getWeekDates(lastMonday);
   const entries=[];
   weekDates.forEach(({day,date})=>{
-    const daySlots=S.slots.filter(s=>s.day===day).sort((a,b)=>a.startM-b.startM);
+    const closeMon=addDays(mondayOf(new Date()),-7);const daySlots=getWeekSlots(closeMon).filter(s=>s.day===day).sort((a,b)=>a.startM-b.startM);
     // Check if PTO day
     const isPTO=pto.active&&pto.startDate&&pto.endDate&&date>=pto.startDate&&date<=pto.endDate;
     if(isPTO){
