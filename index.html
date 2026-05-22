@@ -234,7 +234,7 @@ textarea{resize:vertical}
   <button class="tab active" id="tab-schedule" onclick="st('schedule')">TENNIS</button>
   <button class="tab" id="tab-childcare" onclick="st('childcare')">KIDS</button>
   <button class="tab" id="tab-people" onclick="st('people')" style="display:none">CLIENTS</button>
-  <button class="tab" id="tab-notes" onclick="st('notes')" style="display:none">NOTES</button>
+  <button class="tab" id="tab-notes" onclick="st('notes')" style="display:none">LOG</button>
   <button class="tab" id="tab-life" onclick="st('life')" style="display:none">LIFE</button>
 </div>
 <div id="pto-banner" style="display:none"></div>
@@ -276,9 +276,15 @@ textarea{resize:vertical}
   <div id="people-list"></div>
 </div>
 
-<!-- NOTES -->
+<!-- LOG -->
 <div id="panel-notes" class="panel">
-  <div class="sh"><span style="font-size:15px;font-weight:bold;color:var(--navy)">Daily Notes</span><button class="btn btn-sm" onclick="openAddNote()">+ New note</button></div>
+  <div class="sh">
+    <span style="font-size:15px;font-weight:bold;color:var(--navy)">Log</span>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-sm" style="background:#1a6b6b" onclick="openPayrollExport()">&#128196; Export</button>
+      <button class="btn btn-sm" onclick="openAddNote()">+ Note</button>
+    </div>
+  </div>
   <div id="notes-list"></div>
 </div>
 
@@ -428,7 +434,7 @@ const SCC={Monday:{start:'10:00 AM',end:'12:30 PM',active:true,note:''},Tuesday:
 
 // STATE
 // lifeEvents: [{id, type:'camp'|'vacation', title, startDate, endDate, days(camp only), startTime(camp), endTime(camp), kids(camp), notes, ptoLinked, archived}]
-let S={slots:SEED.map(s=>({...s})),childcare:JSON.parse(JSON.stringify(SCC)),childcareDateNotes:{},people:[],notes:[],activities:[],requests:[],lifeEvents:[],pendingClaims:{},nextId:60};
+let S={slots:SEED.map(s=>({...s})),childcare:JSON.parse(JSON.stringify(SCC)),childcareDateNotes:{},people:[],notes:[],activities:[],requests:[],lifeEvents:[],pendingClaims:{},weekHistory:[],nextId:60};
 let pto={active:false,startDate:null,endDate:null,subs:{},notified:{},viewWeekOffset:0};
 let _ps=[],_st=null,_showArchived=false;
 
@@ -440,7 +446,7 @@ function save(){
   _st=setTimeout(async()=>{
     syncBar('','Saving...');
     const keys=role==='mike'
-      ?['people','notes','activities','childcare','childcareDateNotes','nextId','pto','requests','lifeEvents','slots','pendingClaims']
+      ?['people','notes','activities','childcare','childcareDateNotes','nextId','pto','requests','lifeEvents','slots','pendingClaims','weekHistory']
       :['childcare'];
     for(const k of keys){
       const v=k==='pto'?pto:k==='nextId'?S.nextId:S[k];
@@ -452,9 +458,9 @@ function save(){
 async function boot(){
   syncBar('','Loading from cloud...');
   try{
-    const [people,notes,activities,childcare,nextId,ptoD,requests,lifeEvents,slots,cdNotes,pendingClaims]=await Promise.all([
+    const [people,notes,activities,childcare,nextId,ptoD,requests,lifeEvents,slots,cdNotes,pendingClaims,weekHistory]=await Promise.all([
       dbGet('people'),dbGet('notes'),dbGet('activities'),dbGet('childcare'),
-      dbGet('nextId'),dbGet('pto'),dbGet('requests'),dbGet('lifeEvents'),dbGet('slots'),dbGet('childcareDateNotes'),dbGet('pendingClaims')
+      dbGet('nextId'),dbGet('pto'),dbGet('requests'),dbGet('lifeEvents'),dbGet('slots'),dbGet('childcareDateNotes'),dbGet('pendingClaims'),dbGet('weekHistory')
     ]);
     if(people)S.people=people;if(notes)S.notes=notes;if(activities)S.activities=activities;
     if(childcare)S.childcare=childcare;if(nextId)S.nextId=nextId;
@@ -463,11 +469,12 @@ async function boot(){
     if(slots)S.slots=slots;else S.slots=SEED.map(s=>({...s}));
     if(cdNotes)S.childcareDateNotes=cdNotes;else S.childcareDateNotes={};
     if(pendingClaims)S.pendingClaims=pendingClaims;else S.pendingClaims={};
+    if(weekHistory)S.weekHistory=weekHistory;else S.weekHistory=[];
     // Auto-archive past life events
     autoArchiveLifeEvents();
     syncBar('ok','✓ Loaded from cloud');
   }catch(e){syncBar('err','Could not connect — working offline');}
-  if(role==='mike')renderSchedule();else renderCC();
+  if(role==='mike'){checkAutoClose();renderSchedule();}else renderCC();
 }
 
 function autoArchiveLifeEvents(){
@@ -656,7 +663,7 @@ function openAddLifeEvent(type){
           ${KIDS.map(k=>`<span class="kid-pill on" onclick="toggleKidPill(this)">${k}</span>`).join('')}
         </div>
       </div>
-      <div class="f"><label>NOTES</label><textarea id="le-notes" rows="3" placeholder="What to bring, special instructions..."></textarea></div>
+      <div class="f"><label>LOG</label><textarea id="le-notes" rows="3" placeholder="What to bring, special instructions..."></textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#d97706" onclick="saveLifeEvent('camp')">Save camp</button></div>`);
   } else {
     sm(`<h3>🌴 Add Vacation</h3>
@@ -665,7 +672,7 @@ function openAddLifeEvent(type){
         <div style="flex:1"><div class="fl">Start date</div><input id="le-start" type="date" value="${today}"></div>
         <div style="flex:1"><div class="fl">End date</div><input id="le-end" type="date" value="${today}"></div>
       </div>
-      <div class="f"><label>NOTES</label><textarea id="le-notes" rows="3" placeholder="Where staying, travel details..."></textarea></div>
+      <div class="f"><label>LOG</label><textarea id="le-notes" rows="3" placeholder="Where staying, travel details..."></textarea></div>
       <div style="background:#f0fdf4;border-radius:6px;padding:10px 12px;font-size:12px;color:#065f46;margin-bottom:14px;border:1px solid #86efac">
         ✓ Childcare will automatically be marked Day Off for these dates when you activate PTO.
       </div>
@@ -722,7 +729,7 @@ function openEditLifeEvent(id){
           ${KIDS.map(k=>`<span class="kid-pill ${e.kids?.includes(k)?'on':''}" onclick="toggleKidPill(this)">${k}</span>`).join('')}
         </div>
       </div>
-      <div class="f"><label>NOTES</label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
+      <div class="f"><label>LOG</label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#d97706" onclick="updateLifeEvent(${id},'camp')">Save</button></div>`);
   } else {
     sm(`<h3>🌴 Edit Vacation</h3>
@@ -731,7 +738,7 @@ function openEditLifeEvent(id){
         <div style="flex:1"><div class="fl">Start date</div><input id="le-start" type="date" value="${e.startDate}"></div>
         <div style="flex:1"><div class="fl">End date</div><input id="le-end" type="date" value="${e.endDate}"></div>
       </div>
-      <div class="f"><label>NOTES</label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
+      <div class="f"><label>LOG</label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#0e7490" onclick="updateLifeEvent(${id},'vacation')">Save</button></div>`);
   }
 }
@@ -1027,6 +1034,191 @@ function shareOpenSlots(){
     <p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:14px">Opens in Messages — pick who to send to:</p>
     <a href="sms:?body=${enc}" style="display:block;text-align:center;background:#2d6a4f;color:#fff;padding:12px;border-radius:6px;font-family:Georgia,serif;font-weight:600;font-size:14px;text-decoration:none;margin-bottom:8px">Open in Messages &#8250;</a>
     <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button></div>`);
+}
+
+// ── AUTO CLOSE WEEK ──
+function getWeekDates(mondayDate){
+  const dates=[];
+  for(let i=0;i<5;i++){
+    const d=addDays(mondayDate,i);
+    dates.push({day:DAYS[i],date:isoDate(d)});
+  }
+  return dates;
+}
+
+function autoCloseWeek(silent=true){
+  if(role!=='mike')return;
+  const lastMonday=addDays(mondayOf(new Date()),-7);
+  const weekStart=isoDate(lastMonday);
+  const weekEnd=isoDate(addDays(lastMonday,6));
+  // Check if already closed
+  if(S.weekHistory.find(w=>w.weekStart===weekStart))return;
+  const weekDates=getWeekDates(lastMonday);
+  const entries=[];
+  weekDates.forEach(({day,date})=>{
+    const daySlots=S.slots.filter(s=>s.day===day).sort((a,b)=>a.startM-b.startM);
+    // Check if PTO day
+    const isPTO=pto.active&&pto.startDate&&pto.endDate&&date>=pto.startDate&&date<=pto.endDate;
+    if(isPTO){
+      entries.push({date,day,label:'PTO',hours:0,type:'pto'});
+      return;
+    }
+    daySlots.forEach(s=>{
+      if(s.type==='blocked')return;
+      const hrs=shr(s);
+      if(hrs===0)return;
+      let label=s.label;
+      // For private lessons try to match full name from people
+      if(s.type==='private'&&s.roster&&s.roster.length){
+        const lastName=s.roster[0];
+        const matches=S.people.filter(p=>p.name.split(' ').pop().toLowerCase()===lastName.toLowerCase());
+        if(matches.length===1)label=`Lesson — ${matches[0].name}`;
+        else if(matches.length>1)label=`Lesson — ${lastName} (multiple matches)`;
+        else label=`Lesson — ${lastName}`;
+      }
+      entries.push({date,day,label,hours:hrs,type:s.type,slotId:s.id});
+    });
+  });
+  const record={weekStart,weekEnd,closedAt:new Date().toISOString(),entries};
+  S.weekHistory.push(record);
+  // Purge history older than 20 days
+  const cutoff=isoDate(addDays(new Date(),-20));
+  S.weekHistory=S.weekHistory.filter(w=>w.weekEnd>=cutoff);
+  // Add note to log
+  const closedDate=new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
+  const closedTime=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  S.notes.unshift({id:S.nextId++,date:isoDate(new Date()),text:`Auto-closed week of ${fmtDate(lastMonday)} – ${fmtDate(addDays(lastMonday,6))} on ${closedDate} at ${closedTime}`});
+  save();
+  if(!silent)renderNotes();
+}
+
+function checkAutoClose(){
+  if(role!=='mike')return;
+  // Run auto-close if today is Monday and last week hasn't been closed
+  const today=new Date();
+  if(today.getDay()===1){// Monday
+    autoCloseWeek(true);
+  }
+}
+
+// ── PAYROLL EXPORT ──
+function openPayrollExport(){
+  if(role!=='mike')return;
+  const today=isoDate(new Date());
+  const twoWeeksAgo=isoDate(addDays(new Date(),-14));
+  sm(`<h3>&#128196; Payroll Export</h3>
+    <p style="font-size:12px;color:var(--gray);font-style:italic;margin-bottom:16px">Generates a tab-separated list ready to paste into Google Sheets.</p>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <div style="flex:1"><div class="fl">Start date</div><input id="exp-start" type="date" value="${twoWeeksAgo}"></div>
+      <div style="flex:1"><div class="fl">End date</div><input id="exp-end" type="date" value="${today}"></div>
+    </div>
+    <div class="ma">
+      <button class="btn btn-sm bcx" onclick="cm()">Cancel</button>
+      <button class="btn btn-sm" style="background:#1a6b6b" onclick="generateExport()">Generate</button>
+    </div>`);
+}
+
+function generateExport(){
+  const startStr=document.getElementById('exp-start')?.value;
+  const endStr=document.getElementById('exp-end')?.value;
+  if(!startStr||!endStr||startStr>endStr){alert('Please enter a valid date range.');return;}
+
+  const rows=[['Date','Activity','Hours']];
+  const cur=new Date(startStr+'T12:00:00');
+  const end=new Date(endStr+'T12:00:00');
+  const today=isoDate(new Date());
+  const multipleMatches=[];
+
+  while(cur<=end){
+    const dow=cur.getDay();
+    const dateStr=isoDate(cur);
+    const fmtD=`${String(cur.getMonth()+1).padStart(2,'0')}/${String(cur.getDate()).padStart(2,'0')}/${cur.getFullYear()}`;
+
+    if(dow>=1&&dow<=5){// Mon-Fri only
+      const day=DAYS[dow-1];
+      // Check PTO
+      const isPTO=pto.active&&pto.startDate&&pto.endDate&&dateStr>=pto.startDate&&dateStr<=pto.endDate;
+      if(isPTO){
+        rows.push([fmtD,'PTO','0']);
+        cur.setDate(cur.getDate()+1);
+        continue;
+      }
+      // Check if we have stamped history for this week
+      const weekMon=isoDate(mondayOf(cur));
+      const histRecord=S.weekHistory.find(w=>w.weekStart===weekMon);
+      if(histRecord){
+        // Use stamped data
+        const dayEntries=histRecord.entries.filter(e=>e.date===dateStr);
+        if(dayEntries.length===0){
+          // No entries for this day — skip
+        } else {
+          dayEntries.forEach(e=>{
+            if(e.type==='pto'){rows.push([fmtD,'PTO','0']);}
+            else{
+              const hrs=e.hours%1===0?e.hours.toString():(Math.round(e.hours*2)/2).toString();
+              rows.push([fmtD,e.label,hrs]);
+            }
+          });
+        }
+      } else {
+        // Use live slots (future or unstamped weeks)
+        const daySlots=S.slots.filter(s=>s.day===day&&s.type!=='blocked').sort((a,b)=>a.startM-b.startM);
+        daySlots.forEach(s=>{
+          const hrs=shr(s);
+          if(hrs===0)return;
+          let label=s.label;
+          if(s.type==='private'){
+            if(s.roster&&s.roster.length){
+              const lastName=s.roster[0];
+              const matches=S.people.filter(p=>p.name.split(' ').pop().toLowerCase()===lastName.toLowerCase());
+              if(matches.length===1){label=`Lesson — ${matches[0].name}`;}
+              else if(matches.length>1){
+                label=`Lesson — ${lastName}`;
+                multipleMatches.push({date:fmtD,lastName});
+              } else {label=`Lesson — ${lastName}`;}
+            } else {
+              // Open/available slot — include as open
+              label=s.label||'Lesson (open)';
+            }
+          }
+          const hrsStr=hrs%1===0?hrs.toString():(Math.round(hrs*2)/2).toString();
+          rows.push([fmtD,label,hrsStr]);
+        });
+      }
+    }
+    cur.setDate(cur.getDate()+1);
+  }
+
+  // Build tab-separated text
+  const tab='\t',nl='\n';const tsv=rows.map(r=>r.join(tab)).join(nl);
+
+  // Show result
+  let warningHtml='';
+  if(multipleMatches.length){
+    warningHtml=`<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#92400e">
+      ⚠ Multiple people found with same last name — verify these rows:<br>
+      ${multipleMatches.map(m=>`${m.date}: ${m.lastName}`).join('<br>')}
+    </div>`;
+  }
+
+  sm(`<h3>&#128196; Payroll Export</h3>
+    ${warningHtml}
+    <p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:8px">Select all text below, copy, then paste into Google Sheets:</p>
+    <textarea id="export-out" rows="12" style="font-family:monospace;font-size:11px;background:#f8f8f8;border:1px solid var(--border)" onclick="this.select()" readonly>${tsv}</textarea>
+    <div class="ma">
+      <button class="btn btn-sm bcx" onclick="cm()">Close</button>
+      <button class="btn btn-sm" style="background:#1a6b6b" onclick="copyExport()">Copy all</button>
+    </div>`);
+}
+
+function copyExport(){
+  const ta=document.getElementById('export-out');
+  if(!ta)return;
+  ta.select();
+  document.execCommand('copy');
+  const btn=event.target;
+  btn.textContent='Copied ✓';
+  setTimeout(()=>{btn.textContent='Copy all';},2000);
 }
 function sm(html){const o=document.getElementById('modal');o.style.display='flex';o.innerHTML=`<div class="md" onclick="event.stopPropagation()">${html}</div>`;}
 function cm(){document.getElementById('modal').style.display='none';_ps=[];}
