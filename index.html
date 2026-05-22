@@ -402,7 +402,7 @@ const SHORT=['Mon','Tue','Wed','Thu','Fri'];
 const LT={
   'private':{label:'Private lesson',cap:1,cls:'type-private',fixed:false},
   'group':{label:'Special group',cap:4,cls:'type-group',fixed:false},
-  'liveball':{label:'Liveball',cap:8,cls:'type-liveball',fixed:false},
+  'liveball':{label:'Liveball',cap:0,cls:'type-liveball',fixed:false,attendance:true},
   'camp':{label:'Camp',cap:12,cls:'type-camp',fixed:false},
   'adult-team':{label:'Adult Team',cap:0,cls:'type-adult-team',fixed:true},
   'hp-clinic':{label:'HP Clinic',cap:0,cls:'type-hp-clinic',fixed:true},
@@ -415,7 +415,7 @@ const hm=(h,m)=>h*60+m;
 function mtd(m){const h=Math.floor(m/60),mm=m%60,ap=h<12?'AM':'PM',h12=h===0?12:h>12?h-12:h;return mm===0?`${h12} ${ap}`:`${h12}:${String(mm).padStart(2,'0')} ${ap}`;}
 const sdsp=s=>`${mtd(s.startM)}\u2013${mtd(s.endM)}`;
 const shr=s=>{const d=s.endM-s.startM;return d>0?d/60:0;};
-function pti(str){const s=str.trim(),c=s.indexOf(':');if(c===-1)return parseInt(s)*60;return parseInt(s.slice(0,c))*60+parseInt(s.slice(c+1)||'0');}
+function pti(str){const s=str.trim().toUpperCase();if(s.includes('AM')||s.includes('PM')){const isPM=s.includes('PM');const clean=s.replace('AM','').replace('PM','').trim();const c=clean.indexOf(':');let h=c===-1?parseInt(clean):parseInt(clean.slice(0,c));const m=c===-1?0:parseInt(clean.slice(c+1)||'0');if(isPM&&h!==12)h+=12;if(!isPM&&h===12)h=0;return h*60+m;}const c=s.indexOf(':');const h=c===-1?parseInt(s):parseInt(s.slice(0,c));const m=c===-1?0:parseInt(s.slice(c+1)||'0');let hour=h;if(h>=1&&h<=6)hour=h+12;else if(h===12)hour=12;else hour=h;return hour*60+m;}
 const cp=p=>(p||'').replace(/\D/g,'');
 const pv=p=>cp(p).length===10;
 const gln=n=>{const p=n.trim().split(' ');return p[p.length-1];};
@@ -516,7 +516,7 @@ function autoArchiveLifeEvents(){
 }
 
 const isF=t=>LT[t]?.fixed===true;
-function ss(s){if(isF(s.type))return'fixed';if(s.status==='blocked')return'blocked';if(s.status==='booked')return'booked';const cap=LT[s.type]?.cap||1,f=s.roster.length;if(f===0)return'available';if(f>=cap)return'full';if(f>0)return'partial';return'available';}
+function ss(s){if(isF(s.type))return'fixed';if(s.status==='blocked')return'blocked';if(s.type==='liveball')return'available';if(s.status==='booked')return'booked';const cap=LT[s.type]?.cap||1,f=s.roster.length;if(f===0)return'available';if(f>=cap)return'full';if(f>0)return'partial';return'available';}
 
 function st(t){
   const tabs=['schedule','childcare','people','notes','life'];
