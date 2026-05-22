@@ -212,6 +212,33 @@ textarea{resize:vertical}
 .pto-link-btn:hover{background:#1a4a35}
 .pto-linked-badge{font-size:11px;padding:3px 10px;border-radius:20px;background:#d1fae5;color:#065f46;font-style:italic}
 .archived-toggle{text-align:center;padding:10px;font-size:12px;color:var(--gray);cursor:pointer;font-style:italic;text-decoration:underline}
+
+/* WEEK AT A GLANCE */
+.wag-card{background:var(--navy);border-radius:8px;margin-bottom:10px;overflow:hidden;transition:all .2s}
+.wag-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none}
+.wag-title{color:#fff;font-size:12px;font-weight:bold;letter-spacing:.06em;text-transform:uppercase}
+.wag-collapse-lbl{color:rgba(255,255,255,.5);font-size:11px;font-style:italic;flex:1;text-align:center;padding:0 8px}
+.wag-toggle{color:rgba(255,255,255,.5);font-size:14px;transition:transform .2s}
+.wag-body{padding:0 14px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wag-section{background:rgba(255,255,255,.07);border-radius:6px;padding:10px 12px}
+.wag-section-title{font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;font-weight:700}
+.wag-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.wag-row:last-child{margin-bottom:0}
+.wag-lbl{font-size:11px;color:rgba(255,255,255,.6);font-style:italic}
+.wag-val{font-size:13px;color:#fff;font-weight:bold}
+.wag-val.green{color:#86efac}
+.wag-val.amber{color:#fcd34d}
+.wag-val.gray{color:rgba(255,255,255,.4)}
+.wag-progress{margin-top:6px}
+.wag-progress-bar{height:4px;background:rgba(255,255,255,.15);border-radius:2px;overflow:hidden;margin-top:3px}
+.wag-progress-fill{height:100%;border-radius:2px;background:#86efac;transition:width .3s}
+.wag-progress-fill.warn{background:#fcd34d}
+.wag-progress-fill.over{background:#fca5a5}
+.wag-life{grid-column:1/-1;font-size:11px;color:rgba(255,255,255,.7);font-style:italic;padding:6px 10px;background:rgba(255,255,255,.05);border-radius:4px;text-align:center}
+.wag-collapsed{padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wag-collapsed-item{font-size:11px;color:rgba(255,255,255,.7);font-style:italic}
+.wag-collapsed-item strong{color:#fff;font-style:normal}
+.log-badge{background:#dc2626;color:#fff;font-size:9px;padding:1px 6px;border-radius:20px;margin-left:4px;font-weight:bold;vertical-align:middle}
 .role-badge{position:fixed;bottom:12px;right:12px;background:rgba(26,26,46,.7);color:rgba(255,255,255,.6);font-size:10px;padding:4px 10px;border-radius:20px;font-family:Georgia,serif;font-style:italic;z-index:50;cursor:pointer}
 </style>
 </head>
@@ -234,7 +261,7 @@ textarea{resize:vertical}
   <button class="tab active" id="tab-schedule" onclick="st('schedule')">TENNIS</button>
   <button class="tab" id="tab-childcare" onclick="st('childcare')">KIDS</button>
   <button class="tab" id="tab-people" onclick="st('people')" style="display:none">CLIENTS</button>
-  <button class="tab" id="tab-notes" onclick="st('notes')" style="display:none">LOG</button>
+  <button class="tab" id="tab-notes" onclick="st('notes')" style="display:none">LOG<span class="log-badge" id="log-badge" style="display:none"></span></button>
   <button class="tab" id="tab-life" onclick="st('life')" style="display:none">LIFE</button>
 </div>
 <div id="pto-banner" style="display:none"></div>
@@ -243,6 +270,7 @@ textarea{resize:vertical}
 
 <!-- SCHEDULE -->
 <div id="panel-schedule" class="panel active">
+  <div id="wag-card" class="wag-card" style="display:none"></div>
   <div style="display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px;margin-bottom:8px">
     <div id="event-pills" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-right:auto"></div>
     <div id="pto-active-lbl" style="display:none;font-size:11px;color:#dc2626;font-weight:bold;font-style:italic;letter-spacing:.04em">PTO Active</div>
@@ -315,7 +343,7 @@ function pinDel(){if(pinEntry.length>0){pinEntry=pinEntry.slice(0,-1);updateDots
 function updateDots(){for(let i=0;i<4;i++)document.getElementById('d'+i).classList.toggle('filled',i<pinEntry.length);}
 function checkPin(){if(pinEntry===PINS.mike)unlockApp('mike');else if(pinEntry===PINS.caregiver)unlockApp('caregiver');else{document.getElementById('pin-error').textContent='Incorrect PIN — try again';pinEntry='';updateDots();setTimeout(()=>{document.getElementById('pin-error').textContent='';},2000);}}
 function unlockApp(r){
-  role=r;pinEntry='';
+  role=r;pinEntry='';_summaryExpanded=true;_logSeen=false;
   document.getElementById('pin-screen').style.display='none';
   document.getElementById('main-app').style.display='block';
   document.getElementById('sync-bar').style.display='block';
@@ -436,7 +464,7 @@ const SCC={Monday:{start:'10:00 AM',end:'12:30 PM',active:true,note:''},Tuesday:
 // lifeEvents: [{id, type:'camp'|'vacation', title, startDate, endDate, days(camp only), startTime(camp), endTime(camp), kids(camp), notes, ptoLinked, archived}]
 let S={slots:SEED.map(s=>({...s})),weekSlots:{},childcare:JSON.parse(JSON.stringify(SCC)),childcareDateNotes:{},people:[],notes:[],activities:[],requests:[],lifeEvents:[],pendingClaims:{},weekHistory:[],nextId:60};
 let pto={active:false,startDate:null,endDate:null,subs:{},notified:{},viewWeekOffset:0};
-let _ps=[],_st=null,_showArchived=false;
+let _ps=[],_st=null,_showArchived=false,_summaryExpanded=true,_logBadge=0,_logSeen=false;
 
 function openReqs(pid){return S.requests.filter(r=>r.personId===pid&&!r.closed);}
 function hasOpenReqs(pid){return openReqs(pid).length>0;}
@@ -475,7 +503,7 @@ async function boot(){
     autoArchiveLifeEvents();
     syncBar('ok','✓ Loaded from cloud');
   }catch(e){syncBar('err','Could not connect — working offline');}
-  if(role==='mike'){checkAutoClose();renderSchedule();}else renderCC();
+  if(role==='mike'){checkAutoClose();renderSchedule();countNewNotes();}else renderCC();
 }
 
 function autoArchiveLifeEvents(){
@@ -495,7 +523,7 @@ function st(t){
   document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',tabs[i]===t));
   document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
   document.getElementById('panel-'+t).classList.add('active');
-  if(t==='schedule')renderSchedule();if(t==='childcare')renderCC();
+  if(t==='schedule')renderSchedule();if(t==='childcare')renderCC();if(t==='notes')markLogSeen();
   if(t==='people')renderPeople();if(t==='notes')renderNotes();if(t==='life')renderLife();
 }
 
@@ -664,7 +692,7 @@ function openAddLifeEvent(type){
           ${KIDS.map(k=>`<span class="kid-pill on" onclick="toggleKidPill(this)">${k}</span>`).join('')}
         </div>
       </div>
-      <div class="f"><label>LOG</label><textarea id="le-notes" rows="3" placeholder="What to bring, special instructions..."></textarea></div>
+      <div class="f"><label>LOG<span class="log-badge" id="log-badge" style="display:none"></span></label><textarea id="le-notes" rows="3" placeholder="What to bring, special instructions..."></textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#d97706" onclick="saveLifeEvent('camp')">Save camp</button></div>`);
   } else {
     sm(`<h3>🌴 Add Vacation</h3>
@@ -673,7 +701,7 @@ function openAddLifeEvent(type){
         <div style="flex:1"><div class="fl">Start date</div><input id="le-start" type="date" value="${today}"></div>
         <div style="flex:1"><div class="fl">End date</div><input id="le-end" type="date" value="${today}"></div>
       </div>
-      <div class="f"><label>LOG</label><textarea id="le-notes" rows="3" placeholder="Where staying, travel details..."></textarea></div>
+      <div class="f"><label>LOG<span class="log-badge" id="log-badge" style="display:none"></span></label><textarea id="le-notes" rows="3" placeholder="Where staying, travel details..."></textarea></div>
       <div style="background:#f0fdf4;border-radius:6px;padding:10px 12px;font-size:12px;color:#065f46;margin-bottom:14px;border:1px solid #86efac">
         ✓ Childcare will automatically be marked Day Off for these dates when you activate PTO.
       </div>
@@ -730,7 +758,7 @@ function openEditLifeEvent(id){
           ${KIDS.map(k=>`<span class="kid-pill ${e.kids?.includes(k)?'on':''}" onclick="toggleKidPill(this)">${k}</span>`).join('')}
         </div>
       </div>
-      <div class="f"><label>LOG</label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
+      <div class="f"><label>LOG<span class="log-badge" id="log-badge" style="display:none"></span></label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#d97706" onclick="updateLifeEvent(${id},'camp')">Save</button></div>`);
   } else {
     sm(`<h3>🌴 Edit Vacation</h3>
@@ -739,7 +767,7 @@ function openEditLifeEvent(id){
         <div style="flex:1"><div class="fl">Start date</div><input id="le-start" type="date" value="${e.startDate}"></div>
         <div style="flex:1"><div class="fl">End date</div><input id="le-end" type="date" value="${e.endDate}"></div>
       </div>
-      <div class="f"><label>LOG</label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
+      <div class="f"><label>LOG<span class="log-badge" id="log-badge" style="display:none"></span></label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#0e7490" onclick="updateLifeEvent(${id},'vacation')">Save</button></div>`);
   }
 }
@@ -821,7 +849,7 @@ function goToRequests(){st('people');const s=document.getElementById('people-sea
 
 // ── SCHEDULE RENDER ──
 function renderSchedule(){
-  renderPTOBanner();updateReqBanner();
+  renderPTOBanner();updateReqBanner();renderWAG();
   renderWeekLabel();
   // Event pills: show for viewed week, PLUS next week reminder when on current week
   const viewedEvents=eventsInWeek(getViewMonday());
@@ -1298,6 +1326,153 @@ function copyExport(){
   const btn=event.target;
   btn.textContent='Copied ✓';
   setTimeout(()=>{btn.textContent='Copy all';},2000);
+}
+
+// ── WEEK AT A GLANCE ──
+function computeWAG(){
+  if(role!=='mike')return null;
+  const now=new Date();
+  const todayStr=isoDate(now);
+  const nowMinutes=now.getHours()*60+now.getMinutes();
+  const viewMon=mondayOf(new Date()); // always current week for summary
+  const viewSlots=getWeekSlots(viewMon);
+
+  // TENNIS
+  let worked=0,bookedAhead=0,openHrs=0,pendingHrs=0;
+  viewSlots.forEach(s=>{
+    if(s.type==='blocked'||s.status==='exception')return;
+    const dayIdx=DAYS.indexOf(s.day);
+    if(dayIdx===-1)return;
+    const slotDate=isoDate(addDays(viewMon,dayIdx));
+    const hrs=shr(s);
+    if(hrs===0)return;
+    const slotPast=slotDate<todayStr||(slotDate===todayStr&&s.endM<=nowMinutes);
+    const slotFuture=slotDate>todayStr||(slotDate===todayStr&&s.startM>nowMinutes);
+    if(slotPast){
+      worked+=hrs;
+    } else if(slotFuture){
+      const st2=ss(s);
+      if(st2==='available'){
+        // Check if pending claim
+        const claim=S.pendingClaims&&S.pendingClaims[s.id];
+        if(claim)pendingHrs+=hrs;
+        else openHrs+=hrs;
+      } else if(st2==='booked'||st2==='partial'||st2==='full'||st2==='fixed'){
+        bookedAhead+=hrs;
+      }
+    }
+  });
+
+  // CHILDCARE — current week, using actual dates
+  const BUDGET=16;
+  let ccUsed=0,ccRemaining=0;
+  DAYS.forEach((day,i)=>{
+    const slotDate=isoDate(addDays(viewMon,i));
+    const cc=S.childcare[day];
+    if(!cc||!cc.active)return;
+    // Check vacation
+    const onVac=S.lifeEvents.some(e=>e.type==='vacation'&&!e.archived&&slotDate>=e.startDate&&slotDate<=e.endDate);
+    if(onVac)return;
+    // Parse hours
+    const startM=pti(cc.start),endM=pti(cc.end);
+    const hrs=(endM-startM)/60;
+    if(hrs<=0)return;
+    const dayPast=slotDate<todayStr;
+    if(dayPast)ccUsed+=hrs;
+    else ccRemaining+=hrs;
+  });
+  const ccTotal=ccUsed+ccRemaining;
+
+  // LIFE — anything active this week
+  const weekEnd=isoDate(addDays(viewMon,6));
+  const lifeThisWeek=S.lifeEvents.filter(e=>!e.archived&&e.startDate<=weekEnd&&e.endDate>=isoDate(viewMon));
+
+  return{worked,bookedAhead,openHrs,pendingHrs,ccUsed,ccRemaining,ccTotal,BUDGET,lifeThisWeek};
+}
+
+function fh(h){
+  if(h===0)return'0';
+  const r=Math.round(h*2)/2;
+  return r%1===0?r.toString():r.toFixed(1);
+}
+
+function renderWAG(){
+  const card=document.getElementById('wag-card');
+  if(!card||role!=='mike'){if(card)card.style.display='none';return;}
+  const w=computeWAG();if(!w){card.style.display='none';return;}
+  card.style.display='block';
+
+  const openStr=w.pendingHrs>0?`${fh(w.openHrs+w.pendingHrs)}<span style="color:#fcd34d;font-size:11px">(${fh(w.pendingHrs)})</span>`:fh(w.openHrs);
+  const ccPct=Math.min(100,Math.round((w.ccTotal/w.BUDGET)*100));
+  const ccColor=ccPct>=100?'over':ccPct>=85?'warn':'';
+  const lifeStr=w.lifeThisWeek.length?w.lifeThisWeek.map(e=>e.title).join(' · '):'Nothing scheduled';
+
+  if(_summaryExpanded){
+    card.innerHTML=`
+      <div class="wag-header" onclick="toggleWAG()">
+        <span class="wag-title">&#128198; Week at a Glance</span>
+        <span class="wag-toggle">&#9650;</span>
+      </div>
+      <div class="wag-body">
+        <div class="wag-section">
+          <div class="wag-section-title">&#127934; Tennis</div>
+          <div class="wag-row"><span class="wag-lbl">Worked</span><span class="wag-val green">${fh(w.worked)} hrs</span></div>
+          <div class="wag-row"><span class="wag-lbl">Booked ahead</span><span class="wag-val">${fh(w.bookedAhead)} hrs</span></div>
+          <div class="wag-row"><span class="wag-lbl">Open</span><span class="wag-val ${w.openHrs+w.pendingHrs>0?'amber':'gray'}">${openStr} hrs</span></div>
+        </div>
+        <div class="wag-section">
+          <div class="wag-section-title">&#128100; Childcare</div>
+          <div class="wag-row"><span class="wag-lbl">Used</span><span class="wag-val green">${fh(w.ccUsed)} hrs</span></div>
+          <div class="wag-row"><span class="wag-lbl">Remaining</span><span class="wag-val">${fh(w.ccRemaining)} hrs</span></div>
+          <div class="wag-progress">
+            <div class="wag-row" style="margin-bottom:2px"><span class="wag-lbl">Budget</span><span style="font-size:11px;color:rgba(255,255,255,.6)">${fh(w.ccTotal)}/${w.BUDGET} hrs</span></div>
+            <div class="wag-progress-bar"><div class="wag-progress-fill ${ccColor}" style="width:${ccPct}%"></div></div>
+          </div>
+        </div>
+        <div class="wag-life">&#127774; This week: ${lifeStr}</div>
+      </div>`;
+  } else {
+    card.innerHTML=`
+      <div class="wag-header wag-collapsed" onclick="toggleWAG()">
+        <span class="wag-title" style="white-space:nowrap">&#128198; Week</span>
+        <span class="wag-collapsed-item"><strong>${fh(w.worked)}</strong> worked</span>
+        <span class="wag-collapsed-item"><strong>${fh(w.openHrs+w.pendingHrs)}</strong> open</span>
+        <span class="wag-collapsed-item"><strong>${fh(w.ccTotal)}/${w.BUDGET}</strong> childcare</span>
+        ${w.lifeThisWeek.length?`<span class="wag-collapsed-item">&#127774; ${w.lifeThisWeek[0].title}</span>`:''}
+        <span class="wag-toggle" style="margin-left:auto">&#9660;</span>
+      </div>`;
+  }
+}
+
+function toggleWAG(){_summaryExpanded=!_summaryExpanded;renderWAG();}
+
+// ── LOG BADGE ──
+function updateLogBadge(){
+  const badge=document.getElementById('log-badge');
+  if(!badge)return;
+  if(_logBadge>0&&!_logSeen){
+    badge.style.display='inline';
+    badge.textContent=_logBadge;
+  } else {
+    badge.style.display='none';
+  }
+}
+
+function countNewNotes(){
+  // Count notes added since last login — use session storage as proxy
+  const lastSeen=sessionStorage.getItem('lastNoteSeen');
+  const lastSeenId=lastSeen?parseInt(lastSeen):0;
+  _logBadge=S.notes.filter(n=>n.id>lastSeenId).length;
+  updateLogBadge();
+}
+
+function markLogSeen(){
+  _logSeen=true;
+  if(S.notes.length){
+    sessionStorage.setItem('lastNoteSeen',Math.max(...S.notes.map(n=>n.id)).toString());
+  }
+  _logBadge=0;
+  updateLogBadge();
 }
 function sm(html){const o=document.getElementById('modal');o.style.display='flex';o.innerHTML=`<div class="md" onclick="event.stopPropagation()">${html}</div>`;}
 function cm(){document.getElementById('modal').style.display='none';_ps=[];}
