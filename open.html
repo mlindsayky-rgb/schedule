@@ -94,12 +94,13 @@ const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday'];
 
 function mtd(m){const h=Math.floor(m/60),mm=m%60,ap=h<12?'AM':'PM',h12=h===0?12:h>12?h-12:h;return mm===0?`${h12} ${ap}`:`${h12}:${String(mm).padStart(2,'0')} ${ap}`;}
 function sdsp(s){return`${mtd(s.startM)}\u2013${mtd(s.endM)}`;}
+function isoDate(d){return d.toISOString().slice(0,10);}
 function mondayOf(d){const dt=new Date(d);const dow=dt.getDay();const diff=dow===0?-6:1-dow;dt.setDate(dt.getDate()+diff);dt.setHours(0,0,0,0);return dt;}
 function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
 function fmtDate(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
-function isoDate(d){return d.toISOString().slice(0,10);}
 
 let slots=[];
+let weekSlots={};
 let pendingClaims={};
 let lifeEvents=[];
 let pto={};
@@ -143,6 +144,21 @@ function isPTODay(dateStr){
     new Date(dateStr+'T12:00:00').getDay()>=1 &&
     new Date(dateStr+'T12:00:00').getDay()<=5;
 }
+
+// Get slots for a specific week — uses weekSlots if customized, else template
+function getSlotsForWeek(mondayDateStr){
+  if(weekSlots[mondayDateStr]){
+    return weekSlots[mondayDateStr];
+  }
+  return slots; // fall back to template
+}
+
+function isoDate(d){return d.toISOString().slice(0,10);}
+function mondayOf(d){
+  const dt=new Date(d);const dow=dt.getDay();
+  const diff=dow===0?-6:1-dow;
+  dt.setDate(dt.getDate()+diff);dt.setHours(0,0,0,0);return dt;
+}
 function slotStatus(s){
   if(['adult-team','hp-clinic','blocked'].includes(s.type))return'fixed';
   if(s.status==='blocked')return'blocked';
@@ -163,14 +179,16 @@ function getWeekDays(mondayDate){
 }
 
 async function load(){
-  const [slotsData, claimsData, lifeEventsData, ptoData] = await Promise.all([
+  const [slotsData, weekSlotsData, claimsData, lifeEventsData, ptoData] = await Promise.all([
     dbGet('slots'),
+    dbGet('weekSlots'),
     dbGet('pendingClaims'),
     dbGet('lifeEvents'),
     dbGet('pto')
   ]);
 
   slots = slotsData || [];
+  weekSlots = weekSlotsData || {};
   pendingClaims = claimsData || {};
   lifeEvents = lifeEventsData || [];
   pto = ptoData || {active:false,startDate:null,endDate:null};
@@ -178,11 +196,12 @@ async function load(){
   render();
 }
 
-function getOpenSlotsForWeek(weekDays){
+function getOpenSlotsForWeek(weekDays, weekMondayStr){
+  const weekSlotsToUse=getSlotsForWeek(weekMondayStr);
   return weekDays.flatMap(({name,date})=>{
     if(isVacationDay(date)||isPTODay(date))return[]; // skip vacation and PTO days
-    return slots
-      .filter(s=>s.day===name&&s.type==='private'&&slotStatus(s)==='available')
+    return weekSlotsToUse
+      .filter(s=>s.day===name&&s.type==='private'&&slotStatus(s)==='available'&&s.status!=='exception')
       .map(s=>({...s,date,dayName:name}));
   }).sort((a,b)=>{
     if(a.date!==b.date)return a.date>b.date?1:-1;
@@ -195,8 +214,10 @@ function render(){
   const nextMonday=addDays(thisMonday,7);
   const thisWeekDays=getWeekDays(thisMonday);
   const nextWeekDays=getWeekDays(nextMonday);
-  const thisWeekSlots=getOpenSlotsForWeek(thisWeekDays);
-  const nextWeekSlots=getOpenSlotsForWeek(nextWeekDays);
+  const thisMondayStr=isoDate(thisMonday);
+  const nextMondayStr=isoDate(nextMonday);
+  const thisWeekSlots=getOpenSlotsForWeek(thisWeekDays, thisMondayStr);
+  const nextWeekSlots=getOpenSlotsForWeek(nextWeekDays, nextMondayStr);
 
   const thisStart=fmtDate(thisMonday),thisEnd=fmtDate(addDays(thisMonday,6));
   const nextStart=fmtDate(nextMonday),nextEnd=fmtDate(addDays(nextMonday,6));
