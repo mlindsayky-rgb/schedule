@@ -957,14 +957,42 @@ function editSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id)
   } else if(s.type==='private'){
     const r1=s.roster&&s.roster[0]||'';
     const r2=s.roster&&s.roster[1]||'';
-    rs=`<div class="f"><label>Player 1 (primary)</label><input id="p1-name" value="${r1}" placeholder="Last name"></div><div class="f"><label>Player 2 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9ca3af">(optional)</span></label><input id="p2-name" value="${r2}" placeholder="Last name"></div><div id="req-suggestion-area">${buildReqSuggestion()}</div>`;
+    // Build datalist from people
+    const dlOpts=S.people.map(p=>`<option value="${p.name}">`).join('');
+    rs=`<datalist id="people-dl">${dlOpts}</datalist>
+      <div class="f"><label>Player 1 (primary)</label>
+        <input id="p1-name" value="${r1}" placeholder="Start typing a name..." list="people-dl" autocomplete="off">
+      </div>
+      <div class="f"><label>Player 2 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9ca3af">(optional)</span></label>
+        <input id="p2-name" value="${r2}" placeholder="Start typing a name..." list="people-dl" autocomplete="off">
+      </div>
+      <div id="req-suggestion-area">${buildReqSuggestion()}</div>`;
   } else {
     rs=`<div class="f"><div class="fl">Roster (${cap} spot${cap!==1?'s':''})</div><div id="slot-rc" class="rr">${bRC(id)}</div><div id="slot-ppk">${bPPk(id)}</div></div><div id="req-suggestion-area">${buildReqSuggestion()}</div>`;
   }
   const stSec=l.fixed||s.type==='liveball'||s.type==='private'?'':`<div class="f"><label>Status</label><select id="e-status"><option value="auto" ${s.status!=='blocked'&&s.status!=='booked'?'selected':''}>Auto</option><option value="booked" ${s.status==='booked'?'selected':''}>Booked</option><option value="blocked" ${s.status==='blocked'?'selected':''}>Blocked</option></select></div>`;
   sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma"><button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);}
 function uch(){const t=document.getElementById('e-type')?.value,l=LT[t],el=document.getElementById('cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
-function svSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;s.label=document.getElementById('e-label').value;s.startM=pti(document.getElementById('e-start').value);s.endM=pti(document.getElementById('e-end').value);const nt=document.getElementById('e-type').value;if(nt!==s.type){s.type=nt;if(isF(nt)){s.roster=[];s.status='fixed';}else{const nc=LT[nt]?.cap||1;_ps=_ps.slice(0,nc);s.status='auto';}}if(!isF(s.type)){s.roster=_ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return p?gln(p.name):'';}).filter(Boolean);const se=document.getElementById('e-status');if(se){const v=se.value;s.status=v==='auto'?'auto':v;}_ps.forEach(pid=>{const cb=document.getElementById(`close-req-${pid}`);if(cb&&cb.checked){openReqs(pid).forEach(r=>{r.closed=true;});}});}save();cm();renderSchedule();renderPeople();}
+function svSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;s.label=document.getElementById('e-label').value;s.startM=pti(document.getElementById('e-start').value);s.endM=pti(document.getElementById('e-end').value);const nt=document.getElementById('e-type').value;if(nt!==s.type){s.type=nt;if(isF(nt)){s.roster=[];s.status='fixed';}else{const nc=LT[nt]?.cap||1;_ps=_ps.slice(0,nc);s.status='auto';}}if(!isF(s.type)){
+    if(s.type==='liveball'){
+      const att=parseInt(document.getElementById('lb-attendance')?.value||'0');
+      s.attendance=isNaN(att)?0:att;s.roster=[];
+    } else if(s.type==='private'){
+      const p1v=(document.getElementById('p1-name')?.value||'').trim();
+      const p2v=(document.getElementById('p2-name')?.value||'').trim();
+      const lastName=n=>n.split(' ').pop();
+      s.roster=[p1v?lastName(p1v):'',p2v?lastName(p2v):''].filter(Boolean);
+      s.status=s.roster.length>0?'booked':'available';
+      if(p1v&&p2v)s.label='Lesson — '+p1v+' / '+p2v;
+      else if(p1v)s.label='Lesson — '+p1v;
+      else s.label='Lesson';
+      [p1v,p2v].filter(Boolean).forEach(name=>{const p=S.people.find(x=>x.name===name);if(p){const cb=document.getElementById('close-req-'+p.id);if(cb&&cb.checked){openReqs(p.id).forEach(r=>{r.closed=true;});}}});
+    } else {
+      s.roster=_ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return p?gln(p.name):'';}).filter(Boolean);
+      const se=document.getElementById('e-status');if(se){const v=se.value;s.status=v==='auto'?'auto':v;}
+      _ps.forEach(pid=>{const cb=document.getElementById('close-req-'+pid);if(cb&&cb.checked){openReqs(pid).forEach(r=>{r.closed=true;});}});
+    }
+  }save();cm();renderSchedule();renderPeople();}
 function delSlot(id){if(role!=='mike')return;const vMon=getViewMonday();const wSlots=getWeekSlots(vMon).filter(s=>s.id!==id);saveWeekSlots(vMon,wSlots);cm();renderSchedule();}
 function openAddSlot(def='Monday'){if(role!=='mike')return;sm(`<h3>Add Slot <span style='font-size:11px;color:var(--gray);font-weight:normal;font-style:italic'>— ${fmtDate(getViewMonday())} week</span></h3><div class="f"><label>Day</label><select id="n-day">${DAYS.map(d=>`<option value="${d}" ${d===def?'selected':''}>${d}</option>`).join('')}</select></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="n-start" placeholder="10:00"></div><div style="flex:1"><div class="fl">End</div><input id="n-end" placeholder="11:30"></div></div><div class="f"><label>Label</label><input id="n-label" placeholder="e.g. Lesson \u2014 Smith"></div><div class="f"><label>Type</label><select id="n-type" onchange="ach()">${Object.entries(LT).map(([k,v])=>`<option value="${k}">${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="add-cap-hint">Capacity: 1</div></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addSlot()">Add</button></div>`);}
 function ach(){const t=document.getElementById('n-type')?.value,l=LT[t],el=document.getElementById('add-cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
