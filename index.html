@@ -877,7 +877,7 @@ function renderSchedule(){
     renderPTOBanner();// re-run to wire pto-btn if just created
   }
   const grid=document.getElementById('schedule-grid');
-  const viewMon=getViewMonday();seedWeekWithExceptions(viewMon);const viewSlots=getWeekSlots(viewMon);const bd={};DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
+  const viewMon=getViewMonday();const viewSlots=S.slots;const bd={};DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
   const m=role==='mike';
   grid.innerHTML=DAYS.map(day=>{
     const slots=bd[day],open=slots.filter(s=>ss(s)==='available').length,hrs=fhr(slots.reduce((a,s)=>a+shr(s),0));
@@ -1151,9 +1151,8 @@ function shareOpenSlots(){
 
 // Get slots for a specific week — seeds from template if not yet customized
 function getWeekSlots(weekMondayDate){
-  const key=isoDate(weekMondayDate);
-  if(S.weekSlots[key])return S.weekSlots[key];
-  // Return reference to template (not a copy) so edits persist
+  // Always return S.slots as source of truth
+  // weekSlots customization reserved for future per-week overrides
   return S.slots;
 }
 
