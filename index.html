@@ -591,7 +591,8 @@ function viewLifeEvent(id){
   const kidsStr=isCamp&&e.kids?.length?e.kids.join(', '):'';
   const daysStr=isCamp&&e.days?.length?e.days.join(', '):'';
   const timesStr=isCamp&&e.startTime?`${e.startTime} \u2013 ${e.endTime}`:'';
-  sm(`<h3>${isCamp?'⛺':'🌴'} ${e.title}</h3>
+  const eventIcon=isCamp?'⛺':isAppt?(e.apptIcon||'📅'):'🌴';
+  sm(`<h3>${eventIcon} ${e.title}</h3>
     <div class="life-card-body">
       <div style="margin-bottom:8px"><span class="life-card-type ${e.type}">${e.type}</span></div>
       ${isCamp?`<div><strong>Days:</strong> ${daysStr||'—'}</div><div><strong>Times:</strong> ${timesStr||'—'}</div><div><strong>Kids:</strong> ${kidsStr||'—'}</div>`:''}
@@ -670,7 +671,7 @@ function lifeCard(e,isArchived=false){
         <div class="life-card-subtitle">${dateStr}</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
-        <span class="life-card-type ${e.type}">${e.type}</span>
+        <span class="life-card-type ${isAppt?'appointment':e.type}">${isAppt?(e.apptIcon||'📅')+' '+e.apptType:isCamp?'⛺ Camp':'🌴 Vacation'}</span>
         ${ptoLinked?'<span class="pto-linked-badge">PTO active</span>':''}
       </div>
     </div>
