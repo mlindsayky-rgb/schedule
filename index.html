@@ -877,7 +877,22 @@ function renderSchedule(){
     renderPTOBanner();// re-run to wire pto-btn if just created
   }
   const grid=document.getElementById('schedule-grid');
-  const viewMon=getViewMonday();const vKey=isoDate(viewMon);const viewSlots=S.weekSlots[vKey]||S.slots;const bd={};DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
+  const viewMon=getViewMonday();const vKey=isoDate(viewMon);
+  // Merge: start with S.slots, apply any week-specific overrides from weekSlots
+  let viewSlots=S.slots;
+  if(S.weekSlots[vKey]){
+    // Use S.slots as base, override with weekSlots entries that have _outThisWeek
+    viewSlots=S.slots.map(s=>{
+      const override=S.weekSlots[vKey].find(x=>x.id===s.id);
+      return(override&&override._outThisWeek)?override:s;
+    });
+    // Also include any slots added directly to this week's copy that aren't in template
+    S.weekSlots[vKey].forEach(ws=>{
+      if(!S.slots.find(s=>s.id===ws.id))viewSlots.push(ws);
+    });
+  }
+  const bd={};
+DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
   const m=role==='mike';
   grid.innerHTML=DAYS.map(day=>{
     const slots=bd[day],open=slots.filter(s=>ss(s)==='available').length,hrs=fhr(slots.reduce((a,s)=>a+shr(s),0));
