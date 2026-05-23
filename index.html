@@ -743,11 +743,17 @@ function openAddLifeEvent(type){
 function toggleKidPill(el){el.classList.toggle('on');}
 
 function saveLifeEvent(type){
-  const title=document.getElementById('le-title')?.value?.trim();
+  let title=document.getElementById('le-title')?.value?.trim();
+  // For appointments, title comes from selected type
+  if(type==='appointment'){
+    title=document.querySelector('input[name="appt-type"]:checked')?.value||'Appointment';
+  }
   const start=document.getElementById('le-start')?.value;
-  const end=document.getElementById('le-end')?.value;
+  const endRaw=document.getElementById('le-end')?.value;
+  const end=type==='appointment'?start:endRaw; // appointments are single day
   if(!title){alert('Please enter a name.');return;}
-  if(!start||!end||start>end){alert('Please enter valid dates.');return;}
+  if(!start){alert('Please enter a date.');return;}
+  if(type!=='appointment'&&(!end||start>end)){alert('Please enter valid dates.');return;}
   const e={id:S.nextId++,type,title,startDate:start,endDate:end,notes:document.getElementById('le-notes')?.value?.trim()||'',archived:false};
   if(type==='camp'){
     e.days=[...document.querySelectorAll('.le-day:checked')].map(x=>x.value);
