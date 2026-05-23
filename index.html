@@ -993,23 +993,16 @@ function svSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);i
       _ps.forEach(pid=>{const cb=document.getElementById('close-req-'+pid);if(cb&&cb.checked){openReqs(pid).forEach(r=>{r.closed=true;});}});
     }
   }
-  // Save to this week's slots
-  const vMon=getViewMonday();
-  const wKey=isoDate(vMon);
-  if(S.weekSlots[wKey]){
-    // Update slot in existing week copy
-    const wi=S.weekSlots[wKey].findIndex(x=>x.id===s.id);
-    if(wi>=0)S.weekSlots[wKey][wi]=s;
-    else S.weekSlots[wKey].push(s);
-  } else {
-    // Seed week then update
-    const seeded=S.slots.map(x=>({...x}));
-    const si=seeded.findIndex(x=>x.id===s.id);
-    if(si>=0)seeded[si]=s;
-    S.weekSlots[wKey]=seeded;
-  }
+  // Always save back to S.slots (template) so changes persist
+  const siTemplate=S.slots.findIndex(x=>x.id===s.id);
+  if(siTemplate>=0)S.slots[siTemplate]=s;
+  // Also update any existing week copies
+  Object.keys(S.weekSlots).forEach(wk=>{
+    const wi=S.weekSlots[wk].findIndex(x=>x.id===s.id);
+    if(wi>=0)S.weekSlots[wk][wi]={...s};
+  });
   save();cm();renderSchedule();renderPeople();}
-function delSlot(id){if(role!=='mike')return;const vMon=getViewMonday();const wSlots=getWeekSlots(vMon).filter(s=>s.id!==id);saveWeekSlots(vMon,wSlots);cm();renderSchedule();}
+function delSlot(id){if(role!=='mike')return;S.slots=S.slots.filter(s=>s.id!==id);Object.keys(S.weekSlots).forEach(wk=>{S.weekSlots[wk]=S.weekSlots[wk].filter(s=>s.id!==id);});save();cm();renderSchedule();}
 function openAddSlot(def='Monday'){if(role!=='mike')return;sm(`<h3>Add Slot <span style='font-size:11px;color:var(--gray);font-weight:normal;font-style:italic'>— ${fmtDate(getViewMonday())} week</span></h3><div class="f"><label>Day</label><select id="n-day">${DAYS.map(d=>`<option value="${d}" ${d===def?'selected':''}>${d}</option>`).join('')}</select></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="n-start" placeholder="10:00"></div><div style="flex:1"><div class="fl">End</div><input id="n-end" placeholder="11:30"></div></div><div class="f"><label>Label</label><input id="n-label" placeholder="e.g. Lesson \u2014 Smith"></div><div class="f"><label>Type</label><select id="n-type" onchange="ach()">${Object.entries(LT).map(([k,v])=>`<option value="${k}">${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="add-cap-hint">Capacity: 1</div></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addSlot()">Add</button></div>`);}
 function ach(){const t=document.getElementById('n-type')?.value,l=LT[t],el=document.getElementById('add-cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
 function addSlot(){if(role!=='mike')return;const type=document.getElementById('n-type').value;const s={id:S.nextId++,day:document.getElementById('n-day').value,startM:pti(document.getElementById('n-start').value),endM:pti(document.getElementById('n-end').value),label:document.getElementById('n-label').value,type,status:isF(type)?'fixed':'auto',roster:[]};S.slots.push(s);save();cm();renderSchedule();}
@@ -1160,8 +1153,8 @@ function shareOpenSlots(){
 function getWeekSlots(weekMondayDate){
   const key=isoDate(weekMondayDate);
   if(S.weekSlots[key])return S.weekSlots[key];
-  // Seed from template — deep copy
-  return S.slots.map(s=>({...s,_seeded:true}));
+  // Return reference to template (not a copy) so edits persist
+  return S.slots;
 }
 
 // Save edits to a specific week's slots
