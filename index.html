@@ -1546,6 +1546,47 @@ function markLogSeen(){
   _logBadge=0;
   updateLogBadge();
 }
+
+function markOutThisWeek(slotId){
+  const s=S.slots.find(x=>x.id===slotId);if(!s)return;
+  const vMon=getViewMonday();
+  const wKey=isoDate(vMon);
+  if(!S.weekSlots[wKey]){
+    S.weekSlots[wKey]=S.slots.map(x=>({...x}));
+  }
+  const wi=S.weekSlots[wKey].findIndex(x=>x.id===slotId);
+  if(wi>=0){
+    S.weekSlots[wKey][wi]={
+      ...S.weekSlots[wKey][wi],
+      status:'available',
+      roster:[],
+      label:'Lesson (open)',
+      _outThisWeek:true,
+      _originalLabel:s.label,
+      _originalRoster:[...s.roster]
+    };
+  }
+  save();cm();renderSchedule();
+}
+
+function reinstateThisWeek(slotId){
+  const vMon=getViewMonday();
+  const wKey=isoDate(vMon);
+  if(!S.weekSlots[wKey])return;
+  const wi=S.weekSlots[wKey].findIndex(x=>x.id===slotId);
+  if(wi>=0){
+    const orig=S.weekSlots[wKey][wi];
+    S.weekSlots[wKey][wi]={
+      ...orig,
+      status:'booked',
+      roster:orig._originalRoster||[],
+      label:orig._originalLabel||'Lesson',
+      _outThisWeek:false
+    };
+  }
+  save();cm();renderSchedule();
+}
+
 function sm(html){const o=document.getElementById('modal');o.style.display='flex';o.innerHTML=`<div class="md" onclick="event.stopPropagation()">${html}</div>`;}
 function cm(){document.getElementById('modal').style.display='none';_ps=[];}
 </script>
