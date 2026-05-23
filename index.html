@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Summer Schedule</title>
+<title>Summer Schedule v28</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;background:#faf8f4}
@@ -937,7 +937,7 @@ function renderSchedule(){
         }).join('')}
         ${hasPL?`<button class="pnab" onclick="mkAllN('${day}')">Mark all ${day} lessons notified</button>`:''}
         ${ccb}
-        ${m&&!isPTO?`<div style="padding:6px 2px 2px"><button class="btn btn-sm" onclick="openAddSlot('${day}')" style="font-size:10px">+ Add to ${day}</button></div>`:''}
+
       </div>
     </div>`;
   }).join('');
