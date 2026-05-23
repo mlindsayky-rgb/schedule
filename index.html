@@ -985,9 +985,7 @@ DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)})
           return`<div class="slot ${st2}${m?'':' readonly'}"${m?` onclick="editSlot(${s.id})"`:''}>
             <span class="slot-time">${sdsp(s)}</span>
             <div class="slot-body"><div class="slot-lbl">${s.label}</div>
-              <div class="slot-meta"><span class="tbadge ${l.cls}">${l.label}</span>
-                ${l.fixed?`<span class="fnote">&#x1F512; Fixed</span>`:`<div style="display:flex;align-items:center;gap:4px">${rpips(fil,cap)}<span class="fill-lbl">${fil}/${cap}</span></div>${s.roster.length?`<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:2px">${s.roster.map(r=>`<span class="rchip">${r}</span>`).join('')}</div>`:''}`}
-              </div>
+              ${s.type==='liveball'&&s.attendance>0?`<div style="font-size:11px;color:#6b7280;font-style:italic;margin-top:2px">${s.attendance} attended</div>`:''}
             </div>
             <div class="slot-right">${av&&m?`<button class="send-btn" onclick="event.stopPropagation();notifySlot('${day}',${s.id})">&#x2708;</button>`:''}</div>
           </div>`;
