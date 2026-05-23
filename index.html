@@ -716,16 +716,14 @@ function openAddLifeEvent(type){
   } else if(type==='appointment'){
     const today=isoDate(new Date());
     sm(`<h3>📅 Add Appointment</h3>
-      <div class="f"><label>Type</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-          ${['Mom Match','Dad Match','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;padding:6px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto" ${t==='Doctor'?'checked':''}> ${t==='Mom Match'||t==='Dad Match'?'🎾':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
+      <div class="f"><div class="fl">Type</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+          ${['Mom Match','Dad Match','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${t==='Doctor'?'checked':''}>${t==='Mom Match'||t==='Dad Match'?'🎾':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
         </div>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <div style="flex:1"><div class="fl">Date</div><input id="le-start" type="date" value="${today}"></div>
-        <div style="flex:1"><div class="fl">Start time</div><input id="le-stime" placeholder="e.g. 2 PM"></div>
-      </div>
-      <div class="f"><label>Notes</label><textarea id="le-notes" rows="3" placeholder="e.g. Dr. Smith, 123 Main St..."></textarea></div>
+      <div class="f"><div class="fl">Date</div><input id="le-start" type="date" value="${today}"></div>
+      <div class="f"><div class="fl">Start time</div><input id="le-stime" placeholder="e.g. 2 PM"></div>
+      <div class="f"><div class="fl">Notes</div><textarea id="le-notes" rows="3" placeholder="e.g. Dr. Smith, 123 Main St..."></textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#dc2626" onclick="saveLifeEvent('appointment')">Save</button></div>`);
   } else {
     sm(`<h3>🌴 Add Vacation</h3>
