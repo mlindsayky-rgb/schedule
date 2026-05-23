@@ -877,7 +877,7 @@ function renderSchedule(){
     renderPTOBanner();// re-run to wire pto-btn if just created
   }
   const grid=document.getElementById('schedule-grid');
-  const viewMon=getViewMonday();const viewSlots=S.slots;const bd={};DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
+  const viewMon=getViewMonday();const vKey=isoDate(viewMon);const viewSlots=S.weekSlots[vKey]||S.slots;const bd={};DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
   const m=role==='mike';
   grid.innerHTML=DAYS.map(day=>{
     const slots=bd[day],open=slots.filter(s=>ss(s)==='available').length,hrs=fhr(slots.reduce((a,s)=>a+shr(s),0));
@@ -919,7 +919,7 @@ function renderSchedule(){
             return`<div class="slot" style="background:#fff7ed;border-color:#fed7aa;cursor:pointer" onclick="openClaimModal(${s.id})">
               <span class="slot-time">${sdsp(s)}</span>
               <div class="slot-body">
-                <div class="slot-lbl">${s.label}</div>
+                <div class="slot-lbl">${s.label}${s._outThisWeek?'<span style="font-size:10px;background:#d97706;color:#fff;padding:1px 7px;border-radius:20px;margin-left:6px">OUT this week</span>':''}</div>
                 <div class="slot-meta"><span class="tbadge ${l.cls}">${l.label}</span><span style="font-size:11px;color:#d97706;font-style:italic;margin-left:4px">Claimed by ${claim.name}</span></div>
               </div>
               <div class="slot-right"><span style="font-size:10px;background:#d97706;color:#fff;padding:3px 9px;border-radius:20px;font-weight:600">Pending</span></div>
@@ -971,7 +971,8 @@ function editSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id)
     rs=`<div class="f"><div class="fl">Roster (${cap} spot${cap!==1?'s':''})</div><div id="slot-rc" class="rr">${bRC(id)}</div><div id="slot-ppk">${bPPk(id)}</div></div><div id="req-suggestion-area">${buildReqSuggestion()}</div>`;
   }
   const stSec=l.fixed||s.type==='liveball'||s.type==='private'?'':`<div class="f"><label>Status</label><select id="e-status"><option value="auto" ${s.status!=='blocked'&&s.status!=='booked'?'selected':''}>Auto</option><option value="booked" ${s.status==='booked'?'selected':''}>Booked</option><option value="blocked" ${s.status==='blocked'?'selected':''}>Blocked</option></select></div>`;
-  sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma"><button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);}
+  sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma">${(s.type==='private'&&(s.status==='booked'||s.roster.length>0)&&!s._outThisWeek)?`<button class="btn btn-sm" style="background:#d97706;min-width:76px" onclick="markOutThisWeek(${id})">OUT this week</button>`:''} ${s._outThisWeek?`<button class="btn btn-sm" style="background:#2d6a4f" onclick="reinstateThisWeek(${id})">Reinstate</button>`:''}<button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);
+}
 function uch(){const t=document.getElementById('e-type')?.value,l=LT[t],el=document.getElementById('cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
 function svSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;s.label=document.getElementById('e-label').value;s.startM=pti(document.getElementById('e-start').value);s.endM=pti(document.getElementById('e-end').value);const nt=document.getElementById('e-type').value;if(nt!==s.type){s.type=nt;if(isF(nt)){s.roster=[];s.status='fixed';}else{const nc=LT[nt]?.cap||1;_ps=_ps.slice(0,nc);s.status='auto';}}if(!isF(s.type)){
     if(s.type==='liveball'){
