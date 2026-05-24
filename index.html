@@ -1081,9 +1081,10 @@ function renderCC(){
   if(ccNextReminders.length){
     const ccel=document.getElementById('cc-event-pills');
     if(ccel)ccel.innerHTML+=' '+ccNextReminders.map(e=>{
-      const cls=e.type==='camp'?'pill-camp':'pill-vacation';
-      const label=e.type==='camp'?'Camp Week':'Vacation Week';
-      return`<span class="${cls}" onclick="viewLifeEvent(${e.id})" style="opacity:.7;font-weight:500;font-size:10px">&#128198; Next: ${label} — ${e.title}</span>`;
+      const isAppt=e.type==='appointment';
+      const cls=e.type==='camp'?'pill-camp':isAppt?'pill-appt':'pill-vacation';
+      const label=e.type==='camp'?'Camp Week':isAppt?(e.apptIcon||'📅')+' '+(e.apptType||'Appointment'):'Vacation Week';
+      return`<span class="${cls}" onclick="viewLifeEvent(${e.id})" style="opacity:.85;font-weight:500;font-size:11px">&#128198; Next: ${label}${!isAppt?' — '+e.title:''}</span>`;
     }).join(' ');
   }
   document.getElementById('cc-grid').innerHTML=DAYS.map(day=>{
