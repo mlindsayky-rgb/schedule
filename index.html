@@ -1094,9 +1094,15 @@ function apptWithinCaregiverHours(e){
 function renderCC(){
   updateReqBanner();
   // Event pills for childcare — current week full style, next week softer
-  const ccCurEvts=eventsInWeek(getCCViewMonday());
-  const ccNextReminders=ccWeekOffset===0?eventsNextWeek().filter(e=>!ccCurEvts.find(v=>v.id===e.id)):[];
-  renderEventPills('cc-event-pills',ccCurEvts,false);
+  const ccMon=getCCViewMonday();
+  const ccSun=addDays(ccMon,6);
+  // Update week label
+  const ccWkEl=document.getElementById('cc-week-label');
+  if(ccWkEl){const isNow=ccWeekOffset===0,isNxt=ccWeekOffset===1;const pfx=isNow?'This week · ':isNxt?'Next week · ':'';ccWkEl.textContent=pfx+fmtDate(ccMon)+' – '+fmtDate(ccSun);}
+  const ccCurEvts=eventsInWeek(ccMon);
+  const ccNextReminders=ccWeekOffset===0?eventsNextWeek().filter(e=>!ccCurEvts.find(v=>v.id===e.id)&&apptWithinCaregiverHours(e)):[];
+  const ccViewedFiltered=ccCurEvts.filter(e=>apptWithinCaregiverHours(e));
+  renderEventPills('cc-event-pills',ccViewedFiltered,false);
   if(ccNextReminders.length){
     const ccel=document.getElementById('cc-event-pills');
     if(ccel)ccel.innerHTML+=' '+ccNextReminders.map(e=>{
