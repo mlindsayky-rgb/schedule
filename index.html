@@ -1072,6 +1072,24 @@ function addSlot(){if(role!=='mike')return;const type=document.getElementById('n
 function notifySlot(day,sid){if(role!=='mike')return;const slot=S.slots.find(s=>s.id===sid);if(!slot)return;const interested=S.people.filter(p=>p.notifyAll||p.days.includes(day));if(!interested.length){sm(`<h3>No One to Notify</h3><p style="font-size:13px;color:#6b7280;margin-bottom:12px">No people marked as interested in ${day}.</p><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Close</button></div>`);return;}const msg=nmsg(slot,day),enc=encodeURIComponent(msg);const links=interested.map(p=>`<a href="sms:${cp(p.phone)}?body=${enc}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border:1.5px solid #ddd8d0;border-radius:6px;font-size:13px;font-family:Georgia,serif;margin-bottom:8px;color:#1a1a2e;text-decoration:none;background:#faf8f4"><span>${p.name}</span><span style="color:#6b7280;font-size:11px;font-style:italic">${cp(p.phone)} \u203a</span></a>`).join('');sm(`<h3>&#x2708; Notify \u2014 ${day}</h3><div class="mp">${msg}</div><p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:10px">Tap a name to open in Messages:</p>${links}<div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Done</button></div>`);}
 
 // ── CHILDCARE ──
+
+function apptWithinCaregiverHours(e){
+  // Only filter appointments — camp and vacation always show
+  if(e.type!=='appointment')return true;
+  // If no start time entered, show it to be safe
+  if(!e.startTime)return true;
+  const apptM=pti(e.startTime);
+  // Get day of week for appointment date
+  const dow=new Date(e.startDate+'T12:00:00').getDay();
+  if(dow<1||dow>5)return false; // weekend
+  const dayName=DAYS[dow-1];
+  const cc=S.childcare[dayName];
+  // If childcare is off that day, don't show
+  if(!cc||!cc.active)return false;
+  const ccStart=pti(cc.start);
+  const ccEnd=pti(cc.end);
+  return apptM>=ccStart&&apptM<ccEnd;
+}
 function renderCC(){
   updateReqBanner();
   // Event pills for childcare — current week full style, next week softer
