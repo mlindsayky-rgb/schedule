@@ -429,7 +429,8 @@ const hm=(h,m)=>h*60+m;
 function mtd(m){const h=Math.floor(m/60),mm=m%60,ap=h<12?'AM':'PM',h12=h===0?12:h>12?h-12:h;return`${h12}:${String(mm).padStart(2,'0')} ${ap}`;}
 const sdsp=s=>`${mtd(s.startM)}\u2013${mtd(s.endM)}`;
 const shr=s=>{const d=s.endM-s.startM;return d>0?d/60:0;};
-function pti(str){const s=str.trim().toUpperCase();if(s.includes('AM')||s.includes('PM')){const isPM=s.includes('PM');const clean=s.replace('AM','').replace('PM','').trim();const c=clean.indexOf(':');let h=c===-1?parseInt(clean):parseInt(clean.slice(0,c));const m=c===-1?0:parseInt(clean.slice(c+1)||'0');if(isPM&&h!==12)h+=12;if(!isPM&&h===12)h=0;return h*60+m;}const c=s.indexOf(':');const h=c===-1?parseInt(s):parseInt(s.slice(0,c));const m=c===-1?0:parseInt(s.slice(c+1)||'0');let hour=h;if(h>=1&&h<=6)hour=h+12;else if(h===12)hour=12;else hour=h;return hour*60+m;}
+function pti(str){const s=str.trim().toUpperCase();if(s.includes('AM')||s.includes('PM')){const isPM=s.includes('PM');const clean=s.replace('AM','').replace('PM','').trim();const c=clean.indexOf(':');let h=c===-1?parseInt(clean):parseInt(clean.slice(0,c));const m=c===-1?0:parseInt(clean.slice(c+1)||'0');if(isPM&&h!==12)h+=12;if(!isPM&&h===12)h=0;return h*60+m;}const c=s.indexOf(':');const h=c===-1?parseInt(s):parseInt(s.slice(0,c));const m=c===-1?0:parseInt(s.slice(c+1)||'0');// With or without colon: 1-6 = PM, 7-11 = AM, 12 = noon
+let hour=h;if(h>=1&&h<=6)hour=h+12;else if(h===12)hour=12;else hour=h;return hour*60+m;}
 const cp=p=>(p||'').replace(/\D/g,'');
 const pv=p=>cp(p).length===10;
 const gln=n=>{const p=n.trim().split(' ');return p[p.length-1];};
