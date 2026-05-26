@@ -950,8 +950,8 @@ DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)})
     const campToday=S.lifeEvents.find(e=>e.type==='camp'&&!e.archived&&e.days?.includes(day)&&e.startDate<=viewDayDate&&e.endDate>=viewDayDate);
     const apptToday=S.lifeEvents.filter(e=>e.type==='appointment'&&!e.archived&&e.startDate===viewDayDate);
     const campBadge=campToday?`<span style="font-size:10px;background:#d97706;color:#fff;padding:1px 7px;border-radius:20px;margin-left:6px">⛺ ${campToday.title}</span>`:'';
-    const apptBars=apptToday.map(a=>`<div class="appt-bar" onclick="viewLifeEvent(${a.id})"><span class="appt-bar-time">${a.startTime||'—'}</span><span class="appt-bar-icon" style="margin-right:4px">${a.apptIcon||'📅'}</span><span class="appt-bar-text">${a.apptType||'Appointment'}</span></div>`).join('');
-    const ccb=(cc&&cc.active?`<div class="cc-bar"><span class="cc-bar-time">${cc.start} \u2013 ${cc.end}</span><span class="cc-bar-label">Childcare${campBadge}</span><span class="cc-bar-badge">Coverage</span></div>`:'')+apptBars;
+    const apptBars=apptToday.map(a=>`<div class="appt-bar" onclick="viewLifeEvent(${a.id})"><span class="appt-bar-time">${a.startTime?mtd(pti(a.startTime)):'—'}</span><span class="appt-bar-icon" style="margin-right:4px">${a.apptIcon||'📅'}</span><span class="appt-bar-text">${a.apptType||'Appointment'}</span></div>`).join('');
+    const ccb=(cc&&cc.active?`<div class="cc-bar"><span class="cc-bar-time">${cc.start} \u2013 ${cc.end}</span><span class="cc-bar-label">Childcare${campBadge}</span></div>`:'')+apptBars;
     const isPTO=pto.active&&dayInPTOForWeek(day,viewMon)&&m;
     const acts=slots.filter(s=>{const st2=ss(s),l=LT[s.type];return(l&&l.fixed)||(st2==='booked'||st2==='partial'||st2==='full');});
     const allDone=isPTO&&acts.length>0&&acts.every(s=>{const l=LT[s.type];return l&&l.fixed?!!pto.subs[s.id]:!!pto.notified[s.id];});
@@ -1034,7 +1034,7 @@ function editSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id)
     rs=`<div class="f"><div class="fl">Roster (${cap} spot${cap!==1?'s':''})</div><div id="slot-rc" class="rr">${bRC(id)}</div><div id="slot-ppk">${bPPk(id)}</div></div><div id="req-suggestion-area">${buildReqSuggestion()}</div>`;
   }
   const stSec=l.fixed||s.type==='liveball'||s.type==='private'?'':`<div class="f"><label>Status</label><select id="e-status"><option value="auto" ${s.status!=='blocked'&&s.status!=='booked'?'selected':''}>Auto</option><option value="booked" ${s.status==='booked'?'selected':''}>Booked</option><option value="blocked" ${s.status==='blocked'?'selected':''}>Blocked</option></select></div>`;
-  sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma">${(s.type==='private'&&(s.status==='booked'||s.roster.length>0)&&!s._outThisWeek)?`<button class="btn btn-sm" style="background:#d97706;min-width:76px" onclick="markOutThisWeek(${id},'${isoDate(viewMonCheck)}')">OUT this week</button>`:''} ${s._outThisWeek?`<button class="btn btn-sm" style="background:#2d6a4f" onclick="reinstateThisWeek(${id},'${isoDate(viewMonCheck)}')">Reinstate</button>`:''}<button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);
+  sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma">${((s.type==='private'&&(s.status==='booked'||s.roster.length>0)||s.type==='liveball')&&!s._outThisWeek)?`<button class="btn btn-sm" style="background:#d97706;min-width:76px" onclick="markOutThisWeek(${id},'${isoDate(viewMonCheck)}')">OUT this week</button>`:''} ${s._outThisWeek?`<button class="btn btn-sm" style="background:#2d6a4f" onclick="reinstateThisWeek(${id},'${isoDate(viewMonCheck)}')">Reinstate</button>`:''}<button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);
 }
 function uch(){const t=document.getElementById('e-type')?.value,l=LT[t],el=document.getElementById('cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
 function svSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;s.label=document.getElementById('e-label').value;s.startM=pti(document.getElementById('e-start').value);s.endM=pti(document.getElementById('e-end').value);const nt=document.getElementById('e-type').value;if(nt!==s.type){s.type=nt;if(isF(nt)){s.roster=[];s.status='fixed';}else{const nc=LT[nt]?.cap||1;_ps=_ps.slice(0,nc);s.status='auto';}}if(!isF(s.type)){
@@ -1647,7 +1647,7 @@ function markOutThisWeek(slotId,wKey){
       ...S.weekSlots[wKey][wi],
       status:'available',
       roster:[],
-      label:'Lesson (open)',
+      label:s.type==='liveball'?s.label+' (cancelled)':'Lesson (open)',
       _outThisWeek:true,
       _originalLabel:s.label,
       _originalRoster:[...(s.roster||[])]
@@ -1658,7 +1658,7 @@ function markOutThisWeek(slotId,wKey){
       ...s,
       status:'available',
       roster:[],
-      label:'Lesson (open)',
+      label:s.type==='liveball'?s.label+' (cancelled)':'Lesson (open)',
       _outThisWeek:true,
       _originalLabel:s.label,
       _originalRoster:[...(s.roster||[])]
