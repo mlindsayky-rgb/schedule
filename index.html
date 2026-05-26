@@ -722,7 +722,7 @@ function openAddLifeEvent(type){
     sm(`<h3>📅 Add Appointment</h3>
       <div class="f"><div class="fl">Type</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-          ${['Mom Match','Dad Match','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${t==='Doctor'?'checked':''}>${t==='Mom Match'||t==='Dad Match'?'🎾':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
+          ${['Match','General','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${t==='Doctor'?'checked':''}>${t==='Match'?'🎾':t==='General'?'🏠':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
         </div>
       </div>
       <div class="f"><div class="fl">Date</div><input id="le-start" type="date" value="${today}"></div>
@@ -768,7 +768,7 @@ function saveLifeEvent(type){
     e.endDate=e.startDate; // single day
     e.apptType=document.querySelector('input[name="appt-type"]:checked')?.value||'Doctor';
     e.startTime=document.getElementById('le-stime')?.value?.trim()||'';
-    const icons={'Mom Match':'🎾','Dad Match':'🎾','Service':'🔨','Doctor':'➕'};
+    const icons={'Match':'🎾','General':'🏠','Service':'🔨','Doctor':'➕'};
     e.apptIcon=icons[e.apptType]||'📅';
   }
   S.lifeEvents.push(e);save();cm();renderLife();renderSchedule();
@@ -835,7 +835,7 @@ function updateLifeEvent(id,type){
     e.endDate=e.startDate; // single day
     e.apptType=document.querySelector('input[name="appt-type"]:checked')?.value||'Doctor';
     e.startTime=document.getElementById('le-stime')?.value?.trim()||'';
-    const icons={'Mom Match':'🎾','Dad Match':'🎾','Service':'🔨','Doctor':'➕'};
+    const icons={'Match':'🎾','General':'🏠','Service':'🔨','Doctor':'➕'};
     e.apptIcon=icons[e.apptType]||'📅';
   }
   save();cm();renderLife();renderSchedule();
@@ -1012,7 +1012,7 @@ function buildReqSuggestion(){const suggestions=_ps.map(pid=>{const p=S.people.f
 function bPPk(sid){const s=S.slots.find(x=>x.id===sid);if(!s)return'';const cap=LT[s.type]?.cap||1,ac=_ps.length>=cap;if(!S.people.length)return`<div class="pke">No people yet.</div>`;return`<div class="ppk">${S.people.map(p=>{const sel=_ps.includes(p.id),dis=!sel&&ac;return`<div class="pki ${sel?'sel':''} ${dis?'dis':''}" onclick="togPP(${sid},${p.id})"><span class="pkn">${p.name}</span>${sel?'<span class="pkc">\u2713</span>':''}</div>`;}).join('')}</div>`;}
 function bRC(sid){if(!_ps.length)return`<span style="font-size:11px;color:var(--gray);font-style:italic">No one selected yet</span>`;return _ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return`<span class="rchip">${p?p.name:'?'} <button onclick="togPP(${sid},${pid})">\u2715</button></span>`;}).join('');}
 function togPP(sid,pid){const s=S.slots.find(x=>x.id===sid);if(!s)return;const cap=LT[s.type]?.cap||1,idx=_ps.indexOf(pid);if(idx>=0)_ps.splice(idx,1);else{if(_ps.length>=cap)return;_ps.push(pid);}const pe=document.getElementById('slot-ppk');if(pe)pe.innerHTML=bPPk(sid);const ce=document.getElementById('slot-rc');if(ce)ce.innerHTML=bRC(sid);autoLbl();const rs=document.getElementById('req-suggestion-area');if(rs)rs.innerHTML=buildReqSuggestion();}
-function editSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;const l=LT[s.type]||LT.blocked,cap=l.cap;_ps=[];s.roster.forEach(n=>{const p=S.people.find(x=>x.name===n||gln(x.name)===n);if(p&&!_ps.includes(p.id))_ps.push(p.id);});const ss2=mtd(s.startM),es=mtd(s.endM);let rs='';
+function editSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;const l=LT[s.type]||LT.blocked,cap=l.cap;_ps=[];s.roster.forEach(n=>{const p=S.people.find(x=>x.name===n||gln(x.name)===n);if(p&&!_ps.includes(p.id))_ps.push(p.id);});const ss2=mtd(s.startM),es=mtd(s.endM);const viewMonCheck=getViewMonday();let rs='';
   if(l.fixed){
     rs=`<div style="font-size:11px;color:#6b3f9e;font-style:italic;padding:6px 0">Fixed — no roster needed</div>`;
   } else if(s.type==='liveball'){
