@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Summer Schedule v28</title>
@@ -288,9 +288,9 @@ textarea{resize:vertical}
     <div id="sched-controls" style="display:flex;gap:6px;align-items:center"></div>
   </div>
   <div class="week-nav" style="margin-bottom:6px;padding:4px 0">
-    <button class="week-nav-btn" onclick="changeWeek(-1)">&#8592;</button>
+    <button class="week-nav-btn" onclick="changeWeek(-1)">←</button>
     <span class="week-nav-lbl" id="week-label"></span>
-    <button class="week-nav-btn" onclick="changeWeek(1)">&#8594;</button>
+    <button class="week-nav-btn" onclick="changeWeek(1)">→</button>
   </div>
   <div id="schedule-grid" class="grid"></div>
 </div>
@@ -300,9 +300,9 @@ textarea{resize:vertical}
   <div id="cc-top-note" class="an"></div>
   <div id="cc-event-pills" class="event-pills" style="margin-bottom:8px"></div>
   <div class="week-nav" style="margin-bottom:8px">
-    <button class="week-nav-btn" onclick="changeCCWeek(-1)">&#8592;</button>
+    <button class="week-nav-btn" onclick="changeCCWeek(-1)">←</button>
     <span class="week-nav-lbl" id="cc-week-label"></span>
-    <button class="week-nav-btn" onclick="changeCCWeek(1)">&#8594;</button>
+    <button class="week-nav-btn" onclick="changeCCWeek(1)">→</button>
   </div>
   <div id="cc-grid"></div>
 </div>
@@ -320,7 +320,7 @@ textarea{resize:vertical}
   <div class="sh">
     <span style="font-size:15px;font-weight:bold;color:var(--navy)">Log</span>
     <div style="display:flex;gap:6px">
-      <button class="btn btn-sm" style="background:#1a6b6b" onclick="openPayrollExport()">&#128196; Export</button>
+      <button class="btn btn-sm" style="background:#1a6b6b" onclick="openPayrollExport()">📄 Export</button>
       <button class="btn btn-sm" onclick="openAddNote()">+ Note</button>
     </div>
   </div>
@@ -1034,7 +1034,7 @@ function editSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id)
     rs=`<div class="f"><div class="fl">Roster (${cap} spot${cap!==1?'s':''})</div><div id="slot-rc" class="rr">${bRC(id)}</div><div id="slot-ppk">${bPPk(id)}</div></div><div id="req-suggestion-area">${buildReqSuggestion()}</div>`;
   }
   const stSec=l.fixed||s.type==='liveball'||s.type==='private'?'':`<div class="f"><label>Status</label><select id="e-status"><option value="auto" ${s.status!=='blocked'&&s.status!=='booked'?'selected':''}>Auto</option><option value="booked" ${s.status==='booked'?'selected':''}>Booked</option><option value="blocked" ${s.status==='blocked'?'selected':''}>Blocked</option></select></div>`;
-  sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma">${(s.type==='private'&&(s.status==='booked'||s.roster.length>0)&&!s._outThisWeek)?`<button class="btn btn-sm" style="background:#d97706;min-width:76px" onclick="markOutThisWeek(${id})">OUT this week</button>`:''} ${s._outThisWeek?`<button class="btn btn-sm" style="background:#2d6a4f" onclick="reinstateThisWeek(${id})">Reinstate</button>`:''}<button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);
+  sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma">${(s.type==='private'&&(s.status==='booked'||s.roster.length>0)&&!s._outThisWeek)?`<button class="btn btn-sm" style="background:#d97706;min-width:76px" onclick="markOutThisWeek(${id},'${isoDate(viewMonCheck)}')">OUT this week</button>`:''} ${s._outThisWeek?`<button class="btn btn-sm" style="background:#2d6a4f" onclick="reinstateThisWeek(${id},'${isoDate(viewMonCheck)}')">Reinstate</button>`:''}<button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);
 }
 function uch(){const t=document.getElementById('e-type')?.value,l=LT[t],el=document.getElementById('cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
 function svSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;s.label=document.getElementById('e-label').value;s.startM=pti(document.getElementById('e-start').value);s.endM=pti(document.getElementById('e-end').value);const nt=document.getElementById('e-type').value;if(nt!==s.type){s.type=nt;if(isF(nt)){s.roster=[];s.status='fixed';}else{const nc=LT[nt]?.cap||1;_ps=_ps.slice(0,nc);s.status='auto';}}if(!isF(s.type)){
@@ -1635,10 +1635,9 @@ function markLogSeen(){
   updateLogBadge();
 }
 
-function markOutThisWeek(slotId){
+function markOutThisWeek(slotId,wKey){
   const s=S.slots.find(x=>x.id===slotId);if(!s)return;
-  const vMon=getViewMonday();
-  const wKey=isoDate(vMon);
+  if(!wKey)wKey=isoDate(getViewMonday());
   if(!S.weekSlots[wKey]){
     S.weekSlots[wKey]=S.slots.map(x=>({...x}));
   }
@@ -1651,15 +1650,25 @@ function markOutThisWeek(slotId){
       label:'Lesson (open)',
       _outThisWeek:true,
       _originalLabel:s.label,
-      _originalRoster:[...s.roster]
+      _originalRoster:[...(s.roster||[])]
     };
+  } else {
+    // Slot not found in week copy — add it as OUT
+    S.weekSlots[wKey].push({
+      ...s,
+      status:'available',
+      roster:[],
+      label:'Lesson (open)',
+      _outThisWeek:true,
+      _originalLabel:s.label,
+      _originalRoster:[...(s.roster||[])]
+    });
   }
   save();cm();renderSchedule();
 }
 
-function reinstateThisWeek(slotId){
-  const vMon=getViewMonday();
-  const wKey=isoDate(vMon);
+function reinstateThisWeek(slotId,wKey){
+  if(!wKey)wKey=isoDate(getViewMonday());
   if(!S.weekSlots[wKey])return;
   const wi=S.weekSlots[wKey].findIndex(x=>x.id===slotId);
   if(wi>=0){
@@ -1678,5 +1687,6 @@ function reinstateThisWeek(slotId){
 function sm(html){const o=document.getElementById('modal');o.style.display='flex';o.innerHTML=`<div class="md" onclick="event.stopPropagation()">${html}</div>`;}
 function cm(){document.getElementById('modal').style.display='none';_ps=[];}
 </script>
-</body>
-</html>
+
+
+</body></html>
