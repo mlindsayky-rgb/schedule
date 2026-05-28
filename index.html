@@ -1517,7 +1517,7 @@ function computeWAG(){
     const isOut=weekSlot&&weekSlot._outThisWeek;
     // Check if slot was actually worked (booked/fixed, not open/available)
     const st2wag=ss(s);
-    const wasWorked=st2wag==='booked'||st2wag==='partial'||st2wag==='full'||st2wag==='fixed';
+    const wasWorked=(st2wag==='booked'||st2wag==='partial'||st2wag==='full'||st2wag==='fixed')&&s.type!=='team-meeting';
     if(slotPast&&!isSlotPTO&&!isOut&&wasWorked){
       worked+=hrs;
     } else if(slotFuture){
