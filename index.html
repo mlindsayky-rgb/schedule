@@ -254,9 +254,9 @@ textarea{resize:vertical}
 </style>
 </head>
 <body>
-<div id="pin-screen" style="display: none;">
+<div id="pin-screen">
   <div><h1>Summer Schedule</h1><p style="color:rgba(255,255,255,.6);font-size:13px;font-style:italic;margin-top:6px;text-align:center">Enter your PIN to continue</p></div>
-  <div class="pin-dots"><div class="pin-dot filled" id="d0"></div><div class="pin-dot filled" id="d1"></div><div class="pin-dot filled" id="d2"></div><div class="pin-dot filled" id="d3"></div></div>
+  <div class="pin-dots"><div class="pin-dot filled" id="d0"></div><div class="pin-dot" id="d1"></div><div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div></div>
   <div id="pin-error"></div>
   <div class="pin-pad">
     <button class="pin-btn" onclick="pinTap('1')">1</button><button class="pin-btn" onclick="pinTap('2')">2</button><button class="pin-btn" onclick="pinTap('3')">3</button>
@@ -265,188 +265,39 @@ textarea{resize:vertical}
     <button class="pin-btn zero" onclick="pinTap('0')">0</button><button class="pin-btn del" onclick="pinDel()">⌫</button>
   </div>
 </div>
-<div class="role-badge" id="role-badge" style="display: block;" onclick="lockApp()">👤 Mike — Lock</div>
-<div id="sync-bar" style="display: block;" class="">Live — changes sync automatically</div>
-<div class="app" id="main-app" style="display: block;">
+<div class="role-badge" id="role-badge" style="display:none" onclick="lockApp()">Lock</div>
+<div id="sync-bar" style="display:none">Connecting...</div>
+<div class="app" id="main-app" style="display:none">
 <div class="tabs">
   <button class="tab active" id="tab-schedule" onclick="st('schedule')">TENNIS</button>
   <button class="tab" id="tab-childcare" onclick="st('childcare')">KIDS</button>
-  <button class="tab" id="tab-people" onclick="st('people')" style="">CLIENTS</button>
-  <button class="tab" id="tab-notes" onclick="st('notes')" style="">LOG<span class="log-badge" id="log-badge" style="display: inline;">4</span></button>
-  <button class="tab" id="tab-life" onclick="st('life')" style="">LIFE</button>
+  <button class="tab" id="tab-people" onclick="st('people')" style="display:none">CLIENTS</button>
+  <button class="tab" id="tab-notes" onclick="st('notes')" style="display:none">LOG<span class="log-badge" id="log-badge" style="display:none"></span></button>
+  <button class="tab" id="tab-life" onclick="st('life')" style="display:none">LIFE</button>
 </div>
-<div id="pto-banner" style="display: flex;"><div class="pto-bl"><span class="pto-tag">PTO ACTIVE</span><span class="pto-dates">May 25 – May 25</span><span class="pto-prog">3/3 handled</span></div><div class="pto-nav"><button class="pto-nb" onclick="ptoNav(-1)" disabled="disabled">←</button><span class="pto-nlbl">Week 1/1<br><span style="font-size:10px">May 25</span></span><button class="pto-nb" onclick="ptoNav(1)" disabled="disabled">→</button></div></div>
+<div id="pto-banner" style="display:none"></div>
 <div id="req-banner" style="display:none" onclick="goToRequests()"></div>
 <div class="app-body">
 
 <!-- SCHEDULE -->
 <div id="panel-schedule" class="panel active">
-  <div id="wag-card" class="wag-card" style="display: block;">
-      <div class="wag-header" onclick="toggleWAG()">
-        <span class="wag-title">📆 Week at a Glance</span>
-        <span class="wag-toggle">▲</span>
-      </div>
-      <div class="wag-body">
-        <div class="wag-section">
-          <div class="wag-section-title">🎾 Tennis</div>
-          <div class="wag-row"><span class="wag-lbl">Worked</span><span class="wag-val green">3 hrs</span></div>
-          <div class="wag-row"><span class="wag-lbl">Booked ahead</span><span class="wag-val">10.5 hrs</span></div>
-          <div class="wag-row"><span class="wag-lbl">Open</span><span class="wag-val amber">1.5 hrs</span></div>
-        </div>
-        <div class="wag-section">
-          <div class="wag-section-title">👤 Childcare</div>
-          <div class="wag-row"><span class="wag-lbl">Used</span><span class="wag-val green">2.5 hrs</span></div>
-          <div class="wag-row"><span class="wag-lbl">Remaining</span><span class="wag-val">11 hrs</span></div>
-          <div class="wag-progress">
-            <div class="wag-row" style="margin-bottom:2px"><span class="wag-lbl">Budget</span><span style="font-size:11px;color:rgba(255,255,255,.6)">13.5/16 hrs</span></div>
-            <div class="wag-progress-bar"><div class="wag-progress-fill " style="width:84%"></div></div>
-          </div>
-        </div>
-        <div class="wag-life">🌞 This week: LTC Tennis Camp · Service · Service</div>
-      </div></div>
+  <div id="wag-card" class="wag-card" style="display:none"></div>
   <div style="display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px;margin-bottom:8px">
-    <div id="event-pills" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-right:auto"><span class="pill-camp" onclick="viewLifeEvent(82)">Camp Week! — LTC Tennis Camp</span><span class="pill-appt" onclick="viewLifeEvent(155)">🔨 Service</span><span class="pill-appt" onclick="viewLifeEvent(158)">🔨 Service</span></div>
-    <div id="pto-active-lbl" style="display: block; font-size: 11px; color: rgb(220, 38, 38); font-weight: bold; font-style: italic; letter-spacing: 0.04em;">PTO Active</div>
-    <div id="sched-controls" style="display:flex;gap:6px;align-items:center"><button class="btn btn-sm" onclick="shareOpenSlots()" style="background:#1a6b6b;min-width:76px">🔗 Share</button><button class="btn btn-sm" onclick="openAddSlot()" style="min-width:76px">+ Add slot</button><button class="btn btn-sm bptoc" onclick="openPTO()" id="pto-btn" style="min-width: 80px;">Clear PTO</button><button class="btn btn-sm" onclick="openTemplateManager()" style="background:#4b5563;min-width:76px;font-size:10px">🛠 Template</button></div>
+    <div id="event-pills" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-right:auto"></div>
+    <div id="pto-active-lbl" style="display:none;font-size:11px;color:#dc2626;font-weight:bold;font-style:italic;letter-spacing:.04em">PTO Active</div>
+    <div id="sched-controls" style="display:flex;gap:6px;align-items:center"></div>
   </div>
   <div class="week-nav" style="margin-bottom:6px;padding:4px 0">
     <button class="week-nav-btn" onclick="changeWeek(-1)">←</button>
-    <span class="week-nav-lbl" id="week-label">This week · May 25 – May 31</span>
+    <span class="week-nav-lbl" id="week-label"></span>
     <button class="week-nav-btn" onclick="changeWeek(1)">→</button>
   </div>
-  <div id="schedule-grid" class="grid"><div class="day-block pto-done">
-      <div class="day-header">
-        <div style="display:flex;align-items:baseline"><span class="day-name">Monday</span></div>
-        <span class="day-open-count"><span style="color:#fca5a5;font-size:11px;font-style:italic">PTO</span></span>
-      </div>
-      <div class="day-slots">
-        <div class="slot pto-notify-done" onclick="openNotifyModal(146)"><span class="slot-time">10:00 AM–11:00 AM</span><div class="slot-body"><span class="slot-lbl">Lesson — Shaheen Khan</span></div><div class="slot-right"><span class="pbg">✓ Notified</span></div></div><div class="slot pto-sub-done" onclick="openSubModal(2)"><span class="slot-time">11:00 AM–12:30 PM</span><div class="slot-body"><span class="slot-lbl">RCRL — Scholtz</span></div><div class="slot-right"><span class="pbg">✓ no class</span></div></div><div class="slot pto-sub-done" onclick="openSubModal(3)"><span class="slot-time">12:30 PM–2:00 PM</span><div class="slot-body"><span class="slot-lbl">USTA — Meagher</span></div><div class="slot-right"><span class="pbg">✓ no class</span></div></div>
-        
-        <div class="cc-bar"><span class="cc-bar-time">10:00 AM – 12:30 PM</span><span class="cc-bar-label">Childcare</span></div>
-
-      </div>
-    </div><div class="day-block">
-      <div class="day-header">
-        <div style="display:flex;align-items:baseline"><span class="day-name">Tuesday</span><span class="day-hours">(4 hrs)</span></div>
-        <span class="day-open-count">1 open</span>
-      </div>
-      <div class="day-slots">
-        <div class="slot fixed" onclick="editSlot(4)">
-            <span class="slot-time">9:00 AM–12:00 PM</span>
-            <div class="slot-body"><div class="slot-lbl">HP - JR ELITE </div>
-              
-            </div>
-            <div class="slot-right"></div>
-          </div><div class="slot available" onclick="editSlot(157)">
-            <span class="slot-time">12:00 PM–1:00 PM</span>
-            <div class="slot-body"><div class="slot-lbl">Lesson (open)</div>
-              
-            </div>
-            <div class="slot-right"><button class="send-btn" onclick="event.stopPropagation();notifySlot('Tuesday',157)">✈</button></div>
-          </div>
-        
-        <div class="cc-bar"><span class="cc-bar-time">9:00 AM – 12:00 PM</span><span class="cc-bar-label">Childcare</span></div><div class="appt-bar" onclick="viewLifeEvent(155)"><span class="appt-bar-time">1:30 PM</span><span class="appt-bar-icon" style="margin-right:4px">🔨</span><span class="appt-bar-text">Service</span></div>
-
-      </div>
-    </div><div class="day-block">
-      <div class="day-header">
-        <div style="display:flex;align-items:baseline"><span class="day-name">Wednesday</span><span class="day-hours">(4.5 hrs)</span></div>
-        <span class="day-open-count">1 open</span>
-      </div>
-      <div class="day-slots">
-        <div class="slot available" onclick="editSlot(7)">
-            <span class="slot-time">10:00 AM–11:30 AM</span>
-            <div class="slot-body"><div class="slot-lbl">Live Ball (cancelled)</div>
-              
-            </div>
-            <div class="slot-right"><button class="send-btn" onclick="event.stopPropagation();notifySlot('Wednesday',7)">✈</button></div>
-          </div><div class="slot booked" onclick="editSlot(8)">
-            <span class="slot-time">11:30 AM–12:30 PM</span>
-            <div class="slot-body"><div class="slot-lbl">Lesson — Hayley Liu</div>
-              
-            </div>
-            <div class="slot-right"></div>
-          </div><div class="slot booked" onclick="editSlot(9)">
-            <span class="slot-time">1:00 PM–2:00 PM</span>
-            <div class="slot-body"><div class="slot-lbl">Lesson — Christine Okada</div>
-              
-            </div>
-            <div class="slot-right"></div>
-          </div><div class="slot fixed" onclick="editSlot(148)">
-            <span class="slot-time">2:00 PM–3:00 PM</span>
-            <div class="slot-body"><div class="slot-lbl">Team Meeting</div>
-              
-            </div>
-            <div class="slot-right"></div>
-          </div>
-        
-        <div class="cc-bar"><span class="cc-bar-time">9:30 AM – 12:00 PM</span><span class="cc-bar-label">Childcare</span></div>
-
-      </div>
-    </div><div class="day-block">
-      <div class="day-header">
-        <div style="display:flex;align-items:baseline"><span class="day-name">Thursday</span><span class="day-hours">(3.5 hrs)</span></div>
-        <span class="day-open-count"></span>
-      </div>
-      <div class="day-slots">
-        <div class="slot fixed" onclick="editSlot(10)">
-            <span class="slot-time">9:30 AM–11:00 AM</span>
-            <div class="slot-body"><div class="slot-lbl">RCRL Brunning</div>
-              
-            </div>
-            <div class="slot-right"></div>
-          </div><div class="slot booked" onclick="editSlot(11)">
-            <span class="slot-time">11:00 AM–12:00 PM</span>
-            <div class="slot-body"><div class="slot-lbl">Lesson — Kelsie Williams</div>
-              
-            </div>
-            <div class="slot-right"></div>
-          </div><div class="slot booked" onclick="editSlot(12)">
-            <span class="slot-time">12:00 PM–1:00 PM</span>
-            <div class="slot-body"><div class="slot-lbl">Lesson — Jacquelyn O’Brien</div>
-              
-            </div>
-            <div class="slot-right"></div>
-          </div>
-        
-        <div class="cc-bar"><span class="cc-bar-time">9:30 AM – 12:00 PM</span><span class="cc-bar-label">Childcare</span></div><div class="appt-bar" onclick="viewLifeEvent(158)"><span class="appt-bar-time">3:00 PM</span><span class="appt-bar-icon" style="margin-right:4px">🔨</span><span class="appt-bar-text">Service</span></div>
-
-      </div>
-    </div><div class="day-block">
-      <div class="day-header">
-        <div style="display:flex;align-items:baseline"><span class="day-name">Friday</span><span class="day-hours">(4 hrs)</span></div>
-        <span class="day-open-count"></span>
-      </div>
-      <div class="day-slots">
-        <div class="slot fixed" onclick="editSlot(14)">
-            <span class="slot-time">10:00 AM–12:00 PM</span>
-            <div class="slot-body"><div class="slot-lbl">HP - JR ELITE </div>
-              
-            </div>
-            <div class="slot-right"></div>
-          </div><div class="slot booked" onclick="editSlot(15)">
-            <span class="slot-time">12:00 PM–1:00 PM</span>
-            <div class="slot-body"><div class="slot-lbl">Lesson — Landis Smith</div>
-              
-            </div>
-            <div class="slot-right"></div>
-          </div><div class="slot booked" onclick="editSlot(16)">
-            <span class="slot-time">1:00 PM–2:00 PM</span>
-            <div class="slot-body"><div class="slot-lbl">Lesson — Sarah Kane</div>
-              
-            </div>
-            <div class="slot-right"></div>
-          </div>
-        
-        <div class="cc-bar"><span class="cc-bar-time">9:00 AM – 12:00 PM</span><span class="cc-bar-label">Childcare</span></div>
-
-      </div>
-    </div></div>
+  <div id="schedule-grid" class="grid"></div>
 </div>
 
 <!-- CHILDCARE -->
 <div id="panel-childcare" class="panel">
-  <div id="cc-top-note" class="an">Edit childcare hours and notes for your caregiver.</div>
+  <div id="cc-top-note" class="an"></div>
   <div id="cc-event-pills" class="event-pills" style="margin-bottom:8px"></div>
   <div class="week-nav" style="margin-bottom:8px">
     <button class="week-nav-btn" onclick="changeCCWeek(-1)">←</button>
@@ -748,7 +599,7 @@ function viewLifeEvent(id){
     <div class="life-card-body">
       <div style="margin-bottom:8px"><span class="life-card-type ${e.type}">${e.type}</span></div>
       ${isCamp?`<div><strong>Days:</strong> ${daysStr||'—'}</div><div><strong>Times:</strong> ${timesStr||'—'}</div><div><strong>Kids:</strong> ${kidsStr||'—'}</div>`:''}
-      ${isAppt?`<div><strong>Type:</strong> ${e.apptIcon||''} ${e.apptType||'Appointment'}</div><div><strong>Time:</strong> ${e.startTime||'—'}</div>`:''}
+      ${isAppt?`<div><strong>Type:</strong> ${e.apptIcon||''} ${e.apptType||'Appointment'}</div><div><strong>Time:</strong> ${e.startTime?mtd(pti(e.startTime)):'—'}</div>`:''}
       ${!isCamp?`<div><strong>Dates:</strong> ${fmtDateLong(e.startDate)} – ${fmtDateLong(e.endDate)}</div>`:''}
       ${isCamp?`<div><strong>Dates:</strong> ${fmtDateLong(e.startDate)} – ${fmtDateLong(e.endDate)}</div>`:''}
       ${e.notes?`<div style="margin-top:8px;font-style:italic;color:var(--gray)">${e.notes}</div>`:''}
@@ -1657,8 +1508,8 @@ function computeWAG(){
     if(hrs===0)return;
     const slotPast=slotDate<todayStr||(slotDate===todayStr&&s.endM<=nowMinutes);
     const slotFuture=slotDate>todayStr||(slotDate===todayStr&&s.startM>nowMinutes);
-    // Check if PTO day
-    const isSlotPTO=pto.active&&pto.startDate&&pto.endDate&&slotDate>=pto.startDate&&slotDate<=pto.endDate;
+    // Check if PTO day — use ptoDates() for accurate weekday-only check
+    const isSlotPTO=ptoDates().includes(slotDate);
     // Check if OUT this week (from weekSlots)
     const wKey=isoDate(viewMon);
     const weekCopy=S.weekSlots[wKey];
