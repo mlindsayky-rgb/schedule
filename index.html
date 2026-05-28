@@ -617,7 +617,7 @@ function linkVacationToPTO(id){
     if(!confirm(`PTO is already active (${pto.startDate} to ${pto.endDate}). Replace with vacation dates?`))return;
   }
   pto.active=true;pto.startDate=e.startDate;pto.endDate=e.endDate;
-  pto.subs={};pto.notified={};pto.viewWeekOffset=0;
+  pto.subs={};pto.notified={};pto.viewWeekOffset=0;savePTONow();
   // Auto-mark vacation days as childcare day off
   applyVacationToChildcare(e.startDate,e.endDate);
   save();cm();renderSchedule();renderPTOBanner();
@@ -882,7 +882,11 @@ function renderPTOBanner(){
 function ptoNav(d){const wks=ptoWeeks();pto.viewWeekOffset=Math.max(0,Math.min(wks.length-1,pto.viewWeekOffset+d));save();renderSchedule();renderPTOBanner();}
 function openPTO(){if(pto.active){clearPTO();return;}const today=isoDate(new Date());sm(`<h3>&#127774; Set PTO Dates</h3><p style="font-size:13px;color:#6b7280;font-style:italic;margin-bottom:16px">Mon\u2013Fri in this range get flagged. Weekends ignored.</p><div class="f"><label>Start date</label><input id="ps" type="date" value="${today}"></div><div class="f"><label>End date</label><input id="pe" type="date" value="${today}"></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm bpto" onclick="actPTO()">Activate PTO</button></div>`);}
 function actPTO(){const s=document.getElementById('ps').value,e=document.getElementById('pe').value;if(!s||!e||s>e){alert('Please enter a valid date range.');return;}pto.active=true;pto.startDate=s;pto.endDate=e;pto.subs={};pto.notified={};pto.viewWeekOffset=0;save();cm();renderSchedule();renderPTOBanner();}
-function clearPTO(){pto.active=false;pto.startDate=null;pto.endDate=null;pto.subs={};pto.notified={};pto.viewWeekOffset=0;save();renderSchedule();renderPTOBanner();}
+function savePTONow(){
+  // Save PTO immediately without debounce to prevent race conditions
+  dbSet('pto', pto);
+}
+function clearPTO(){pto.active=false;pto.startDate=null;pto.endDate=null;pto.subs={};pto.notified={};pto.viewWeekOffset=0;savePTONow();save();renderSchedule();renderPTOBanner();}
 function openSubModal(sid){const s=S.slots.find(x=>x.id===sid);if(!s)return;const cur=pto.subs[sid]||'',last=Object.values(pto.subs).filter(Boolean).pop()||'';const po=S.people.length?`<div class="ppk" style="max-height:180px;overflow-y:auto">${S.people.map(p=>`<div class="pki" onclick="subSel(${sid},'${p.name.replace(/'/g,"\\'")}')">${p.name}</div>`).join('')}</div>`:'';sm(`<h3>&#128101; Assign Sub</h3><p style="font-size:13px;color:#6b7280;font-style:italic;margin-bottom:14px">${s.label} \u2014 ${s.day}</p>${last&&last!==cur?`<button class="btn btn-sm" style="width:100%;background:#2d6a4f;margin-bottom:10px" onclick="subSel(${sid},'${last.replace(/'/g,"\\'")}')">Use last sub: ${last}</button>`:''}${po}<div class="f" style="margin-top:8px"><label>Or type a name</label><input id="sub-in" placeholder="Coach name" value="${cur}"></div><div class="ma">${cur?`<button class="btn btn-sm bdg" onclick="clrSub(${sid})">Remove sub</button>`:''}<button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSub(${sid})">Save</button></div>`);}
 function subSel(sid,n){const i=document.getElementById('sub-in');if(i)i.value=n;}
 function svSub(sid){const n=document.getElementById('sub-in')?.value?.trim();if(!n){alert('Enter a sub name.');return;}pto.subs[sid]=n;save();cm();renderSchedule();renderPTOBanner();}
