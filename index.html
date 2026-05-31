@@ -1338,7 +1338,7 @@ function autoCloseWeek(silent=true){
   weekDates.forEach(({day,date})=>{
     const closeMon=addDays(mondayOf(new Date()),-7);const daySlots=getWeekSlots(closeMon).filter(s=>s.day===day).sort((a,b)=>a.startM-b.startM);
     // Check if PTO day
-    const isPTO=pto.active&&pto.startDate&&pto.endDate&&date>=pto.startDate&&date<=pto.endDate;
+    const isPTO=ptoDates().includes(date);
     if(isPTO){
       entries.push({date,day,label:'PTO',hours:0,type:'pto'});
       return;
@@ -1364,10 +1364,16 @@ function autoCloseWeek(silent=true){
   // Purge history older than 20 days
   const cutoff=isoDate(addDays(new Date(),-20));
   S.weekHistory=S.weekHistory.filter(w=>w.weekEnd>=cutoff);
-  // Add note to log
+  // Build summary for log note
   const closedDate=new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
   const closedTime=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-  S.notes.unshift({id:S.nextId++,date:isoDate(new Date()),text:`Auto-closed week of ${fmtDate(lastMonday)} – ${fmtDate(addDays(lastMonday,6))} on ${closedDate} at ${closedTime}`});
+  const totalHrs=entries.reduce((sum,e)=>sum+(e.hours||0),0);
+  const ptoCount=entries.filter(e=>e.type==='pto').length;
+  const lessonCount=entries.filter(e=>e.type==='private').length;
+  const clinicCount=entries.filter(e=>e.type==='hp-clinic'||e.type==='fixed').length;
+  const workedDays=[...new Set(entries.filter(e=>e.type!=='pto'&&e.hours>0).map(e=>e.day))].length;
+  const summary=`Week of ${fmtDate(lastMonday)} – ${fmtDate(addDays(lastMonday,6))} | Total: ${fh(totalHrs)} hrs | ${workedDays} days worked${ptoCount>0?' | PTO: '+ptoCount+' day'+(ptoCount>1?'s':''):''} | Lessons: ${lessonCount} | Stamped: ${closedDate} ${closedTime}`;
+  S.notes.unshift({id:S.nextId++,date:isoDate(new Date()),text:summary});
   save();
   if(!silent)renderNotes();
 }
