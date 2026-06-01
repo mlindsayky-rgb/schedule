@@ -1345,9 +1345,13 @@ function autoCloseWeek(silent=true){
   // Check if already closed
   if(S.weekHistory.find(w=>w.weekStart===weekStart))return;
   const weekDates=getWeekDates(lastMonday);
+  const wKey=isoDate(lastMonday);
+  const wc=S.weekSlots[wKey]||[];
+  // Get IDs of slots marked OUT for this week
+  const outIds=new Set(wc.filter(s=>s._outThisWeek).map(s=>s.id));
   const entries=[];
   weekDates.forEach(({day,date})=>{
-    const closeMon=lastMonday;const daySlots=getWeekSlots(closeMon).filter(s=>s.day===day).sort((a,b)=>a.startM-b.startM);
+    const daySlots=S.slots.filter(s=>s.day===day).sort((a,b)=>a.startM-b.startM);
     // Check if PTO day
     const isPTO=ptoDates().includes(date);
     if(isPTO){
@@ -1355,7 +1359,8 @@ function autoCloseWeek(silent=true){
       return;
     }
     daySlots.forEach(s=>{
-      if(s.type==='blocked')return;
+      if(s.type==='blocked'||s.type==='team-meeting')return;
+      if(outIds.has(s.id))return; // Skip OUT this week slots
       const hrs=shr(s);
       if(hrs===0)return;
       let label=s.label;
@@ -1368,6 +1373,11 @@ function autoCloseWeek(silent=true){
         else label=`Lesson — ${lastName}`;
       }
       entries.push({date,day,label,hours:hrs,type:s.type,slotId:s.id});
+    });
+    // Add week-only slots (added just for this week, not in template)
+    wc.filter(s=>s.day===day&&!S.slots.find(x=>x.id===s.id)&&!s._outThisWeek).forEach(s=>{
+      const hrs=shr(s);
+      if(hrs>0)entries.push({date,day,label:s.label,hours:hrs,type:s.type,slotId:s.id});
     });
   });
   const record={weekStart,weekEnd,closedAt:new Date().toISOString(),entries};
