@@ -1248,9 +1248,18 @@ function shareOpenSlots(){
 
 // Get slots for a specific week — seeds from template if not yet customized
 function getWeekSlots(weekMondayDate){
-  // Always return S.slots as source of truth
-  // weekSlots customization reserved for future per-week overrides
-  return S.slots;
+  const key=isoDate(weekMondayDate);
+  if(!S.weekSlots[key])return S.slots;
+  // Merge: S.slots as base, apply _outThisWeek overrides from weekSlots
+  const merged=S.slots.map(s=>{
+    const override=S.weekSlots[key].find(x=>x.id===s.id);
+    return(override&&override._outThisWeek)?override:s;
+  });
+  // Also include week-only slots not in template
+  S.weekSlots[key].forEach(ws=>{
+    if(!S.slots.find(s=>s.id===ws.id))merged.push(ws);
+  });
+  return merged;
 }
 
 // Save edits to a specific week's slots
@@ -1376,6 +1385,10 @@ function autoCloseWeek(silent=true){
   const workedDays=[...new Set(entries.filter(e=>e.type!=='pto'&&e.hours>0).map(e=>e.day))].length;
   const summary=`Week of ${fmtDate(lastMonday)} – ${fmtDate(addDays(lastMonday,6))} | Total: ${fh(totalHrs)} hrs | ${workedDays} days worked${ptoCount>0?' | PTO: '+ptoCount+' day'+(ptoCount>1?'s':''):''} | Lessons: ${lessonCount} | Stamped: ${closedDate} ${closedTime}`;
   S.notes.unshift({id:S.nextId++,date:isoDate(new Date()),text:summary});
+  // Force immediate save of weekHistory (bypass debounce)
+  dbSave('weekHistory', S.weekHistory);
+  dbSave('notes', S.notes);
+  dbSave('nextId', S.nextId);
   save();
   if(!silent)renderNotes();
 }
