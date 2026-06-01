@@ -607,7 +607,7 @@ function viewLifeEvent(id){
     </div>
     <div class="ma">
       ${!isCamp&&(!pto.active||pto.startDate!==e.startDate)?`<button class="pto-link-btn" onclick="linkVacationToPTO(${e.id})">Activate PTO for these dates</button>`:''}
-      ${role==='mike'?`<button class="btn btn-sm bcx" onclick="cm()">Close</button><button class="btn btn-sm bdg" onclick="deleteLifeEvent(${e.id})">Delete</button>`:'<button class="btn btn-sm bcx" onclick="cm()">Close</button>'}
+      ${role==='mike'?`<button class="btn btn-sm bcx" onclick="cm()">Close</button><button class="btn btn-sm" style="background:#4b5563" onclick="openEditLifeEvent(${e.id})">Edit</button><button class="btn btn-sm bdg" onclick="deleteLifeEvent(${e.id})">Delete</button>`:'<button class="btn btn-sm bcx" onclick="cm()">Close</button>'}
     </div>`);
 }
 
@@ -722,7 +722,7 @@ function openAddLifeEvent(type){
     sm(`<h3>📅 Add Appointment</h3>
       <div class="f"><div class="fl">Type</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-          ${['Match','General','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${t==='Doctor'?'checked':''}>${t==='Match'?'🎾':t==='General'?'🏠':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
+          ${['Match','General','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${t==='Match'?'checked':''}>${t==='Match'?'🎾':t==='General'?'🏠':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
         </div>
       </div>
       <div class="f"><div class="fl">Date</div><input id="le-start" type="date" value="${today}"></div>
@@ -808,6 +808,17 @@ function openEditLifeEvent(id){
       </div>
       <div class="f"><label>LOG<span class="log-badge" id="log-badge" style="display:none"></span></label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#d97706" onclick="updateLifeEvent(${id},'camp')">Save</button></div>`);
+  } else if(isAppt){
+    sm(`<h3>🎾 Edit Appointment</h3>
+      <div class="f"><div class="fl">Type</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+          ${['Match','General','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${e.apptType===t?'checked':''}>${t==='Match'?'🎾':t==='General'?'🏠':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
+        </div>
+      </div>
+      <div class="f"><div class="fl">Date</div><input id="le-start" type="date" value="${e.startDate}"></div>
+      <div class="f"><div class="fl">Start time</div><input id="le-stime" placeholder="e.g. 2 PM" value="${e.startTime||''}"></div>
+      <div class="f"><div class="fl">Notes</div><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
+      <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#dc2626" onclick="updateLifeEvent(${id},'appointment')">Save</button></div>`);
   } else {
     sm(`<h3>🌴 Edit Vacation</h3>
       <div class="f"><label>Destination / name</label><input id="le-title" value="${e.title}"></div>
@@ -822,9 +833,9 @@ function openEditLifeEvent(id){
 
 function updateLifeEvent(id,type){
   const e=S.lifeEvents.find(x=>x.id===id);if(!e)return;
-  e.title=document.getElementById('le-title')?.value?.trim()||e.title;
+  if(type!=='appointment'){e.title=document.getElementById('le-title')?.value?.trim()||e.title;}
   e.startDate=document.getElementById('le-start')?.value||e.startDate;
-  e.endDate=document.getElementById('le-end')?.value||e.endDate;
+  e.endDate=type==='appointment'?e.startDate:(document.getElementById('le-end')?.value||e.endDate);
   e.notes=document.getElementById('le-notes')?.value?.trim()||'';
   if(type==='camp'){
     e.days=[...document.querySelectorAll('.le-day:checked')].map(x=>x.value);
