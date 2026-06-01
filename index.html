@@ -1328,7 +1328,9 @@ function autoCloseWeek(silent=true){
   // On Monday (old behavior): mondayOf = today, -7 = last Monday
   const today=new Date();
   const isSunday=today.getDay()===0;
-  const lastMonday=isSunday?addDays(mondayOf(new Date()),-7):addDays(mondayOf(new Date()),-7);
+  // On Sunday: mondayOf goes back to last Monday (6 days ago) — that IS this week's Monday
+  // On Monday: mondayOf = today, -7 = last week's Monday
+  const lastMonday=isSunday?mondayOf(new Date()):addDays(mondayOf(new Date()),-7);
   const weekStart=isoDate(lastMonday);
   const weekEnd=isoDate(addDays(lastMonday,6));
   // Check if already closed
@@ -1336,7 +1338,7 @@ function autoCloseWeek(silent=true){
   const weekDates=getWeekDates(lastMonday);
   const entries=[];
   weekDates.forEach(({day,date})=>{
-    const closeMon=addDays(mondayOf(new Date()),-7);const daySlots=getWeekSlots(closeMon).filter(s=>s.day===day).sort((a,b)=>a.startM-b.startM);
+    const closeMon=lastMonday;const daySlots=getWeekSlots(closeMon).filter(s=>s.day===day).sort((a,b)=>a.startM-b.startM);
     // Check if PTO day
     const isPTO=ptoDates().includes(date);
     if(isPTO){
