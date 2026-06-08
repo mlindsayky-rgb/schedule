@@ -948,10 +948,10 @@ function renderSchedule(){
   // Merge: start with S.slots, apply any week-specific overrides from weekSlots
   let viewSlots=S.slots;
   if(S.weekSlots[vKey]){
-    // Use S.slots as base, override with weekSlots entries that have _outThisWeek
+    // Use S.slots as base, apply ALL weekSlots overrides (attendance, _outThisWeek, etc.)
     viewSlots=S.slots.map(s=>{
       const override=S.weekSlots[vKey].find(x=>x.id===s.id);
-      return(override&&override._outThisWeek)?override:s;
+      return override?override:s;
     });
     // Also include any slots added directly to this week's copy that aren't in template
     S.weekSlots[vKey].forEach(ws=>{
@@ -1261,10 +1261,10 @@ function shareOpenSlots(){
 function getWeekSlots(weekMondayDate){
   const key=isoDate(weekMondayDate);
   if(!S.weekSlots[key])return S.slots;
-  // Merge: S.slots as base, apply _outThisWeek overrides from weekSlots
+  // Merge: S.slots as base, apply ALL weekSlots overrides (attendance, _outThisWeek, etc.)
   const merged=S.slots.map(s=>{
     const override=S.weekSlots[key].find(x=>x.id===s.id);
-    return(override&&override._outThisWeek)?override:s;
+    return override?override:s;
   });
   // Also include week-only slots not in template
   S.weekSlots[key].forEach(ws=>{
@@ -1388,6 +1388,7 @@ function autoCloseWeek(silent=true){
     });
     // Add week-only slots (added just for this week, not in template)
     wc.filter(s=>s.day===day&&!S.slots.find(x=>x.id===s.id)&&!s._outThisWeek).forEach(s=>{
+      if(ss(s)==='available')return; // Skip unfilled open slots
       const hrs=shr(s);
       if(hrs>0)entries.push({date,day,label:s.label,hours:hrs,type:s.type,slotId:s.id});
     });
