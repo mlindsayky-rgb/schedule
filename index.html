@@ -254,9 +254,9 @@ textarea{resize:vertical}
 </style>
 </head>
 <body>
-<div id="pin-screen">
+<div id="pin-screen" style="display: none;">
   <div><h1>Summer Schedule</h1><p style="color:rgba(255,255,255,.6);font-size:13px;font-style:italic;margin-top:6px;text-align:center">Enter your PIN to continue</p></div>
-  <div class="pin-dots"><div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div><div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div></div>
+  <div class="pin-dots"><div class="pin-dot filled" id="d0"></div><div class="pin-dot filled" id="d1"></div><div class="pin-dot filled" id="d2"></div><div class="pin-dot filled" id="d3"></div></div>
   <div id="pin-error"></div>
   <div class="pin-pad">
     <button class="pin-btn" onclick="pinTap('1')">1</button><button class="pin-btn" onclick="pinTap('2')">2</button><button class="pin-btn" onclick="pinTap('3')">3</button>
@@ -265,15 +265,15 @@ textarea{resize:vertical}
     <button class="pin-btn zero" onclick="pinTap('0')">0</button><button class="pin-btn del" onclick="pinDel()">⌫</button>
   </div>
 </div>
-<div class="role-badge" id="role-badge" style="display:none" onclick="lockApp()">Lock</div>
-<div id="sync-bar" style="display:none">Connecting...</div>
-<div class="app" id="main-app" style="display:none">
+<div class="role-badge" id="role-badge" style="display: block;" onclick="lockApp()">👤 Mike — Lock</div>
+<div id="sync-bar" style="display: block;" class="">Live — changes sync automatically</div>
+<div class="app" id="main-app" style="display: block;">
 <div class="tabs">
   <button class="tab active" id="tab-schedule" onclick="st('schedule')">TENNIS</button>
   <button class="tab" id="tab-childcare" onclick="st('childcare')">KIDS</button>
-  <button class="tab" id="tab-people" onclick="st('people')" style="display:none">CLIENTS</button>
-  <button class="tab" id="tab-notes" onclick="st('notes')" style="display:none">LOG<span class="log-badge" id="log-badge" style="display:none"></span></button>
-  <button class="tab" id="tab-life" onclick="st('life')" style="display:none">LIFE</button>
+  <button class="tab" id="tab-people" onclick="st('people')" style="">CLIENTS</button>
+  <button class="tab" id="tab-notes" onclick="st('notes')" style="">LOG<span class="log-badge" id="log-badge" style="display: inline;">5</span></button>
+  <button class="tab" id="tab-life" onclick="st('life')" style="">LIFE</button>
 </div>
 <div id="pto-banner" style="display:none"></div>
 <div id="req-banner" style="display:none" onclick="goToRequests()"></div>
@@ -281,23 +281,196 @@ textarea{resize:vertical}
 
 <!-- SCHEDULE -->
 <div id="panel-schedule" class="panel active">
-  <div id="wag-card" class="wag-card" style="display:none"></div>
+  <div id="wag-card" class="wag-card" style="display: block;">
+      <div class="wag-header" onclick="toggleWAG()">
+        <span class="wag-title">📆 Week at a Glance</span>
+        <span class="wag-toggle">▲</span>
+      </div>
+      <div class="wag-body">
+        <div class="wag-section">
+          <div class="wag-section-title">🎾 Tennis</div>
+          <div class="wag-row"><span class="wag-lbl">Worked</span><span class="wag-val green">0 hrs</span></div>
+          <div class="wag-row"><span class="wag-lbl">Booked ahead</span><span class="wag-val">17.5 hrs</span></div>
+          <div class="wag-row"><span class="wag-lbl">Open</span><span class="wag-val amber">5 hrs</span></div>
+        </div>
+        <div class="wag-section">
+          <div class="wag-section-title">👤 Childcare</div>
+          <div class="wag-row"><span class="wag-lbl">Used</span><span class="wag-val green">0 hrs</span></div>
+          <div class="wag-row"><span class="wag-lbl">Remaining</span><span class="wag-val">1 hrs</span></div>
+          <div class="wag-progress">
+            <div class="wag-row" style="margin-bottom:2px"><span class="wag-lbl">Budget</span><span style="font-size:11px;color:rgba(255,255,255,.6)">1/16 hrs</span></div>
+            <div class="wag-progress-bar"><div class="wag-progress-fill " style="width:6%"></div></div>
+          </div>
+        </div>
+        <div class="wag-life">🌞 This week: Camp Hi-Ho</div>
+      </div></div>
   <div style="display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px;margin-bottom:8px">
-    <div id="event-pills" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-right:auto"></div>
+    <div id="event-pills" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-right:auto"><span class="pill-camp" onclick="viewLifeEvent(70)">Camp Week! — Camp Hi-Ho</span></div>
     <div id="pto-active-lbl" style="display:none;font-size:11px;color:#dc2626;font-weight:bold;font-style:italic;letter-spacing:.04em">PTO Active</div>
-    <div id="sched-controls" style="display:flex;gap:6px;align-items:center"></div>
+    <div id="sched-controls" style="display:flex;gap:6px;align-items:center"><button class="btn btn-sm" onclick="shareOpenSlots()" style="background:#1a6b6b;min-width:76px">🔗 Share</button><button class="btn btn-sm" onclick="openAddSlot()" style="min-width:76px">+ Add slot</button><button class="btn btn-sm bpto" onclick="openPTO()" id="pto-btn" style="min-width: 60px;">PTO</button><button class="btn btn-sm" onclick="openTemplateManager()" style="background:#4b5563;min-width:76px;font-size:10px">🛠 Template</button></div>
   </div>
   <div class="week-nav" style="margin-bottom:6px;padding:4px 0">
     <button class="week-nav-btn" onclick="changeWeek(-1)">←</button>
-    <span class="week-nav-lbl" id="week-label"></span>
+    <span class="week-nav-lbl" id="week-label">This week · Jun 8 – Jun 14</span>
     <button class="week-nav-btn" onclick="changeWeek(1)">→</button>
   </div>
-  <div id="schedule-grid" class="grid"></div>
+  <div id="schedule-grid" class="grid"><div class="day-block">
+      <div class="day-header">
+        <div style="display:flex;align-items:baseline"><span class="day-name">Monday</span><span class="day-hours">(3 hrs)</span></div>
+        <span class="day-open-count">2 open</span>
+      </div>
+      <div class="day-slots">
+        <div class="slot available" onclick="editSlot(146)">
+            <span class="slot-time">10:00 AM–11:00 AM</span>
+            <div class="slot-body"><div class="slot-lbl">Lesson (open)</div>
+              
+            </div>
+            <div class="slot-right"><button class="send-btn" onclick="event.stopPropagation();notifySlot('Monday',146)">✈</button></div>
+          </div><div class="slot fixed" onclick="editSlot(2)">
+            <span class="slot-time">11:00 AM–12:30 PM</span>
+            <div class="slot-body"><div class="slot-lbl">RCRL — Scholtz</div>
+              
+            </div>
+            <div class="slot-right"></div>
+          </div><div class="slot fixed" onclick="editSlot(3)">
+            <span class="slot-time">12:30 PM–2:00 PM</span>
+            <div class="slot-body"><div class="slot-lbl">USTA — Meagher</div>
+              
+            </div>
+            <div class="slot-right"></div>
+          </div><div class="slot available" onclick="editSlot(177)">
+            <span class="slot-time">6:00 PM–7:30 PM</span>
+            <div class="slot-body"><div class="slot-lbl">Live Ball</div>
+              
+            </div>
+            <div class="slot-right"><button class="send-btn" onclick="event.stopPropagation();notifySlot('Monday',177)">✈</button></div>
+          </div>
+        
+        <div class="cc-bar"><span class="cc-bar-time">5:30 pm – 8:30 om</span><span class="cc-bar-label">Childcare</span></div>
+
+      </div>
+    </div><div class="day-block">
+      <div class="day-header">
+        <div style="display:flex;align-items:baseline"><span class="day-name">Tuesday</span><span class="day-hours">(5 hrs)</span></div>
+        <span class="day-open-count"></span>
+      </div>
+      <div class="day-slots">
+        <div class="slot fixed" onclick="editSlot(4)">
+            <span class="slot-time">9:00 AM–12:00 PM</span>
+            <div class="slot-body"><div class="slot-lbl">HP - JR ELITE </div>
+              
+            </div>
+            <div class="slot-right"></div>
+          </div><div class="slot booked" onclick="editSlot(157)">
+            <span class="slot-time">12:30 PM–1:30 PM</span>
+            <div class="slot-body"><div class="slot-lbl">Lesson — Kelsie Williams</div>
+              
+            </div>
+            <div class="slot-right"></div>
+          </div><div class="slot booked" onclick="editSlot(173)">
+            <span class="slot-time">1:30 PM–2:30 PM</span>
+            <div class="slot-body"><div class="slot-lbl">Lesson — Kesha Samur</div>
+              
+            </div>
+            <div class="slot-right"></div>
+          </div>
+        
+        
+
+      </div>
+    </div><div class="day-block">
+      <div class="day-header">
+        <div style="display:flex;align-items:baseline"><span class="day-name">Wednesday</span><span class="day-hours">(2 hrs)</span></div>
+        <span class="day-open-count">1 open</span>
+      </div>
+      <div class="day-slots">
+        <div class="slot available" onclick="editSlot(7)">
+            <span class="slot-time">10:00 AM–11:30 AM</span>
+            <div class="slot-body"><div class="slot-lbl">Live Ball</div>
+              
+            </div>
+            <div class="slot-right"><button class="send-btn" onclick="event.stopPropagation();notifySlot('Wednesday',7)">✈</button></div>
+          </div><div class="slot booked" onclick="editSlot(8)">
+            <span class="slot-time">11:30 AM–12:30 PM</span>
+            <div class="slot-body"><div class="slot-lbl">Lesson — Landis Smith</div>
+              
+            </div>
+            <div class="slot-right"></div>
+          </div><div class="slot booked" onclick="editSlot(9)">
+            <span class="slot-time">12:30 PM–1:30 PM</span>
+            <div class="slot-body"><div class="slot-lbl">Lesson — Christine Okada</div>
+              
+            </div>
+            <div class="slot-right"></div>
+          </div>
+        
+        
+
+      </div>
+    </div><div class="day-block">
+      <div class="day-header">
+        <div style="display:flex;align-items:baseline"><span class="day-name">Thursday</span><span class="day-hours">(2.5 hrs)</span></div>
+        <span class="day-open-count">1 open</span>
+      </div>
+      <div class="day-slots">
+        <div class="slot fixed" onclick="editSlot(10)">
+            <span class="slot-time">9:30 AM–11:00 AM</span>
+            <div class="slot-body"><div class="slot-lbl">RCRL Brunning</div>
+              
+            </div>
+            <div class="slot-right"></div>
+          </div><div class="slot available" onclick="editSlot(11)">
+            <span class="slot-time">11:00 AM–12:00 PM</span>
+            <div class="slot-body"><div class="slot-lbl">Lesson (open)</div>
+              
+            </div>
+            <div class="slot-right"><button class="send-btn" onclick="event.stopPropagation();notifySlot('Thursday',11)">✈</button></div>
+          </div><div class="slot booked" onclick="editSlot(12)">
+            <span class="slot-time">12:00 PM–1:00 PM</span>
+            <div class="slot-body"><div class="slot-lbl">Lesson — Jacquelyn O’Brien</div>
+              
+            </div>
+            <div class="slot-right"></div>
+          </div>
+        
+        <div class="cc-bar"><span class="cc-bar-time">8:00 am – 9:00 am</span><span class="cc-bar-label">Childcare</span></div>
+
+      </div>
+    </div><div class="day-block">
+      <div class="day-header">
+        <div style="display:flex;align-items:baseline"><span class="day-name">Friday</span><span class="day-hours">(5 hrs)</span></div>
+        <span class="day-open-count"></span>
+      </div>
+      <div class="day-slots">
+        <div class="slot fixed" onclick="editSlot(14)">
+            <span class="slot-time">9:00 AM–12:00 PM</span>
+            <div class="slot-body"><div class="slot-lbl">HP - JR ELITE </div>
+              
+            </div>
+            <div class="slot-right"></div>
+          </div><div class="slot booked" onclick="editSlot(15)">
+            <span class="slot-time">12:00 PM–1:00 PM</span>
+            <div class="slot-body"><div class="slot-lbl">Lesson — Landis Smith</div>
+              
+            </div>
+            <div class="slot-right"></div>
+          </div><div class="slot booked" onclick="editSlot(16)">
+            <span class="slot-time">1:00 PM–2:00 PM</span>
+            <div class="slot-body"><div class="slot-lbl">Lesson — Sarah Kane</div>
+              
+            </div>
+            <div class="slot-right"></div>
+          </div>
+        
+        
+
+      </div>
+    </div></div>
 </div>
 
 <!-- CHILDCARE -->
 <div id="panel-childcare" class="panel">
-  <div id="cc-top-note" class="an"></div>
+  <div id="cc-top-note" class="an">Edit childcare hours and notes for your caregiver.</div>
   <div id="cc-event-pills" class="event-pills" style="margin-bottom:8px"></div>
   <div class="week-nav" style="margin-bottom:8px">
     <button class="week-nav-btn" onclick="changeCCWeek(-1)">←</button>
@@ -962,7 +1135,7 @@ function renderSchedule(){
 DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
   const m=role==='mike';
   grid.innerHTML=DAYS.map(day=>{
-    const slots=bd[day],open=slots.filter(s=>ss(s)==='available').length,hrs=fhr(slots.reduce((a,s)=>a+shr(s),0));
+    const slots=bd[day],open=slots.filter(s=>ss(s)==='available').length,hrs=fhr(slots.filter(s=>ss(s)!=='available'&&ss(s)!=='blocked').reduce((a,s)=>a+shr(s),0));
     const cc=S.childcare[day];
     // Check if this day has a camp event this view week
     const viewDayDate=isoDate(addDays(viewMon,DAYS.indexOf(day)));
@@ -1174,7 +1347,7 @@ function chphn(){const i=document.getElementById('p-p'),h=document.getElementByI
 function addP(){if(role!=='mike')return;const n=document.getElementById('p-n').value.trim();if(!n)return;const p={id:S.nextId++,name:n,phone:cp(document.getElementById('p-p').value),initials:document.getElementById('p-i').value.trim()||n.split(' ').map(w=>w[0]).join('').toUpperCase(),days:[],notifyAll:document.getElementById('p-a').checked};S.people.push(p);save();cm();renderPeople();}
 
 // ── NOTES ──
-function renderNotes(){if(role!=='mike')return;const list=document.getElementById('notes-list');if(!S.notes.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic">No notes yet.</div>';return;}list.innerHTML=S.notes.slice().reverse().map(n=>`<div class="nb"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:11px;color:#6b7280;font-style:italic">${n.date}</div><button class="btn btn-sm bdg" onclick="delNote(${n.id})" style="padding:4px 10px">\u2715</button></div><div style="font-size:13px;line-height:1.7;margin-top:6px">${n.text}</div></div>`).join('');}
+function renderNotes(){if(role!=='mike')return;const list=document.getElementById('notes-list');if(!S.notes.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic">No notes yet.</div>';return;}list.innerHTML=S.notes.slice().reverse().map(n=>`<div class="nb"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:11px;color:#6b7280;font-style:italic">${n.date}</div><button class="btn btn-sm bdg" onclick="delNote(${n.id})" style="padding:4px 10px">\u2715</button></div><div style="font-size:13px;line-height:1.7;margin-top:6px;white-space:pre-wrap;font-family:Georgia,serif">${n.text}</div></div>`).join('');}
 function delNote(id){if(role!=='mike')return;S.notes=S.notes.filter(n=>n.id!==id);save();renderNotes();}
 function openAddNote(){if(role!=='mike')return;const today=isoDate(new Date());sm(`<h3>Add Note</h3><div class="f"><label>Date</label><input id="nn-d" type="date" value="${today}"></div><div class="f"><label>Note</label><textarea id="nn-t" rows="4"></textarea></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addNote()">Save</button></div>`);}
 function addNote(){if(role!=='mike')return;const n={id:S.nextId++,date:document.getElementById('nn-d').value,text:document.getElementById('nn-t').value};S.notes.push(n);save();cm();renderNotes();}
@@ -1372,6 +1545,7 @@ function autoCloseWeek(silent=true){
     daySlots.forEach(s=>{
       if(s.type==='blocked'||s.type==='team-meeting')return;
       if(outIds.has(s.id))return; // Skip OUT this week slots
+      if(ss(s)==='available')return; // Skip unfilled open slots
       const hrs=shr(s);
       if(hrs===0)return;
       let label=s.label;
@@ -1396,15 +1570,51 @@ function autoCloseWeek(silent=true){
   // Purge history older than 20 days
   const cutoff=isoDate(addDays(new Date(),-20));
   S.weekHistory=S.weekHistory.filter(w=>w.weekEnd>=cutoff);
-  // Build summary for log note
-  const closedDate=new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
-  const closedTime=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-  const totalHrs=entries.reduce((sum,e)=>sum+(e.hours||0),0);
+  // Build childcare hours by day
+  const ccByDay={};
+  let ccTotalHrs=0;
+  weekDates.forEach(({day,date})=>{
+    const cc=S.childcare[day];
+    if(!cc||!cc.active){ccByDay[day]=0;return;}
+    const onVac=S.lifeEvents.some(e=>e.type==='vacation'&&!e.archived&&date>=e.startDate&&date<=e.endDate);
+    if(onVac){ccByDay[day]=0;return;}
+    const hrs=(pti(cc.end)-pti(cc.start))/60;
+    ccByDay[day]=hrs>0?hrs:0;
+    ccTotalHrs+=ccByDay[day];
+  });
+  // Build tennis totals
+  const tennisTotalHrs=entries.filter(e=>e.type!=='pto').reduce((sum,e)=>sum+(e.hours||0),0);
   const ptoCount=entries.filter(e=>e.type==='pto').length;
-  const lessonCount=entries.filter(e=>e.type==='private').length;
-  const clinicCount=entries.filter(e=>e.type==='hp-clinic'||e.type==='fixed').length;
-  const workedDays=[...new Set(entries.filter(e=>e.type!=='pto'&&e.hours>0).map(e=>e.day))].length;
-  const summary=`Week of ${fmtDate(lastMonday)} – ${fmtDate(addDays(lastMonday,6))} | Total: ${fh(totalHrs)} hrs | ${workedDays} days worked${ptoCount>0?' | PTO: '+ptoCount+' day'+(ptoCount>1?'s':''):''} | Lessons: ${lessonCount} | Stamped: ${closedDate} ${closedTime}`;
+  // Build note text
+  const weekLabel=`Week of ${fmtDate(lastMonday)} – ${fmtDate(addDays(lastMonday,6))}`;
+  let noteLines=[weekLabel,''];
+  // Tennis section
+  noteLines.push('🎾 TENNIS');
+  DAYS.forEach(day=>{
+    const dayEntries=entries.filter(e=>e.day===day);
+    if(!dayEntries.length)return;
+    if(dayEntries[0].type==='pto'){noteLines.push(`  ${day}: PTO`);return;}
+    const dayHrs=dayEntries.reduce((s,e)=>s+(e.hours||0),0);
+    noteLines.push(`  ${day} (${fh(dayHrs)} hrs)`);
+    dayEntries.forEach(e=>noteLines.push(`    · ${e.label} — ${fh(e.hours)} hrs`));
+  });
+  noteLines.push(`  Tennis Total: ${fh(tennisTotalHrs)} hrs`);
+  noteLines.push('');
+  // Childcare section
+  noteLines.push('👶 CHILDCARE');
+  DAYS.forEach(day=>{
+    const hrs=ccByDay[day]||0;
+    const cc=S.childcare[day];
+    if(!cc||!cc.active){noteLines.push(`  ${day}: Day off`);return;}
+    noteLines.push(`  ${day}: ${cc.start} – ${cc.end} (${fh(hrs)} hrs)`);
+  });
+  noteLines.push(`  Childcare Total: ${fh(ccTotalHrs)} hrs`);
+  noteLines.push('');
+  // Grand total
+  const netHrs=tennisTotalHrs-ccTotalHrs;
+  const netStr=netHrs>=0?`+${fh(netHrs)}`:`-${fh(Math.abs(netHrs))}`;
+  noteLines.push(`📋 NET HOURS: ${netStr} hrs${ptoCount>0?' | PTO: '+ptoCount+' day'+(ptoCount>1?'s':''):''}`)
+  const summary=noteLines.join('\n');
   S.notes.unshift({id:S.nextId++,date:isoDate(new Date()),text:summary});
   // Force immediate save of weekHistory (bypass debounce)
   dbSave('weekHistory', S.weekHistory);
