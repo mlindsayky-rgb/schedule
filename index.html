@@ -1524,9 +1524,22 @@ function generateExport(){
           });
         }
       } else {
-        // Use live slots (future or unstamped weeks)
-        const daySlots=S.slots.filter(s=>s.day===day&&s.type!=='blocked').sort((a,b)=>a.startM-b.startM);
-        daySlots.forEach(s=>{
+        // Use live slots (future or unstamped weeks) — merge weekSlots same as renderSchedule
+        const weekMon2=mondayOf(cur);
+        const wKey2=isoDate(weekMon2);
+        let liveSlots=S.slots.filter(s=>s.day===day&&s.type!=='blocked');
+        if(S.weekSlots[wKey2]){
+          liveSlots=liveSlots.map(s=>{
+            const ov=S.weekSlots[wKey2].find(x=>x.id===s.id);
+            return ov?ov:s;
+          });
+          S.weekSlots[wKey2].forEach(ws=>{
+            if(!S.slots.find(s=>s.id===ws.id)&&ws.day===day&&ws.type!=='blocked')liveSlots.push(ws);
+          });
+        }
+        liveSlots.sort((a,b)=>a.startM-b.startM);
+        liveSlots.forEach(s=>{
+          if(ss(s)==='available'||ss(s)==='blocked')return; // Skip open/unfilled slots
           const hrs=shr(s);
           if(hrs===0)return;
           let label=s.label;
@@ -1539,9 +1552,6 @@ function generateExport(){
                 label=`Lesson — ${lastName}`;
                 multipleMatches.push({date:fmtD,lastName});
               } else {label=`Lesson — ${lastName}`;}
-            } else {
-              // Open/available slot — include as open
-              label=s.label||'Lesson (open)';
             }
           }
           const hrsStr=hrs%1===0?hrs.toString():(Math.round(hrs*2)/2).toString();
@@ -1551,6 +1561,13 @@ function generateExport(){
     }
     cur.setDate(cur.getDate()+1);
   }
+
+  // Calculate total exported hours
+  const exportTotal=rows.slice(1).filter(r=>r[1]!=='PTO').reduce((sum,r)=>sum+(parseFloat(r[2])||0),0);
+  const exportedAt=new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})+' '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  const exportNote=`📄 Payroll export run — ${fmtDate(new Date(startStr+'T12:00:00'))} – ${fmtDate(new Date(endStr+'T12:00:00'))} | Total: ${fh(exportTotal)} hrs | Exported: ${exportedAt}`;
+  S.notes.unshift({id:S.nextId++,date:isoDate(new Date()),text:exportNote});
+  save();
 
   // Build tab-separated text
   const tab='\t',nl='\n';const tsv=rows.map(r=>r.join(tab)).join(nl);
