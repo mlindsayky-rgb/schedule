@@ -1413,36 +1413,11 @@ function autoCloseWeek(silent=true){
   // Build tennis totals
   const tennisTotalHrs=entries.filter(e=>e.type!=='pto').reduce((sum,e)=>sum+(e.hours||0),0);
   const ptoCount=entries.filter(e=>e.type==='pto').length;
-  // Build note text
+  // Build note text — summary only, detail lives in weekHistory.entries for payroll export
   const weekLabel=`Week of ${fmtDate(lastMonday)} – ${fmtDate(addDays(lastMonday,6))}`;
-  let noteLines=[weekLabel,''];
-  // Tennis section
-  noteLines.push('🎾 TENNIS');
-  DAYS.forEach(day=>{
-    const dayEntries=entries.filter(e=>e.day===day);
-    if(!dayEntries.length)return;
-    if(dayEntries[0].type==='pto'){noteLines.push(`  ${day}: PTO`);return;}
-    const dayHrs=dayEntries.reduce((s,e)=>s+(e.hours||0),0);
-    noteLines.push(`  ${day} (${fh(dayHrs)} hrs)`);
-    dayEntries.forEach(e=>noteLines.push(`    · ${e.label} — ${fh(e.hours)} hrs`));
-  });
-  noteLines.push(`  Tennis Total: ${fh(tennisTotalHrs)} hrs`);
-  noteLines.push('');
-  // Childcare section
-  noteLines.push('👶 CHILDCARE');
-  DAYS.forEach(day=>{
-    const hrs=ccByDay[day]||0;
-    const cc=S.childcare[day];
-    if(!cc||!cc.active){noteLines.push(`  ${day}: Day off`);return;}
-    noteLines.push(`  ${day}: ${cc.start} – ${cc.end} (${fh(hrs)} hrs)`);
-  });
-  noteLines.push(`  Childcare Total: ${fh(ccTotalHrs)} hrs`);
-  noteLines.push('');
-  // Grand total
   const netHrs=tennisTotalHrs-ccTotalHrs;
   const netStr=netHrs>=0?`+${fh(netHrs)}`:`-${fh(Math.abs(netHrs))}`;
-  noteLines.push(`📋 NET HOURS: ${netStr} hrs${ptoCount>0?' | PTO: '+ptoCount+' day'+(ptoCount>1?'s':''):''}`)
-  const summary=noteLines.join('\n');
+  const summary=`${weekLabel}\n🎾 Tennis: ${fh(tennisTotalHrs)} hrs\n👶 Childcare: ${fh(ccTotalHrs)} hrs\n📋 Net Hours: ${netStr} hrs${ptoCount>0?' | PTO: '+ptoCount+' day'+(ptoCount>1?'s':''):''}`;
   S.notes.unshift({id:S.nextId++,date:isoDate(new Date()),text:summary});
   // Force immediate save of weekHistory (bypass debounce)
   dbSave('weekHistory', S.weekHistory);
@@ -1490,7 +1465,6 @@ function generateExport(){
   const cur=new Date(startStr+'T12:00:00');
   const end=new Date(endStr+'T12:00:00');
   const today=isoDate(new Date());
-  const multipleMatches=[];
 
   while(cur<=end){
     const dow=cur.getDay();
@@ -1539,23 +1513,11 @@ function generateExport(){
         }
         liveSlots.sort((a,b)=>a.startM-b.startM);
         liveSlots.forEach(s=>{
-          if(ss(s)==='available'||ss(s)==='blocked')return; // Skip open/unfilled slots
+          if(ss(s)==='available'||ss(s)==='blocked')return;
           const hrs=shr(s);
           if(hrs===0)return;
-          let label=s.label;
-          if(s.type==='private'){
-            if(s.roster&&s.roster.length){
-              const lastName=s.roster[0];
-              const matches=S.people.filter(p=>p.name.split(' ').pop().toLowerCase()===lastName.toLowerCase());
-              if(matches.length===1){label=`Lesson — ${matches[0].name}`;}
-              else if(matches.length>1){
-                label=`Lesson — ${lastName}`;
-                multipleMatches.push({date:fmtD,lastName});
-              } else {label=`Lesson — ${lastName}`;}
-            }
-          }
           const hrsStr=hrs%1===0?hrs.toString():(Math.round(hrs*2)/2).toString();
-          rows.push([fmtD,label,hrsStr]);
+          rows.push([fmtD,s.label,hrsStr]);
         });
       }
     }
@@ -1572,17 +1534,7 @@ function generateExport(){
   // Build tab-separated text
   const tab='\t',nl='\n';const tsv=rows.map(r=>r.join(tab)).join(nl);
 
-  // Show result
-  let warningHtml='';
-  if(multipleMatches.length){
-    warningHtml=`<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#92400e">
-      ⚠ Multiple people found with same last name — verify these rows:<br>
-      ${multipleMatches.map(m=>`${m.date}: ${m.lastName}`).join('<br>')}
-    </div>`;
-  }
-
   sm(`<h3>&#128196; Payroll Export</h3>
-    ${warningHtml}
     <p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:8px">Select all text below, copy, then paste into Google Sheets:</p>
     <textarea id="export-out" rows="12" style="font-family:monospace;font-size:11px;background:#f8f8f8;border:1px solid var(--border)" onclick="this.select()" readonly>${tsv}</textarea>
     <div class="ma">
