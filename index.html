@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Summer Schedule v28</title>
@@ -288,9 +288,9 @@ textarea{resize:vertical}
     <div id="sched-controls" style="display:flex;gap:6px;align-items:center"></div>
   </div>
   <div class="week-nav" style="margin-bottom:6px;padding:4px 0">
-    <button class="week-nav-btn" onclick="changeWeek(-1)">←</button>
+    <button class="week-nav-btn" onclick="changeWeek(-1)">&#8592;</button>
     <span class="week-nav-lbl" id="week-label"></span>
-    <button class="week-nav-btn" onclick="changeWeek(1)">→</button>
+    <button class="week-nav-btn" onclick="changeWeek(1)">&#8594;</button>
   </div>
   <div id="schedule-grid" class="grid"></div>
 </div>
@@ -300,9 +300,9 @@ textarea{resize:vertical}
   <div id="cc-top-note" class="an"></div>
   <div id="cc-event-pills" class="event-pills" style="margin-bottom:8px"></div>
   <div class="week-nav" style="margin-bottom:8px">
-    <button class="week-nav-btn" onclick="changeCCWeek(-1)">←</button>
+    <button class="week-nav-btn" onclick="changeCCWeek(-1)">&#8592;</button>
     <span class="week-nav-lbl" id="cc-week-label"></span>
-    <button class="week-nav-btn" onclick="changeCCWeek(1)">→</button>
+    <button class="week-nav-btn" onclick="changeCCWeek(1)">&#8594;</button>
   </div>
   <div id="cc-grid"></div>
 </div>
@@ -320,7 +320,7 @@ textarea{resize:vertical}
   <div class="sh">
     <span style="font-size:15px;font-weight:bold;color:var(--navy)">Log</span>
     <div style="display:flex;gap:6px">
-      <button class="btn btn-sm" style="background:#1a6b6b" onclick="openPayrollExport()">📄 Export</button>
+      <button class="btn btn-sm" style="background:#1a6b6b" onclick="openPayrollExport()">&#128196; Export</button>
       <button class="btn btn-sm" onclick="openAddNote()">+ Note</button>
     </div>
   </div>
@@ -429,7 +429,7 @@ const hm=(h,m)=>h*60+m;
 function mtd(m){const h=Math.floor(m/60),mm=m%60,ap=h<12?'AM':'PM',h12=h===0?12:h>12?h-12:h;return`${h12}:${String(mm).padStart(2,'0')} ${ap}`;}
 const sdsp=s=>`${mtd(s.startM)}\u2013${mtd(s.endM)}`;
 const shr=s=>{const d=s.endM-s.startM;return d>0?d/60:0;};
-function pti(str){const s=str.trim().toUpperCase();if(s.includes('AM')||s.includes('PM')){const isPM=s.includes('PM');const clean=s.replace('AM','').replace('PM','').trim();const c=clean.indexOf(':');let h=c===-1?parseInt(clean):parseInt(clean.slice(0,c));const m=c===-1?0:parseInt(clean.slice(c+1)||'0');if(isPM&&h!==12)h+=12;if(!isPM&&h===12)h=0;return h*60+m;}const c=s.indexOf(':');const h=c===-1?parseInt(s):parseInt(s.slice(0,c));const m=c===-1?0:parseInt(s.slice(c+1)||'0');// With or without colon: 1-6 = PM, 7-11 = AM, 12 = noon
+function pti(str){const s=str.trim().toUpperCase().replace(/;/g,':');if(s.includes('AM')||s.includes('PM')){const isPM=s.includes('PM');const clean=s.replace('AM','').replace('PM','').trim();const c=clean.indexOf(':');let h=c===-1?parseInt(clean):parseInt(clean.slice(0,c));const m=c===-1?0:parseInt(clean.slice(c+1)||'0');if(isPM&&h!==12)h+=12;if(!isPM&&h===12)h=0;return h*60+m;}const c=s.indexOf(':');const h=c===-1?parseInt(s):parseInt(s.slice(0,c));const m=c===-1?0:parseInt(s.slice(c+1)||'0');// With or without colon: 1-6 = PM, 7-11 = AM, 12 = noon
 let hour=h;if(h>=1&&h<=6)hour=h+12;else if(h===12)hour=12;else hour=h;return hour*60+m;}
 const cp=p=>(p||'').replace(/\D/g,'');
 const pv=p=>cp(p).length===10;
@@ -531,7 +531,7 @@ function autoArchiveLifeEvents(){
 }
 
 const isF=t=>LT[t]?.fixed===true;
-function ss(s){if(isF(s.type))return'fixed';if(s.status==='blocked')return'blocked';if(s.type==='liveball')return s.attendance>0?'full':'available';if(s.status==='booked')return'booked';const cap=LT[s.type]?.cap||1,f=s.roster.length;if(f===0)return'available';if(f>=cap)return'full';if(f>0)return'partial';return'available';}
+function ss(s){if(isF(s.type))return'fixed';if(s.status==='blocked')return'blocked';if(s.type==='liveball')return'available';if(s.status==='booked')return'booked';const cap=LT[s.type]?.cap||1,f=s.roster.length;if(f===0)return'available';if(f>=cap)return'full';if(f>0)return'partial';return'available';}
 
 function st(t){
   const tabs=['schedule','childcare','people','notes','life'];
@@ -607,7 +607,7 @@ function viewLifeEvent(id){
     </div>
     <div class="ma">
       ${!isCamp&&(!pto.active||pto.startDate!==e.startDate)?`<button class="pto-link-btn" onclick="linkVacationToPTO(${e.id})">Activate PTO for these dates</button>`:''}
-      ${role==='mike'?`<button class="btn btn-sm bcx" onclick="cm()">Close</button><button class="btn btn-sm" style="background:#4b5563" onclick="openEditLifeEvent(${e.id})">Edit</button><button class="btn btn-sm bdg" onclick="deleteLifeEvent(${e.id})">Delete</button>`:'<button class="btn btn-sm bcx" onclick="cm()">Close</button>'}
+      ${role==='mike'?`<button class="btn btn-sm bcx" onclick="cm()">Close</button><button class="btn btn-sm bdg" onclick="deleteLifeEvent(${e.id})">Delete</button>`:'<button class="btn btn-sm bcx" onclick="cm()">Close</button>'}
     </div>`);
 }
 
@@ -722,11 +722,11 @@ function openAddLifeEvent(type){
     sm(`<h3>📅 Add Appointment</h3>
       <div class="f"><div class="fl">Type</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-          ${['Match','General','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${t==='Match'?'checked':''}>${t==='Match'?'🎾':t==='General'?'🏠':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
+          ${['Match','General','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${t==='Doctor'?'checked':''}>${t==='Match'?'🎾':t==='General'?'🏠':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
         </div>
       </div>
       <div class="f"><div class="fl">Date</div><input id="le-start" type="date" value="${today}"></div>
-      <div class="f"><div class="fl">Start time</div><input id="le-stime" placeholder="e.g. 2 PM"></div>
+      <div class="f"><div class="fl">Start time</div><input id="le-stime" placeholder="e.g. 2 PM" onblur="this.value=this.value.replace(/;/g,':')"></div>
       <div class="f"><div class="fl">Notes</div><textarea id="le-notes" rows="3" placeholder="e.g. Dr. Smith, 123 Main St..."></textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#dc2626" onclick="saveLifeEvent('appointment')">Save</button></div>`);
   } else {
@@ -808,17 +808,6 @@ function openEditLifeEvent(id){
       </div>
       <div class="f"><label>LOG<span class="log-badge" id="log-badge" style="display:none"></span></label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#d97706" onclick="updateLifeEvent(${id},'camp')">Save</button></div>`);
-  } else if(isAppt){
-    sm(`<h3>🎾 Edit Appointment</h3>
-      <div class="f"><div class="fl">Type</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-          ${['Match','General','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${e.apptType===t?'checked':''}>${t==='Match'?'🎾':t==='General'?'🏠':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
-        </div>
-      </div>
-      <div class="f"><div class="fl">Date</div><input id="le-start" type="date" value="${e.startDate}"></div>
-      <div class="f"><div class="fl">Start time</div><input id="le-stime" placeholder="e.g. 2 PM" value="${e.startTime||''}"></div>
-      <div class="f"><div class="fl">Notes</div><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
-      <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#dc2626" onclick="updateLifeEvent(${id},'appointment')">Save</button></div>`);
   } else {
     sm(`<h3>🌴 Edit Vacation</h3>
       <div class="f"><label>Destination / name</label><input id="le-title" value="${e.title}"></div>
@@ -833,9 +822,9 @@ function openEditLifeEvent(id){
 
 function updateLifeEvent(id,type){
   const e=S.lifeEvents.find(x=>x.id===id);if(!e)return;
-  if(type!=='appointment'){e.title=document.getElementById('le-title')?.value?.trim()||e.title;}
+  e.title=document.getElementById('le-title')?.value?.trim()||e.title;
   e.startDate=document.getElementById('le-start')?.value||e.startDate;
-  e.endDate=type==='appointment'?e.startDate:(document.getElementById('le-end')?.value||e.endDate);
+  e.endDate=document.getElementById('le-end')?.value||e.endDate;
   e.notes=document.getElementById('le-notes')?.value?.trim()||'';
   if(type==='camp'){
     e.days=[...document.querySelectorAll('.le-day:checked')].map(x=>x.value);
@@ -948,10 +937,10 @@ function renderSchedule(){
   // Merge: start with S.slots, apply any week-specific overrides from weekSlots
   let viewSlots=S.slots;
   if(S.weekSlots[vKey]){
-    // Use S.slots as base, apply ALL weekSlots overrides (attendance, _outThisWeek, etc.)
+    // Use S.slots as base, override with weekSlots entries that have _outThisWeek
     viewSlots=S.slots.map(s=>{
       const override=S.weekSlots[vKey].find(x=>x.id===s.id);
-      return override?override:s;
+      return(override&&override._outThisWeek)?override:s;
     });
     // Also include any slots added directly to this week's copy that aren't in template
     S.weekSlots[vKey].forEach(ws=>{
@@ -962,7 +951,7 @@ function renderSchedule(){
 DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
   const m=role==='mike';
   grid.innerHTML=DAYS.map(day=>{
-    const slots=bd[day],open=slots.filter(s=>ss(s)==='available').length,hrs=fhr(slots.filter(s=>ss(s)!=='available'&&ss(s)!=='blocked').reduce((a,s)=>a+shr(s),0));
+    const slots=bd[day],open=slots.filter(s=>ss(s)==='available').length,hrs=fhr(slots.reduce((a,s)=>a+shr(s),0));
     const cc=S.childcare[day];
     // Check if this day has a camp event this view week
     const viewDayDate=isoDate(addDays(viewMon,DAYS.indexOf(day)));
@@ -1174,7 +1163,7 @@ function chphn(){const i=document.getElementById('p-p'),h=document.getElementByI
 function addP(){if(role!=='mike')return;const n=document.getElementById('p-n').value.trim();if(!n)return;const p={id:S.nextId++,name:n,phone:cp(document.getElementById('p-p').value),initials:document.getElementById('p-i').value.trim()||n.split(' ').map(w=>w[0]).join('').toUpperCase(),days:[],notifyAll:document.getElementById('p-a').checked};S.people.push(p);save();cm();renderPeople();}
 
 // ── NOTES ──
-function renderNotes(){if(role!=='mike')return;const list=document.getElementById('notes-list');if(!S.notes.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic">No notes yet.</div>';return;}list.innerHTML=S.notes.slice().reverse().map(n=>`<div class="nb"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:11px;color:#6b7280;font-style:italic">${n.date}</div><button class="btn btn-sm bdg" onclick="delNote(${n.id})" style="padding:4px 10px">\u2715</button></div><div style="font-size:13px;line-height:1.7;margin-top:6px;white-space:pre-wrap;font-family:Georgia,serif">${n.text}</div></div>`).join('');}
+function renderNotes(){if(role!=='mike')return;const list=document.getElementById('notes-list');if(!S.notes.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic">No notes yet.</div>';return;}list.innerHTML=S.notes.slice().reverse().map(n=>`<div class="nb"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:11px;color:#6b7280;font-style:italic">${n.date}</div><button class="btn btn-sm bdg" onclick="delNote(${n.id})" style="padding:4px 10px">\u2715</button></div><div style="font-size:13px;line-height:1.7;margin-top:6px">${n.text}</div></div>`).join('');}
 function delNote(id){if(role!=='mike')return;S.notes=S.notes.filter(n=>n.id!==id);save();renderNotes();}
 function openAddNote(){if(role!=='mike')return;const today=isoDate(new Date());sm(`<h3>Add Note</h3><div class="f"><label>Date</label><input id="nn-d" type="date" value="${today}"></div><div class="f"><label>Note</label><textarea id="nn-t" rows="4"></textarea></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addNote()">Save</button></div>`);}
 function addNote(){if(role!=='mike')return;const n={id:S.nextId++,date:document.getElementById('nn-d').value,text:document.getElementById('nn-t').value};S.notes.push(n);save();cm();renderNotes();}
@@ -1261,10 +1250,10 @@ function shareOpenSlots(){
 function getWeekSlots(weekMondayDate){
   const key=isoDate(weekMondayDate);
   if(!S.weekSlots[key])return S.slots;
-  // Merge: S.slots as base, apply ALL weekSlots overrides (attendance, _outThisWeek, etc.)
+  // Merge: S.slots as base, apply _outThisWeek overrides from weekSlots
   const merged=S.slots.map(s=>{
     const override=S.weekSlots[key].find(x=>x.id===s.id);
-    return override?override:s;
+    return(override&&override._outThisWeek)?override:s;
   });
   // Also include week-only slots not in template
   S.weekSlots[key].forEach(ws=>{
@@ -1372,7 +1361,6 @@ function autoCloseWeek(silent=true){
     daySlots.forEach(s=>{
       if(s.type==='blocked'||s.type==='team-meeting')return;
       if(outIds.has(s.id))return; // Skip OUT this week slots
-      if(ss(s)==='available')return; // Skip unfilled open slots
       const hrs=shr(s);
       if(hrs===0)return;
       let label=s.label;
@@ -1388,7 +1376,6 @@ function autoCloseWeek(silent=true){
     });
     // Add week-only slots (added just for this week, not in template)
     wc.filter(s=>s.day===day&&!S.slots.find(x=>x.id===s.id)&&!s._outThisWeek).forEach(s=>{
-      if(ss(s)==='available')return; // Skip unfilled open slots
       const hrs=shr(s);
       if(hrs>0)entries.push({date,day,label:s.label,hours:hrs,type:s.type,slotId:s.id});
     });
@@ -1398,26 +1385,15 @@ function autoCloseWeek(silent=true){
   // Purge history older than 20 days
   const cutoff=isoDate(addDays(new Date(),-20));
   S.weekHistory=S.weekHistory.filter(w=>w.weekEnd>=cutoff);
-  // Build childcare hours by day
-  const ccByDay={};
-  let ccTotalHrs=0;
-  weekDates.forEach(({day,date})=>{
-    const cc=S.childcare[day];
-    if(!cc||!cc.active){ccByDay[day]=0;return;}
-    const onVac=S.lifeEvents.some(e=>e.type==='vacation'&&!e.archived&&date>=e.startDate&&date<=e.endDate);
-    if(onVac){ccByDay[day]=0;return;}
-    const hrs=(pti(cc.end)-pti(cc.start))/60;
-    ccByDay[day]=hrs>0?hrs:0;
-    ccTotalHrs+=ccByDay[day];
-  });
-  // Build tennis totals
-  const tennisTotalHrs=entries.filter(e=>e.type!=='pto').reduce((sum,e)=>sum+(e.hours||0),0);
+  // Build summary for log note
+  const closedDate=new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
+  const closedTime=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  const totalHrs=entries.reduce((sum,e)=>sum+(e.hours||0),0);
   const ptoCount=entries.filter(e=>e.type==='pto').length;
-  // Build note text — summary only, detail lives in weekHistory.entries for payroll export
-  const weekLabel=`Week of ${fmtDate(lastMonday)} – ${fmtDate(addDays(lastMonday,6))}`;
-  const netHrs=tennisTotalHrs-ccTotalHrs;
-  const netStr=netHrs>=0?`+${fh(netHrs)}`:`-${fh(Math.abs(netHrs))}`;
-  const summary=`${weekLabel}\n🎾 Tennis: ${fh(tennisTotalHrs)} hrs\n👶 Childcare: ${fh(ccTotalHrs)} hrs\n📋 Net Hours: ${netStr} hrs${ptoCount>0?' | PTO: '+ptoCount+' day'+(ptoCount>1?'s':''):''}`;
+  const lessonCount=entries.filter(e=>e.type==='private').length;
+  const clinicCount=entries.filter(e=>e.type==='hp-clinic'||e.type==='fixed').length;
+  const workedDays=[...new Set(entries.filter(e=>e.type!=='pto'&&e.hours>0).map(e=>e.day))].length;
+  const summary=`Week of ${fmtDate(lastMonday)} – ${fmtDate(addDays(lastMonday,6))} | Total: ${fh(totalHrs)} hrs | ${workedDays} days worked${ptoCount>0?' | PTO: '+ptoCount+' day'+(ptoCount>1?'s':''):''} | Lessons: ${lessonCount} | Stamped: ${closedDate} ${closedTime}`;
   S.notes.unshift({id:S.nextId++,date:isoDate(new Date()),text:summary});
   // Force immediate save of weekHistory (bypass debounce)
   dbSave('weekHistory', S.weekHistory);
@@ -1465,6 +1441,7 @@ function generateExport(){
   const cur=new Date(startStr+'T12:00:00');
   const end=new Date(endStr+'T12:00:00');
   const today=isoDate(new Date());
+  const multipleMatches=[];
 
   while(cur<=end){
     const dow=cur.getDay();
@@ -1498,43 +1475,48 @@ function generateExport(){
           });
         }
       } else {
-        // Use live slots (future or unstamped weeks) — merge weekSlots same as renderSchedule
-        const weekMon2=mondayOf(cur);
-        const wKey2=isoDate(weekMon2);
-        let liveSlots=S.slots.filter(s=>s.day===day&&s.type!=='blocked');
-        if(S.weekSlots[wKey2]){
-          liveSlots=liveSlots.map(s=>{
-            const ov=S.weekSlots[wKey2].find(x=>x.id===s.id);
-            return ov?ov:s;
-          });
-          S.weekSlots[wKey2].forEach(ws=>{
-            if(!S.slots.find(s=>s.id===ws.id)&&ws.day===day&&ws.type!=='blocked')liveSlots.push(ws);
-          });
-        }
-        liveSlots.sort((a,b)=>a.startM-b.startM);
-        liveSlots.forEach(s=>{
-          if(ss(s)==='available'||ss(s)==='blocked')return;
+        // Use live slots (future or unstamped weeks)
+        const daySlots=S.slots.filter(s=>s.day===day&&s.type!=='blocked').sort((a,b)=>a.startM-b.startM);
+        daySlots.forEach(s=>{
           const hrs=shr(s);
           if(hrs===0)return;
+          let label=s.label;
+          if(s.type==='private'){
+            if(s.roster&&s.roster.length){
+              const lastName=s.roster[0];
+              const matches=S.people.filter(p=>p.name.split(' ').pop().toLowerCase()===lastName.toLowerCase());
+              if(matches.length===1){label=`Lesson — ${matches[0].name}`;}
+              else if(matches.length>1){
+                label=`Lesson — ${lastName}`;
+                multipleMatches.push({date:fmtD,lastName});
+              } else {label=`Lesson — ${lastName}`;}
+            } else {
+              // Open/available slot — include as open
+              label=s.label||'Lesson (open)';
+            }
+          }
           const hrsStr=hrs%1===0?hrs.toString():(Math.round(hrs*2)/2).toString();
-          rows.push([fmtD,s.label,hrsStr]);
+          rows.push([fmtD,label,hrsStr]);
         });
       }
     }
     cur.setDate(cur.getDate()+1);
   }
 
-  // Calculate total exported hours
-  const exportTotal=rows.slice(1).filter(r=>r[1]!=='PTO').reduce((sum,r)=>sum+(parseFloat(r[2])||0),0);
-  const exportedAt=new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})+' '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-  const exportNote=`📄 Payroll export run — ${fmtDate(new Date(startStr+'T12:00:00'))} – ${fmtDate(new Date(endStr+'T12:00:00'))} | Total: ${fh(exportTotal)} hrs | Exported: ${exportedAt}`;
-  S.notes.unshift({id:S.nextId++,date:isoDate(new Date()),text:exportNote});
-  save();
-
   // Build tab-separated text
   const tab='\t',nl='\n';const tsv=rows.map(r=>r.join(tab)).join(nl);
 
+  // Show result
+  let warningHtml='';
+  if(multipleMatches.length){
+    warningHtml=`<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#92400e">
+      ⚠ Multiple people found with same last name — verify these rows:<br>
+      ${multipleMatches.map(m=>`${m.date}: ${m.lastName}`).join('<br>')}
+    </div>`;
+  }
+
   sm(`<h3>&#128196; Payroll Export</h3>
+    ${warningHtml}
     <p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:8px">Select all text below, copy, then paste into Google Sheets:</p>
     <textarea id="export-out" rows="12" style="font-family:monospace;font-size:11px;background:#f8f8f8;border:1px solid var(--border)" onclick="this.select()" readonly>${tsv}</textarea>
     <div class="ma">
@@ -1762,6 +1744,5 @@ function reinstateThisWeek(slotId,wKey){
 function sm(html){const o=document.getElementById('modal');o.style.display='flex';o.innerHTML=`<div class="md" onclick="event.stopPropagation()">${html}</div>`;}
 function cm(){document.getElementById('modal').style.display='none';_ps=[];}
 </script>
-
-
-</body></html>
+</body>
+</html>
