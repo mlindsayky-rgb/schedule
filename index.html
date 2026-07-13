@@ -1405,12 +1405,12 @@ function autoCloseWeek(silent=true){
 
 function checkAutoClose(){
   if(role!=='mike')return;
-  // Run auto-close on Sunday — stamps the current week before Monday changes
+  // Run auto-close on Saturday — stamps Mon-Fri week just completed
   const today=new Date();
   const dow=today.getDay();
-  if(dow===0){// Sunday — close current week
+  if(dow===6){// Saturday — stamp the week just completed
     autoCloseWeek(true);
-  } else if(dow===1){// Monday — close last week as fallback if missed Sunday
+  } else if(dow===0||dow===1){// Sunday/Monday fallback if missed Saturday
     autoCloseWeek(true);
   }
 }
@@ -1541,7 +1541,9 @@ function computeWAG(){
   const now=new Date();
   const todayStr=isoDate(now);
   const nowMinutes=now.getHours()*60+now.getMinutes();
-  const viewMon=mondayOf(new Date()); // always current week for summary
+  // On Saturday: show upcoming week so you can plan ahead after stamping
+  const todayDow=new Date().getDay();
+  const viewMon=todayDow===6?addDays(mondayOf(new Date()),7):mondayOf(new Date());
   const viewSlots=getWeekSlots(viewMon);
 
   // TENNIS
