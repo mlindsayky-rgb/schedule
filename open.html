@@ -198,10 +198,19 @@ async function load(){
 
 function getOpenSlotsForWeek(weekDays, weekMondayStr){
   const weekSlotsToUse=getSlotsForWeek(weekMondayStr);
+  const now=new Date();
+  const todayStr=isoDate(now);
+  const nowMinutes=now.getHours()*60+now.getMinutes();
   return weekDays.flatMap(({name,date})=>{
     if(isVacationDay(date)||isPTODay(date))return[]; // skip vacation and PTO days
+    if(date<todayStr)return[]; // skip past days
     return weekSlotsToUse
-      .filter(s=>s.day===name&&s.type==='private'&&slotStatus(s)==='available'&&s.status!=='exception')
+      .filter(s=>{
+        if(s.day!==name||s.type!=='private'||slotStatus(s)!=='available'||s.status==='exception')return false;
+        // For today, only show slots that haven't started yet
+        if(date===todayStr&&s.startM<=nowMinutes)return false;
+        return true;
+      })
       .map(s=>({...s,date,dayName:name}));
   }).sort((a,b)=>{
     if(a.date!==b.date)return a.date>b.date?1:-1;
