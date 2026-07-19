@@ -871,7 +871,7 @@ function dayInPTOForWeek(day,weekMonday){
     return isoDate(mon)===isoDate(weekMonday)&&DN[dt.getDay()]===day;
   });
 }
-function ptoProg(){const dates=ptoDates();let total=0,done=0;S.slots.forEach(s=>{const inP=dates.some(d=>DN[new Date(d+'T12:00:00').getDay()]===s.day);if(!inP)return;const st2=ss(s),l=LT[s.type];if(l&&l.fixed){total++;if(pto.subs[s.id])done++;}else if(st2==='booked'||st2==='partial'||st2==='full'){total++;if(pto.notified[s.id])done++;}});return{total,done};}
+function ptoProg(){const dates=ptoDates();let total=0,done=0;S.slots.forEach(s=>{const inP=dates.some(d=>DN[new Date(d+'T12:00:00').getDay()]===s.day);if(!inP)return;const st2=ss(s),l=LT[s.type];if(l&&l.fixed){total++;if(pto.subs[s.id])done++;}else if(s.type==='liveball'){total++;if(pto.subs[s.id])done++;}else if(st2==='booked'||st2==='partial'||st2==='full'){total++;if(pto.notified[s.id])done++;}});return{total,done};}
 function renderPTOBanner(){
   const bn=document.getElementById('pto-banner');
   if(role!=='mike'){bn.style.display='none';return;}
@@ -974,7 +974,7 @@ DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)})
     const isPTO=pto.active&&dayInPTOForWeek(day,viewMon)&&m;
     const acts=slots.filter(s=>{const st2=ss(s),l=LT[s.type];return(l&&l.fixed)||(st2==='booked'||st2==='partial'||st2==='full');});
     const allDone=isPTO&&acts.length>0&&acts.every(s=>{const l=LT[s.type];return l&&l.fixed?!!pto.subs[s.id]:!!pto.notified[s.id];});
-    const hasPL=isPTO&&slots.some(s=>{const st2=ss(s);return!isF(s.type)&&(st2==='booked'||st2==='partial'||st2==='full')&&!pto.notified[s.id];});
+    const hasPL=isPTO&&slots.some(s=>{const st2=ss(s);return!isF(s.type)&&s.type!=='liveball'&&(st2==='booked'||st2==='partial'||st2==='full')&&!pto.notified[s.id];});
     return`<div class="day-block${isPTO?(allDone?' pto-done':' pto-day'):''}">
       <div class="day-header">
         <div style="display:flex;align-items:baseline"><span class="day-name">${day}</span>${hrs&&!isPTO?`<span class="day-hours">(${hrs})</span>`:''}</div>
@@ -984,7 +984,7 @@ DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)})
         ${slots.map(s=>{
           const st2=ss(s),l=LT[s.type]||LT.blocked,cap=l.cap,fil=s.roster.length,av=st2==='available';
           if(isPTO){
-            if(l.fixed){const sub=pto.subs[s.id];return`<div class="slot ${sub?'pto-sub-done':'pto-sub-needed'}" onclick="openSubModal(${s.id})"><span class="slot-time">${sdsp(s)}</span><div class="slot-body"><span class="slot-lbl">${s.label}</span></div><div class="slot-right">${sub?`<span class="pbg">&#10003; ${sub}</span>`:`<span class="pbr">Sub needed</span>`}</div></div>`;}
+            if(l.fixed||s.type==='liveball'){const sub=pto.subs[s.id];return`<div class="slot ${sub?'pto-sub-done':'pto-sub-needed'}" onclick="openSubModal(${s.id})"><span class="slot-time">${sdsp(s)}</span><div class="slot-body"><span class="slot-lbl">${s.label}</span></div><div class="slot-right">${sub?`<span class="pbg">&#10003; ${sub}</span>`:`<span class="pbr">Sub needed</span>`}</div></div>`;}
             if(st2==='booked'||st2==='partial'||st2==='full'){const nt=pto.notified[s.id];return`<div class="slot ${nt?'pto-notify-done':'pto-notify-needed'}" onclick="openNotifyModal(${s.id})"><span class="slot-time">${sdsp(s)}</span><div class="slot-body"><span class="slot-lbl">${s.label}</span></div><div class="slot-right">${nt?`<span class="pbg">&#10003; Notified</span>`:`<span class="pbr">Cancel lesson</span>`}</div></div>`;}
             return`<div class="slot pto-dim"><span class="slot-time">${sdsp(s)}</span><div class="slot-body"><div class="slot-lbl" style="color:#9ca3af">${s.label}</div></div></div>`;
           }
