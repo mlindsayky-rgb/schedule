@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Summer Schedule v28</title>
@@ -124,8 +124,6 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .pill-camp:hover{background:#bfdbfe}
 .pill-vacation{background:var(--life-bg);color:var(--life-text);border:1px solid var(--life-border);font-size:11px;padding:4px 11px;border-radius:20px;font-weight:600;cursor:pointer;transition:background .15s}
 .pill-vacation:hover{background:#bfdbfe}
-.pill-appt{background:#fff5f5;color:#991b1b;border:1px solid #fca5a5;font-size:11px;padding:4px 11px;border-radius:20px;font-weight:600;cursor:pointer;transition:background .15s}
-.pill-appt:hover{background:#fee2e2}
 /* REQUEST BANNER */
 .req-banner{background:#dc2626;color:#fff;padding:7px 16px;font-size:12px;font-family:Georgia,serif;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s}
 .req-banner:hover{background:#b91c1c}
@@ -189,7 +187,7 @@ textarea{resize:vertical}
 .cd{border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden;background:#fff}
 .cdh{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--navy)}
 .cdt{font-weight:bold;font-size:13px;color:#fff;letter-spacing:.06em;text-transform:uppercase}
-.cdhr{font-size:12px;color:rgba(255,255,255,.6);font-style:italic;white-space:nowrap}
+.cdhr{font-size:12px;color:rgba(255,255,255,.6);font-style:italic}
 .cdb{padding:12px}
 .cdnl{font-size:11px;color:#6b7280;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;display:flex;justify-content:space-between}
 .cdsr{display:flex;justify-content:flex-end;margin-top:6px}
@@ -288,9 +286,9 @@ textarea{resize:vertical}
     <div id="sched-controls" style="display:flex;gap:6px;align-items:center"></div>
   </div>
   <div class="week-nav" style="margin-bottom:6px;padding:4px 0">
-    <button class="week-nav-btn" onclick="changeWeek(-1)">←</button>
+    <button class="week-nav-btn" onclick="changeWeek(-1)">&#8592;</button>
     <span class="week-nav-lbl" id="week-label"></span>
-    <button class="week-nav-btn" onclick="changeWeek(1)">→</button>
+    <button class="week-nav-btn" onclick="changeWeek(1)">&#8594;</button>
   </div>
   <div id="schedule-grid" class="grid"></div>
 </div>
@@ -300,9 +298,9 @@ textarea{resize:vertical}
   <div id="cc-top-note" class="an"></div>
   <div id="cc-event-pills" class="event-pills" style="margin-bottom:8px"></div>
   <div class="week-nav" style="margin-bottom:8px">
-    <button class="week-nav-btn" onclick="changeCCWeek(-1)">←</button>
+    <button class="week-nav-btn" onclick="changeCCWeek(-1)">&#8592;</button>
     <span class="week-nav-lbl" id="cc-week-label"></span>
-    <button class="week-nav-btn" onclick="changeCCWeek(1)">→</button>
+    <button class="week-nav-btn" onclick="changeCCWeek(1)">&#8594;</button>
   </div>
   <div id="cc-grid"></div>
 </div>
@@ -320,7 +318,7 @@ textarea{resize:vertical}
   <div class="sh">
     <span style="font-size:15px;font-weight:bold;color:var(--navy)">Log</span>
     <div style="display:flex;gap:6px">
-      <button class="btn btn-sm" style="background:#1a6b6b" onclick="openPayrollExport()">📄 Export</button>
+      <button class="btn btn-sm" style="background:#1a6b6b" onclick="openPayrollExport()">&#128196; Export</button>
       <button class="btn btn-sm" onclick="openAddNote()">+ Note</button>
     </div>
   </div>
@@ -429,8 +427,7 @@ const hm=(h,m)=>h*60+m;
 function mtd(m){const h=Math.floor(m/60),mm=m%60,ap=h<12?'AM':'PM',h12=h===0?12:h>12?h-12:h;return`${h12}:${String(mm).padStart(2,'0')} ${ap}`;}
 const sdsp=s=>`${mtd(s.startM)}\u2013${mtd(s.endM)}`;
 const shr=s=>{const d=s.endM-s.startM;return d>0?d/60:0;};
-function pti(str){const s=str.trim().toUpperCase();if(s.includes('AM')||s.includes('PM')){const isPM=s.includes('PM');const clean=s.replace('AM','').replace('PM','').trim();const c=clean.indexOf(':');let h=c===-1?parseInt(clean):parseInt(clean.slice(0,c));const m=c===-1?0:parseInt(clean.slice(c+1)||'0');if(isPM&&h!==12)h+=12;if(!isPM&&h===12)h=0;return h*60+m;}const c=s.indexOf(':');const h=c===-1?parseInt(s):parseInt(s.slice(0,c));const m=c===-1?0:parseInt(s.slice(c+1)||'0');// With or without colon: 1-6 = PM, 7-11 = AM, 12 = noon
-let hour=h;if(h>=1&&h<=6)hour=h+12;else if(h===12)hour=12;else hour=h;return hour*60+m;}
+function pti(str){const s=str.trim().toUpperCase();if(s.includes('AM')||s.includes('PM')){const isPM=s.includes('PM');const clean=s.replace('AM','').replace('PM','').trim();const c=clean.indexOf(':');let h=c===-1?parseInt(clean):parseInt(clean.slice(0,c));const m=c===-1?0:parseInt(clean.slice(c+1)||'0');if(isPM&&h!==12)h+=12;if(!isPM&&h===12)h=0;return h*60+m;}const c=s.indexOf(':');const h=c===-1?parseInt(s):parseInt(s.slice(0,c));const m=c===-1?0:parseInt(s.slice(c+1)||'0');let hour=h;if(h>=1&&h<=6)hour=h+12;else if(h===12)hour=12;else hour=h;return hour*60+m;}
 const cp=p=>(p||'').replace(/\D/g,'');
 const pv=p=>cp(p).length===10;
 const gln=n=>{const p=n.trim().split(' ');return p[p.length-1];};
@@ -441,7 +438,7 @@ function mondayOf(date){const d=new Date(date);const dow=d.getDay();const diff=d
 function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
 function fmtDate(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
 function fmtDateLong(str){return new Date(str+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric'});}
-function isoDate(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${day}`;}
+function isoDate(d){return d.toISOString().slice(0,10);}
 function dateInRange(dateStr,startStr,endStr){return dateStr>=startStr&&dateStr<=endStr;}
 
 // Current view week offset (0=this week)
@@ -531,7 +528,7 @@ function autoArchiveLifeEvents(){
 }
 
 const isF=t=>LT[t]?.fixed===true;
-function ss(s){if(isF(s.type))return'fixed';if(s.status==='blocked')return'blocked';if(s.type==='liveball')return s.attendance>0?'full':'available';if(s.status==='booked')return'booked';const cap=LT[s.type]?.cap||1,f=s.roster.length;if(f===0)return'available';if(f>=cap)return'full';if(f>0)return'partial';return'available';}
+function ss(s){if(isF(s.type))return'fixed';if(s.status==='blocked')return'blocked';if(s.type==='liveball')return'available';if(s.status==='booked')return'booked';const cap=LT[s.type]?.cap||1,f=s.roster.length;if(f===0)return'available';if(f>=cap)return'full';if(f>0)return'partial';return'available';}
 
 function st(t){
   const tabs=['schedule','childcare','people','notes','life'];
@@ -577,13 +574,13 @@ function renderEventPills(containerId,events,isReminder=false){
   const el=document.getElementById(containerId);if(!el)return;
   if(!events.length){el.innerHTML='';return;}
   el.innerHTML=events.map(e=>{
-    const isAppt=e.type==='appointment';
-    const cls=e.type==='camp'?'pill-camp':isAppt?'pill-appt':'pill-vacation';
-    const label=e.type==='camp'?'Camp Week!':isAppt?`${e.apptIcon||'📅'} ${e.apptType||'Appointment'}`:'Vacation Week!';
+    const cls=e.type==='camp'?'pill-camp':'pill-vacation';
+    const label=e.type==='camp'?'Camp Week!':'Vacation Week!';
     if(isReminder){
-      return`<span class="${cls}" onclick="viewLifeEvent(${e.id})" style="opacity:.85;font-weight:500">&#128198; Next: ${label} — ${e.title||''}</span>`;
+      // Next week reminder — softer style with "Next week:" prefix
+      return`<span class="${cls}" onclick="viewLifeEvent(${e.id})" style="opacity:.75;font-weight:500">&#128198; Next week: ${label.replace('!','')} — ${e.title}</span>`;
     }
-    return`<span class="${cls}" onclick="viewLifeEvent(${e.id})">${label}${e.title&&!isAppt?' — '+e.title:''}</span>`;
+    return`<span class="${cls}" onclick="viewLifeEvent(${e.id})">${label} — ${e.title}</span>`;
   }).join('');
 }
 
@@ -599,7 +596,7 @@ function viewLifeEvent(id){
     <div class="life-card-body">
       <div style="margin-bottom:8px"><span class="life-card-type ${e.type}">${e.type}</span></div>
       ${isCamp?`<div><strong>Days:</strong> ${daysStr||'—'}</div><div><strong>Times:</strong> ${timesStr||'—'}</div><div><strong>Kids:</strong> ${kidsStr||'—'}</div>`:''}
-      ${isAppt?`<div><strong>Type:</strong> ${e.apptIcon||''} ${e.apptType||'Appointment'}</div><div><strong>Time:</strong> ${e.startTime?mtd(pti(e.startTime)):'—'}</div>`:''}
+      ${isAppt?`<div><strong>Type:</strong> ${e.apptIcon||''} ${e.apptType||'Appointment'}</div><div><strong>Time:</strong> ${e.startTime||'—'}</div>`:''}
       ${!isCamp?`<div><strong>Dates:</strong> ${fmtDateLong(e.startDate)} – ${fmtDateLong(e.endDate)}</div>`:''}
       ${isCamp?`<div><strong>Dates:</strong> ${fmtDateLong(e.startDate)} – ${fmtDateLong(e.endDate)}</div>`:''}
       ${e.notes?`<div style="margin-top:8px;font-style:italic;color:var(--gray)">${e.notes}</div>`:''}
@@ -607,7 +604,7 @@ function viewLifeEvent(id){
     </div>
     <div class="ma">
       ${!isCamp&&(!pto.active||pto.startDate!==e.startDate)?`<button class="pto-link-btn" onclick="linkVacationToPTO(${e.id})">Activate PTO for these dates</button>`:''}
-      ${role==='mike'?`<button class="btn btn-sm bcx" onclick="cm()">Close</button><button class="btn btn-sm" style="background:#4b5563" onclick="openEditLifeEvent(${e.id})">Edit</button><button class="btn btn-sm bdg" onclick="deleteLifeEvent(${e.id})">Delete</button>`:'<button class="btn btn-sm bcx" onclick="cm()">Close</button>'}
+      ${role==='mike'?`<button class="btn btn-sm bcx" onclick="cm()">Close</button><button class="btn btn-sm bdg" onclick="deleteLifeEvent(${e.id})">Delete</button>`:'<button class="btn btn-sm bcx" onclick="cm()">Close</button>'}
     </div>`);
 }
 
@@ -617,7 +614,7 @@ function linkVacationToPTO(id){
     if(!confirm(`PTO is already active (${pto.startDate} to ${pto.endDate}). Replace with vacation dates?`))return;
   }
   pto.active=true;pto.startDate=e.startDate;pto.endDate=e.endDate;
-  pto.subs={};pto.notified={};pto.viewWeekOffset=0;savePTONow();
+  pto.subs={};pto.notified={};pto.viewWeekOffset=0;
   // Auto-mark vacation days as childcare day off
   applyVacationToChildcare(e.startDate,e.endDate);
   save();cm();renderSchedule();renderPTOBanner();
@@ -722,7 +719,7 @@ function openAddLifeEvent(type){
     sm(`<h3>📅 Add Appointment</h3>
       <div class="f"><div class="fl">Type</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-          ${['Match','General','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${t==='Match'?'checked':''}>${t==='Match'?'🎾':t==='General'?'🏠':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
+          ${['Mom Match','Dad Match','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${t==='Doctor'?'checked':''}>${t==='Mom Match'||t==='Dad Match'?'🎾':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
         </div>
       </div>
       <div class="f"><div class="fl">Date</div><input id="le-start" type="date" value="${today}"></div>
@@ -768,7 +765,7 @@ function saveLifeEvent(type){
     e.endDate=e.startDate; // single day
     e.apptType=document.querySelector('input[name="appt-type"]:checked')?.value||'Doctor';
     e.startTime=document.getElementById('le-stime')?.value?.trim()||'';
-    const icons={'Match':'🎾','General':'🏠','Service':'🔨','Doctor':'➕'};
+    const icons={'Mom Match':'🎾','Dad Match':'🎾','Service':'🔨','Doctor':'➕'};
     e.apptIcon=icons[e.apptType]||'📅';
   }
   S.lifeEvents.push(e);save();cm();renderLife();renderSchedule();
@@ -808,17 +805,6 @@ function openEditLifeEvent(id){
       </div>
       <div class="f"><label>LOG<span class="log-badge" id="log-badge" style="display:none"></span></label><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#d97706" onclick="updateLifeEvent(${id},'camp')">Save</button></div>`);
-  } else if(isAppt){
-    sm(`<h3>🎾 Edit Appointment</h3>
-      <div class="f"><div class="fl">Type</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-          ${['Match','General','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${e.apptType===t?'checked':''}>${t==='Match'?'🎾':t==='General'?'🏠':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
-        </div>
-      </div>
-      <div class="f"><div class="fl">Date</div><input id="le-start" type="date" value="${e.startDate}"></div>
-      <div class="f"><div class="fl">Start time</div><input id="le-stime" placeholder="e.g. 2 PM" value="${e.startTime||''}"></div>
-      <div class="f"><div class="fl">Notes</div><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
-      <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#dc2626" onclick="updateLifeEvent(${id},'appointment')">Save</button></div>`);
   } else {
     sm(`<h3>🌴 Edit Vacation</h3>
       <div class="f"><label>Destination / name</label><input id="le-title" value="${e.title}"></div>
@@ -833,9 +819,9 @@ function openEditLifeEvent(id){
 
 function updateLifeEvent(id,type){
   const e=S.lifeEvents.find(x=>x.id===id);if(!e)return;
-  if(type!=='appointment'){e.title=document.getElementById('le-title')?.value?.trim()||e.title;}
+  e.title=document.getElementById('le-title')?.value?.trim()||e.title;
   e.startDate=document.getElementById('le-start')?.value||e.startDate;
-  e.endDate=type==='appointment'?e.startDate:(document.getElementById('le-end')?.value||e.endDate);
+  e.endDate=document.getElementById('le-end')?.value||e.endDate;
   e.notes=document.getElementById('le-notes')?.value?.trim()||'';
   if(type==='camp'){
     e.days=[...document.querySelectorAll('.le-day:checked')].map(x=>x.value);
@@ -846,7 +832,7 @@ function updateLifeEvent(id,type){
     e.endDate=e.startDate; // single day
     e.apptType=document.querySelector('input[name="appt-type"]:checked')?.value||'Doctor';
     e.startTime=document.getElementById('le-stime')?.value?.trim()||'';
-    const icons={'Match':'🎾','General':'🏠','Service':'🔨','Doctor':'➕'};
+    const icons={'Mom Match':'🎾','Dad Match':'🎾','Service':'🔨','Doctor':'➕'};
     e.apptIcon=icons[e.apptType]||'📅';
   }
   save();cm();renderLife();renderSchedule();
@@ -893,15 +879,7 @@ function renderPTOBanner(){
 function ptoNav(d){const wks=ptoWeeks();pto.viewWeekOffset=Math.max(0,Math.min(wks.length-1,pto.viewWeekOffset+d));save();renderSchedule();renderPTOBanner();}
 function openPTO(){if(pto.active){clearPTO();return;}const today=isoDate(new Date());sm(`<h3>&#127774; Set PTO Dates</h3><p style="font-size:13px;color:#6b7280;font-style:italic;margin-bottom:16px">Mon\u2013Fri in this range get flagged. Weekends ignored.</p><div class="f"><label>Start date</label><input id="ps" type="date" value="${today}"></div><div class="f"><label>End date</label><input id="pe" type="date" value="${today}"></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm bpto" onclick="actPTO()">Activate PTO</button></div>`);}
 function actPTO(){const s=document.getElementById('ps').value,e=document.getElementById('pe').value;if(!s||!e||s>e){alert('Please enter a valid date range.');return;}pto.active=true;pto.startDate=s;pto.endDate=e;pto.subs={};pto.notified={};pto.viewWeekOffset=0;save();cm();renderSchedule();renderPTOBanner();}
-async function savePTONow(){
-  // Cancel any pending debounced save to prevent race condition
-  clearTimeout(_st);
-  // Save PTO immediately
-  await dbSave('pto', pto);
-  // Then trigger full save after PTO is confirmed written
-  save();
-}
-function clearPTO(){pto.active=false;pto.startDate=null;pto.endDate=null;pto.subs={};pto.notified={};pto.viewWeekOffset=0;savePTONow();save();renderSchedule();renderPTOBanner();}
+function clearPTO(){pto.active=false;pto.startDate=null;pto.endDate=null;pto.subs={};pto.notified={};pto.viewWeekOffset=0;save();renderSchedule();renderPTOBanner();}
 function openSubModal(sid){const s=S.slots.find(x=>x.id===sid);if(!s)return;const cur=pto.subs[sid]||'',last=Object.values(pto.subs).filter(Boolean).pop()||'';const po=S.people.length?`<div class="ppk" style="max-height:180px;overflow-y:auto">${S.people.map(p=>`<div class="pki" onclick="subSel(${sid},'${p.name.replace(/'/g,"\\'")}')">${p.name}</div>`).join('')}</div>`:'';sm(`<h3>&#128101; Assign Sub</h3><p style="font-size:13px;color:#6b7280;font-style:italic;margin-bottom:14px">${s.label} \u2014 ${s.day}</p>${last&&last!==cur?`<button class="btn btn-sm" style="width:100%;background:#2d6a4f;margin-bottom:10px" onclick="subSel(${sid},'${last.replace(/'/g,"\\'")}')">Use last sub: ${last}</button>`:''}${po}<div class="f" style="margin-top:8px"><label>Or type a name</label><input id="sub-in" placeholder="Coach name" value="${cur}"></div><div class="ma">${cur?`<button class="btn btn-sm bdg" onclick="clrSub(${sid})">Remove sub</button>`:''}<button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSub(${sid})">Save</button></div>`);}
 function subSel(sid,n){const i=document.getElementById('sub-in');if(i)i.value=n;}
 function svSub(sid){const n=document.getElementById('sub-in')?.value?.trim();if(!n){alert('Enter a sub name.');return;}pto.subs[sid]=n;save();cm();renderSchedule();renderPTOBanner();}
@@ -948,10 +926,10 @@ function renderSchedule(){
   // Merge: start with S.slots, apply any week-specific overrides from weekSlots
   let viewSlots=S.slots;
   if(S.weekSlots[vKey]){
-    // Use S.slots as base, apply ALL weekSlots overrides (attendance, _outThisWeek, etc.)
+    // Use S.slots as base, override with weekSlots entries that have _outThisWeek
     viewSlots=S.slots.map(s=>{
       const override=S.weekSlots[vKey].find(x=>x.id===s.id);
-      return override?override:s;
+      return(override&&override._outThisWeek)?override:s;
     });
     // Also include any slots added directly to this week's copy that aren't in template
     S.weekSlots[vKey].forEach(ws=>{
@@ -962,15 +940,15 @@ function renderSchedule(){
 DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
   const m=role==='mike';
   grid.innerHTML=DAYS.map(day=>{
-    const slots=bd[day],open=slots.filter(s=>ss(s)==='available').length,hrs=fhr(slots.filter(s=>ss(s)!=='available'&&ss(s)!=='blocked').reduce((a,s)=>a+shr(s),0));
+    const slots=bd[day],open=slots.filter(s=>ss(s)==='available').length,hrs=fhr(slots.reduce((a,s)=>a+shr(s),0));
     const cc=S.childcare[day];
     // Check if this day has a camp event this view week
     const viewDayDate=isoDate(addDays(viewMon,DAYS.indexOf(day)));
     const campToday=S.lifeEvents.find(e=>e.type==='camp'&&!e.archived&&e.days?.includes(day)&&e.startDate<=viewDayDate&&e.endDate>=viewDayDate);
     const apptToday=S.lifeEvents.filter(e=>e.type==='appointment'&&!e.archived&&e.startDate===viewDayDate);
     const campBadge=campToday?`<span style="font-size:10px;background:#d97706;color:#fff;padding:1px 7px;border-radius:20px;margin-left:6px">⛺ ${campToday.title}</span>`:'';
-    const apptBars=apptToday.map(a=>`<div class="appt-bar" onclick="viewLifeEvent(${a.id})"><span class="appt-bar-time">${a.startTime?mtd(pti(a.startTime)):'—'}</span><span class="appt-bar-icon" style="margin-right:4px">${a.apptIcon||'📅'}</span><span class="appt-bar-text">${a.apptType||'Appointment'}</span></div>`).join('');
-    const ccb=(cc&&cc.active?`<div class="cc-bar"><span class="cc-bar-time">${cc.start} \u2013 ${cc.end}</span><span class="cc-bar-label">Childcare${campBadge}</span></div>`:'')+apptBars;
+    const apptBars=apptToday.map(a=>`<div class="appt-bar" onclick="viewLifeEvent(${a.id})"><span class="appt-bar-time">${a.startTime||'—'}</span><span class="appt-bar-icon" style="margin-right:4px">${a.apptIcon||'📅'}</span><span class="appt-bar-text">${a.apptType||'Appointment'}</span></div>`).join('');
+    const ccb=(cc&&cc.active?`<div class="cc-bar"><span class="cc-bar-time">${cc.start} \u2013 ${cc.end}</span><span class="cc-bar-label">Childcare${campBadge}</span><span class="cc-bar-badge">Coverage</span></div>`:'')+apptBars;
     const isPTO=pto.active&&dayInPTOForWeek(day,viewMon)&&m;
     const acts=slots.filter(s=>{const st2=ss(s),l=LT[s.type];return(l&&l.fixed)||(st2==='booked'||st2==='partial'||st2==='full');});
     const allDone=isPTO&&acts.length>0&&acts.every(s=>{const l=LT[s.type];return l&&l.fixed?!!pto.subs[s.id]:!!pto.notified[s.id];});
@@ -1031,7 +1009,7 @@ function buildReqSuggestion(){const suggestions=_ps.map(pid=>{const p=S.people.f
 function bPPk(sid){const s=S.slots.find(x=>x.id===sid);if(!s)return'';const cap=LT[s.type]?.cap||1,ac=_ps.length>=cap;if(!S.people.length)return`<div class="pke">No people yet.</div>`;return`<div class="ppk">${S.people.map(p=>{const sel=_ps.includes(p.id),dis=!sel&&ac;return`<div class="pki ${sel?'sel':''} ${dis?'dis':''}" onclick="togPP(${sid},${p.id})"><span class="pkn">${p.name}</span>${sel?'<span class="pkc">\u2713</span>':''}</div>`;}).join('')}</div>`;}
 function bRC(sid){if(!_ps.length)return`<span style="font-size:11px;color:var(--gray);font-style:italic">No one selected yet</span>`;return _ps.map(pid=>{const p=S.people.find(x=>x.id===pid);return`<span class="rchip">${p?p.name:'?'} <button onclick="togPP(${sid},${pid})">\u2715</button></span>`;}).join('');}
 function togPP(sid,pid){const s=S.slots.find(x=>x.id===sid);if(!s)return;const cap=LT[s.type]?.cap||1,idx=_ps.indexOf(pid);if(idx>=0)_ps.splice(idx,1);else{if(_ps.length>=cap)return;_ps.push(pid);}const pe=document.getElementById('slot-ppk');if(pe)pe.innerHTML=bPPk(sid);const ce=document.getElementById('slot-rc');if(ce)ce.innerHTML=bRC(sid);autoLbl();const rs=document.getElementById('req-suggestion-area');if(rs)rs.innerHTML=buildReqSuggestion();}
-function editSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;const l=LT[s.type]||LT.blocked,cap=l.cap;_ps=[];s.roster.forEach(n=>{const p=S.people.find(x=>x.name===n||gln(x.name)===n);if(p&&!_ps.includes(p.id))_ps.push(p.id);});const ss2=mtd(s.startM),es=mtd(s.endM);const viewMonCheck=getViewMonday();let rs='';
+function editSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;const l=LT[s.type]||LT.blocked,cap=l.cap;_ps=[];s.roster.forEach(n=>{const p=S.people.find(x=>x.name===n||gln(x.name)===n);if(p&&!_ps.includes(p.id))_ps.push(p.id);});const ss2=mtd(s.startM),es=mtd(s.endM);let rs='';
   if(l.fixed){
     rs=`<div style="font-size:11px;color:#6b3f9e;font-style:italic;padding:6px 0">Fixed — no roster needed</div>`;
   } else if(s.type==='liveball'){
@@ -1053,7 +1031,7 @@ function editSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id)
     rs=`<div class="f"><div class="fl">Roster (${cap} spot${cap!==1?'s':''})</div><div id="slot-rc" class="rr">${bRC(id)}</div><div id="slot-ppk">${bPPk(id)}</div></div><div id="req-suggestion-area">${buildReqSuggestion()}</div>`;
   }
   const stSec=l.fixed||s.type==='liveball'||s.type==='private'?'':`<div class="f"><label>Status</label><select id="e-status"><option value="auto" ${s.status!=='blocked'&&s.status!=='booked'?'selected':''}>Auto</option><option value="booked" ${s.status==='booked'?'selected':''}>Booked</option><option value="blocked" ${s.status==='blocked'?'selected':''}>Blocked</option></select></div>`;
-  sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma">${((s.type==='private'&&(s.status==='booked'||s.roster.length>0)||s.type==='liveball')&&!s._outThisWeek)?`<button class="btn btn-sm" style="background:#d97706;min-width:76px" onclick="markOutThisWeek(${id},'${isoDate(viewMonCheck)}')">OUT this week</button>`:''} ${s._outThisWeek?`<button class="btn btn-sm" style="background:#2d6a4f" onclick="reinstateThisWeek(${id},'${isoDate(viewMonCheck)}')">Reinstate</button>`:''}<button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);
+  sm(`<h3>Edit Slot</h3><div class="f"><label>Label</label><input id="e-label" value="${s.label}"></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="e-start" value="${ss2}"></div><div style="flex:1"><div class="fl">End</div><input id="e-end" value="${es}"></div></div><div class="f"><label>Type</label><select id="e-type" onchange="uch()">${Object.entries(LT).map(([k,v])=>`<option value="${k}" ${s.type===k?'selected':''}>${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="cap-hint">${l.fixed?'Fixed \u2014 no tracking':`Capacity: ${cap}`}</div></div>${stSec}${rs}<div class="ma">${(s.type==='private'&&(s.status==='booked'||s.roster.length>0)&&!s._outThisWeek)?`<button class="btn btn-sm" style="background:#d97706;min-width:76px" onclick="markOutThisWeek(${id})">OUT this week</button>`:''} ${s._outThisWeek?`<button class="btn btn-sm" style="background:#2d6a4f" onclick="reinstateThisWeek(${id})">Reinstate</button>`:''}<button class="btn btn-sm bdg" onclick="delSlot(${id})">Delete</button><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="svSlot(${id})">Save</button></div>`);
 }
 function uch(){const t=document.getElementById('e-type')?.value,l=LT[t],el=document.getElementById('cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
 function svSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);if(!s)return;s.label=document.getElementById('e-label').value;s.startM=pti(document.getElementById('e-start').value);s.endM=pti(document.getElementById('e-end').value);const nt=document.getElementById('e-type').value;if(nt!==s.type){s.type=nt;if(isF(nt)){s.roster=[];s.status='fixed';}else{const nc=LT[nt]?.cap||1;_ps=_ps.slice(0,nc);s.status='auto';}}if(!isF(s.type)){
@@ -1092,43 +1070,18 @@ function addSlot(){if(role!=='mike')return;const type=document.getElementById('n
 function notifySlot(day,sid){if(role!=='mike')return;const slot=S.slots.find(s=>s.id===sid);if(!slot)return;const interested=S.people.filter(p=>p.notifyAll||p.days.includes(day));if(!interested.length){sm(`<h3>No One to Notify</h3><p style="font-size:13px;color:#6b7280;margin-bottom:12px">No people marked as interested in ${day}.</p><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Close</button></div>`);return;}const msg=nmsg(slot,day),enc=encodeURIComponent(msg);const links=interested.map(p=>`<a href="sms:${cp(p.phone)}?body=${enc}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border:1.5px solid #ddd8d0;border-radius:6px;font-size:13px;font-family:Georgia,serif;margin-bottom:8px;color:#1a1a2e;text-decoration:none;background:#faf8f4"><span>${p.name}</span><span style="color:#6b7280;font-size:11px;font-style:italic">${cp(p.phone)} \u203a</span></a>`).join('');sm(`<h3>&#x2708; Notify \u2014 ${day}</h3><div class="mp">${msg}</div><p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:10px">Tap a name to open in Messages:</p>${links}<div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Done</button></div>`);}
 
 // ── CHILDCARE ──
-
-function apptWithinCaregiverHours(e){
-  // Only filter appointments — camp and vacation always show
-  if(e.type!=='appointment')return true;
-  // If no start time entered, show it to be safe
-  if(!e.startTime)return true;
-  const apptM=pti(e.startTime);
-  // Get day of week for appointment date
-  const dow=new Date(e.startDate+'T12:00:00').getDay();
-  if(dow<1||dow>5)return false; // weekend
-  const dayName=DAYS[dow-1];
-  const cc=S.childcare[dayName];
-  // If childcare is off that day, don't show
-  if(!cc||!cc.active)return false;
-  const ccStart=pti(cc.start);
-  const ccEnd=pti(cc.end);
-  return apptM>=ccStart&&apptM<ccEnd;
-}
 function renderCC(){
   updateReqBanner();
   // Event pills for childcare — current week full style, next week softer
-  const ccMon=getCCViewMonday();
-  const ccSun=addDays(ccMon,6);
-  // Update week label
-  const ccWkEl=document.getElementById('cc-week-label');
-  if(ccWkEl){const isNow=ccWeekOffset===0,isNxt=ccWeekOffset===1;const pfx=isNow?'This week · ':isNxt?'Next week · ':'';ccWkEl.textContent=pfx+fmtDate(ccMon)+' – '+fmtDate(ccSun);}
-  const ccCurEvts=eventsInWeek(ccMon);
-  const ccNextReminders=ccWeekOffset===0?eventsNextWeek().filter(e=>!ccCurEvts.find(v=>v.id===e.id)&&apptWithinCaregiverHours(e)):[];
-  const ccViewedFiltered=ccCurEvts.filter(e=>apptWithinCaregiverHours(e));
-  renderEventPills('cc-event-pills',ccViewedFiltered,false);
+  const ccCurEvts=eventsInWeek(getCCViewMonday());
+  const ccNextReminders=ccWeekOffset===0?eventsNextWeek().filter(e=>!ccCurEvts.find(v=>v.id===e.id)):[];
+  renderEventPills('cc-event-pills',ccCurEvts,false);
   if(ccNextReminders.length){
     const ccel=document.getElementById('cc-event-pills');
     if(ccel)ccel.innerHTML+=' '+ccNextReminders.map(e=>{
-      const isAppt=e.type==='appointment';
-      const cls=e.type==='camp'?'pill-camp':isAppt?'pill-appt':'pill-vacation';
-      const label=e.type==='camp'?'Camp Week':isAppt?(e.apptIcon||'📅')+' '+(e.apptType||'Appointment'):'Vacation Week';
-      return`<span class="${cls}" onclick="viewLifeEvent(${e.id})" style="opacity:.85;font-weight:500;font-size:11px">&#128198; Next: ${label}${!isAppt?' — '+e.title:''}</span>`;
+      const cls=e.type==='camp'?'pill-camp':'pill-vacation';
+      const label=e.type==='camp'?'Camp Week':'Vacation Week';
+      return`<span class="${cls}" onclick="viewLifeEvent(${e.id})" style="opacity:.7;font-weight:500;font-size:10px">&#128198; Next: ${label} — ${e.title}</span>`;
     }).join(' ');
   }
   document.getElementById('cc-grid').innerHTML=DAYS.map(day=>{
@@ -1174,7 +1127,7 @@ function chphn(){const i=document.getElementById('p-p'),h=document.getElementByI
 function addP(){if(role!=='mike')return;const n=document.getElementById('p-n').value.trim();if(!n)return;const p={id:S.nextId++,name:n,phone:cp(document.getElementById('p-p').value),initials:document.getElementById('p-i').value.trim()||n.split(' ').map(w=>w[0]).join('').toUpperCase(),days:[],notifyAll:document.getElementById('p-a').checked};S.people.push(p);save();cm();renderPeople();}
 
 // ── NOTES ──
-function renderNotes(){if(role!=='mike')return;const list=document.getElementById('notes-list');if(!S.notes.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic">No notes yet.</div>';return;}list.innerHTML=S.notes.slice().reverse().map(n=>`<div class="nb"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:11px;color:#6b7280;font-style:italic">${n.date}</div><button class="btn btn-sm bdg" onclick="delNote(${n.id})" style="padding:4px 10px">\u2715</button></div><div style="font-size:13px;line-height:1.7;margin-top:6px;white-space:pre-wrap;font-family:Georgia,serif">${n.text}</div></div>`).join('');}
+function renderNotes(){if(role!=='mike')return;const list=document.getElementById('notes-list');if(!S.notes.length){list.innerHTML='<div style="color:#6b7280;font-size:13px;font-style:italic">No notes yet.</div>';return;}list.innerHTML=S.notes.slice().reverse().map(n=>`<div class="nb"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:11px;color:#6b7280;font-style:italic">${n.date}</div><button class="btn btn-sm bdg" onclick="delNote(${n.id})" style="padding:4px 10px">\u2715</button></div><div style="font-size:13px;line-height:1.7;margin-top:6px">${n.text}</div></div>`).join('');}
 function delNote(id){if(role!=='mike')return;S.notes=S.notes.filter(n=>n.id!==id);save();renderNotes();}
 function openAddNote(){if(role!=='mike')return;const today=isoDate(new Date());sm(`<h3>Add Note</h3><div class="f"><label>Date</label><input id="nn-d" type="date" value="${today}"></div><div class="f"><label>Note</label><textarea id="nn-t" rows="4"></textarea></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addNote()">Save</button></div>`);}
 function addNote(){if(role!=='mike')return;const n={id:S.nextId++,date:document.getElementById('nn-d').value,text:document.getElementById('nn-t').value};S.notes.push(n);save();cm();renderNotes();}
@@ -1259,18 +1212,9 @@ function shareOpenSlots(){
 
 // Get slots for a specific week — seeds from template if not yet customized
 function getWeekSlots(weekMondayDate){
-  const key=isoDate(weekMondayDate);
-  if(!S.weekSlots[key])return S.slots;
-  // Merge: S.slots as base, apply ALL weekSlots overrides (attendance, _outThisWeek, etc.)
-  const merged=S.slots.map(s=>{
-    const override=S.weekSlots[key].find(x=>x.id===s.id);
-    return override?override:s;
-  });
-  // Also include week-only slots not in template
-  S.weekSlots[key].forEach(ws=>{
-    if(!S.slots.find(s=>s.id===ws.id))merged.push(ws);
-  });
-  return merged;
+  // Always return S.slots as source of truth
+  // weekSlots customization reserved for future per-week overrides
+  return S.slots;
 }
 
 // Save edits to a specific week's slots
@@ -1343,36 +1287,23 @@ function getWeekDates(mondayDate){
 
 function autoCloseWeek(silent=true){
   if(role!=='mike')return;
-  // On Sunday: mondayOf(new Date()) = tomorrow (next Monday)
-  // So go back 7 days to get this week's Monday
-  // On Monday (old behavior): mondayOf = today, -7 = last Monday
-  const today=new Date();
-  const isSunday=today.getDay()===0;
-  // On Sunday: mondayOf goes back to last Monday (6 days ago) — that IS this week's Monday
-  // On Monday: mondayOf = today, -7 = last week's Monday
-  const lastMonday=isSunday?mondayOf(new Date()):addDays(mondayOf(new Date()),-7);
+  const lastMonday=addDays(mondayOf(new Date()),-7);
   const weekStart=isoDate(lastMonday);
   const weekEnd=isoDate(addDays(lastMonday,6));
   // Check if already closed
   if(S.weekHistory.find(w=>w.weekStart===weekStart))return;
   const weekDates=getWeekDates(lastMonday);
-  const wKey=isoDate(lastMonday);
-  const wc=S.weekSlots[wKey]||[];
-  // Get IDs of slots marked OUT for this week
-  const outIds=new Set(wc.filter(s=>s._outThisWeek).map(s=>s.id));
   const entries=[];
   weekDates.forEach(({day,date})=>{
-    const daySlots=S.slots.filter(s=>s.day===day).sort((a,b)=>a.startM-b.startM);
+    const closeMon=addDays(mondayOf(new Date()),-7);const daySlots=getWeekSlots(closeMon).filter(s=>s.day===day).sort((a,b)=>a.startM-b.startM);
     // Check if PTO day
-    const isPTO=ptoDates().includes(date);
+    const isPTO=pto.active&&pto.startDate&&pto.endDate&&date>=pto.startDate&&date<=pto.endDate;
     if(isPTO){
       entries.push({date,day,label:'PTO',hours:0,type:'pto'});
       return;
     }
     daySlots.forEach(s=>{
-      if(s.type==='blocked'||s.type==='team-meeting')return;
-      if(outIds.has(s.id))return; // Skip OUT this week slots
-      if(ss(s)==='available')return; // Skip unfilled open slots
+      if(s.type==='blocked')return;
       const hrs=shr(s);
       if(hrs===0)return;
       let label=s.label;
@@ -1386,55 +1317,25 @@ function autoCloseWeek(silent=true){
       }
       entries.push({date,day,label,hours:hrs,type:s.type,slotId:s.id});
     });
-    // Add week-only slots (added just for this week, not in template)
-    wc.filter(s=>s.day===day&&!S.slots.find(x=>x.id===s.id)&&!s._outThisWeek).forEach(s=>{
-      if(ss(s)==='available')return; // Skip unfilled open slots
-      const hrs=shr(s);
-      if(hrs>0)entries.push({date,day,label:s.label,hours:hrs,type:s.type,slotId:s.id});
-    });
   });
   const record={weekStart,weekEnd,closedAt:new Date().toISOString(),entries};
   S.weekHistory.push(record);
   // Purge history older than 20 days
   const cutoff=isoDate(addDays(new Date(),-20));
   S.weekHistory=S.weekHistory.filter(w=>w.weekEnd>=cutoff);
-  // Build childcare hours by day
-  const ccByDay={};
-  let ccTotalHrs=0;
-  weekDates.forEach(({day,date})=>{
-    const cc=S.childcare[day];
-    if(!cc||!cc.active){ccByDay[day]=0;return;}
-    const onVac=S.lifeEvents.some(e=>e.type==='vacation'&&!e.archived&&date>=e.startDate&&date<=e.endDate);
-    if(onVac){ccByDay[day]=0;return;}
-    const hrs=(pti(cc.end)-pti(cc.start))/60;
-    ccByDay[day]=hrs>0?hrs:0;
-    ccTotalHrs+=ccByDay[day];
-  });
-  // Build tennis totals
-  const tennisTotalHrs=entries.filter(e=>e.type!=='pto').reduce((sum,e)=>sum+(e.hours||0),0);
-  const ptoCount=entries.filter(e=>e.type==='pto').length;
-  // Build note text — summary only, detail lives in weekHistory.entries for payroll export
-  const weekLabel=`Week of ${fmtDate(lastMonday)} – ${fmtDate(addDays(lastMonday,6))}`;
-  const netHrs=tennisTotalHrs-ccTotalHrs;
-  const netStr=netHrs>=0?`+${fh(netHrs)}`:`-${fh(Math.abs(netHrs))}`;
-  const summary=`${weekLabel}\n🎾 Tennis: ${fh(tennisTotalHrs)} hrs\n👶 Childcare: ${fh(ccTotalHrs)} hrs\n📋 Net Hours: ${netStr} hrs${ptoCount>0?' | PTO: '+ptoCount+' day'+(ptoCount>1?'s':''):''}`;
-  S.notes.unshift({id:S.nextId++,date:isoDate(new Date()),text:summary});
-  // Force immediate save of weekHistory (bypass debounce)
-  dbSave('weekHistory', S.weekHistory);
-  dbSave('notes', S.notes);
-  dbSave('nextId', S.nextId);
+  // Add note to log
+  const closedDate=new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
+  const closedTime=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  S.notes.unshift({id:S.nextId++,date:isoDate(new Date()),text:`Auto-closed week of ${fmtDate(lastMonday)} – ${fmtDate(addDays(lastMonday,6))} on ${closedDate} at ${closedTime}`});
   save();
   if(!silent)renderNotes();
 }
 
 function checkAutoClose(){
   if(role!=='mike')return;
-  // Run auto-close on Sunday — stamps the current week before Monday changes
+  // Run auto-close if today is Monday and last week hasn't been closed
   const today=new Date();
-  const dow=today.getDay();
-  if(dow===0){// Sunday — close current week
-    autoCloseWeek(true);
-  } else if(dow===1){// Monday — close last week as fallback if missed Sunday
+  if(today.getDay()===1){// Monday
     autoCloseWeek(true);
   }
 }
@@ -1465,6 +1366,7 @@ function generateExport(){
   const cur=new Date(startStr+'T12:00:00');
   const end=new Date(endStr+'T12:00:00');
   const today=isoDate(new Date());
+  const multipleMatches=[];
 
   while(cur<=end){
     const dow=cur.getDay();
@@ -1498,43 +1400,48 @@ function generateExport(){
           });
         }
       } else {
-        // Use live slots (future or unstamped weeks) — merge weekSlots same as renderSchedule
-        const weekMon2=mondayOf(cur);
-        const wKey2=isoDate(weekMon2);
-        let liveSlots=S.slots.filter(s=>s.day===day&&s.type!=='blocked');
-        if(S.weekSlots[wKey2]){
-          liveSlots=liveSlots.map(s=>{
-            const ov=S.weekSlots[wKey2].find(x=>x.id===s.id);
-            return ov?ov:s;
-          });
-          S.weekSlots[wKey2].forEach(ws=>{
-            if(!S.slots.find(s=>s.id===ws.id)&&ws.day===day&&ws.type!=='blocked')liveSlots.push(ws);
-          });
-        }
-        liveSlots.sort((a,b)=>a.startM-b.startM);
-        liveSlots.forEach(s=>{
-          if(ss(s)==='available'||ss(s)==='blocked')return;
+        // Use live slots (future or unstamped weeks)
+        const daySlots=S.slots.filter(s=>s.day===day&&s.type!=='blocked').sort((a,b)=>a.startM-b.startM);
+        daySlots.forEach(s=>{
           const hrs=shr(s);
           if(hrs===0)return;
+          let label=s.label;
+          if(s.type==='private'){
+            if(s.roster&&s.roster.length){
+              const lastName=s.roster[0];
+              const matches=S.people.filter(p=>p.name.split(' ').pop().toLowerCase()===lastName.toLowerCase());
+              if(matches.length===1){label=`Lesson — ${matches[0].name}`;}
+              else if(matches.length>1){
+                label=`Lesson — ${lastName}`;
+                multipleMatches.push({date:fmtD,lastName});
+              } else {label=`Lesson — ${lastName}`;}
+            } else {
+              // Open/available slot — include as open
+              label=s.label||'Lesson (open)';
+            }
+          }
           const hrsStr=hrs%1===0?hrs.toString():(Math.round(hrs*2)/2).toString();
-          rows.push([fmtD,s.label,hrsStr]);
+          rows.push([fmtD,label,hrsStr]);
         });
       }
     }
     cur.setDate(cur.getDate()+1);
   }
 
-  // Calculate total exported hours
-  const exportTotal=rows.slice(1).filter(r=>r[1]!=='PTO').reduce((sum,r)=>sum+(parseFloat(r[2])||0),0);
-  const exportedAt=new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})+' '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-  const exportNote=`📄 Payroll export run — ${fmtDate(new Date(startStr+'T12:00:00'))} – ${fmtDate(new Date(endStr+'T12:00:00'))} | Total: ${fh(exportTotal)} hrs | Exported: ${exportedAt}`;
-  S.notes.unshift({id:S.nextId++,date:isoDate(new Date()),text:exportNote});
-  save();
-
   // Build tab-separated text
   const tab='\t',nl='\n';const tsv=rows.map(r=>r.join(tab)).join(nl);
 
+  // Show result
+  let warningHtml='';
+  if(multipleMatches.length){
+    warningHtml=`<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#92400e">
+      ⚠ Multiple people found with same last name — verify these rows:<br>
+      ${multipleMatches.map(m=>`${m.date}: ${m.lastName}`).join('<br>')}
+    </div>`;
+  }
+
   sm(`<h3>&#128196; Payroll Export</h3>
+    ${warningHtml}
     <p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:8px">Select all text below, copy, then paste into Google Sheets:</p>
     <textarea id="export-out" rows="12" style="font-family:monospace;font-size:11px;background:#f8f8f8;border:1px solid var(--border)" onclick="this.select()" readonly>${tsv}</textarea>
     <div class="ma">
@@ -1572,19 +1479,8 @@ function computeWAG(){
     const hrs=shr(s);
     if(hrs===0)return;
     const slotPast=slotDate<todayStr||(slotDate===todayStr&&s.endM<=nowMinutes);
-    const slotInProgress=slotDate===todayStr&&s.startM<=nowMinutes&&s.endM>nowMinutes;
     const slotFuture=slotDate>todayStr||(slotDate===todayStr&&s.startM>nowMinutes);
-    // Check if PTO day — use ptoDates() for accurate weekday-only check
-    const isSlotPTO=ptoDates().includes(slotDate);
-    // Check if OUT this week (from weekSlots)
-    const wKey=isoDate(viewMon);
-    const weekCopy=S.weekSlots[wKey];
-    const weekSlot=weekCopy?weekCopy.find(x=>x.id===s.id):null;
-    const isOut=weekSlot&&weekSlot._outThisWeek;
-    // Check if slot was actually worked (booked/fixed, not open/available)
-    const st2wag=ss(s);
-    const wasWorked=(st2wag==='booked'||st2wag==='partial'||st2wag==='full'||st2wag==='fixed'||(s.type==='liveball'&&(slotPast||slotInProgress)))&&s.type!=='team-meeting';
-    if((slotPast||slotInProgress)&&!isSlotPTO&&!isOut&&wasWorked){
+    if(slotPast){
       worked+=hrs;
     } else if(slotFuture){
       const st2=ss(s);
@@ -1711,9 +1607,10 @@ function markLogSeen(){
   updateLogBadge();
 }
 
-function markOutThisWeek(slotId,wKey){
+function markOutThisWeek(slotId){
   const s=S.slots.find(x=>x.id===slotId);if(!s)return;
-  if(!wKey)wKey=isoDate(getViewMonday());
+  const vMon=getViewMonday();
+  const wKey=isoDate(vMon);
   if(!S.weekSlots[wKey]){
     S.weekSlots[wKey]=S.slots.map(x=>({...x}));
   }
@@ -1723,28 +1620,18 @@ function markOutThisWeek(slotId,wKey){
       ...S.weekSlots[wKey][wi],
       status:'available',
       roster:[],
-      label:s.type==='liveball'?s.label+' (cancelled)':'Lesson (open)',
+      label:'Lesson (open)',
       _outThisWeek:true,
       _originalLabel:s.label,
-      _originalRoster:[...(s.roster||[])]
+      _originalRoster:[...s.roster]
     };
-  } else {
-    // Slot not found in week copy — add it as OUT
-    S.weekSlots[wKey].push({
-      ...s,
-      status:'available',
-      roster:[],
-      label:s.type==='liveball'?s.label+' (cancelled)':'Lesson (open)',
-      _outThisWeek:true,
-      _originalLabel:s.label,
-      _originalRoster:[...(s.roster||[])]
-    });
   }
   save();cm();renderSchedule();
 }
 
-function reinstateThisWeek(slotId,wKey){
-  if(!wKey)wKey=isoDate(getViewMonday());
+function reinstateThisWeek(slotId){
+  const vMon=getViewMonday();
+  const wKey=isoDate(vMon);
   if(!S.weekSlots[wKey])return;
   const wi=S.weekSlots[wKey].findIndex(x=>x.id===slotId);
   if(wi>=0){
@@ -1763,6 +1650,5 @@ function reinstateThisWeek(slotId,wKey){
 function sm(html){const o=document.getElementById('modal');o.style.display='flex';o.innerHTML=`<div class="md" onclick="event.stopPropagation()">${html}</div>`;}
 function cm(){document.getElementById('modal').style.display='none';_ps=[];}
 </script>
-
-
-</body></html>
+</body>
+</html>
