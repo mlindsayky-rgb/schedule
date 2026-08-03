@@ -593,8 +593,12 @@ function eventsInWeek(weekMonday){
 
 function eventsNextWeek(){return eventsInWeek(getNextMonday());}
 
+// Activity/School already render inline as kid-bars on the day — no pill needed
+const isKidBar=e=>e.type==='appointment'&&(e.apptType==='Activity'||e.apptType==='School');
+
 function renderEventPills(containerId,events,isReminder=false){
   const el=document.getElementById(containerId);if(!el)return;
+  events=events.filter(e=>!isKidBar(e));
   if(!events.length){el.innerHTML='';return;}
   el.innerHTML=events.map(e=>{
     const isAppt=e.type==='appointment';
@@ -1021,16 +1025,17 @@ function renderSchedule(){
   renderWeekLabel();
   // Event pills: show for viewed week, PLUS next week reminder when on current week
   const viewedEvents=eventsInWeek(getViewMonday());
-  const nextWeekReminders=weekOffset===0?eventsNextWeek().filter(e=>!viewedEvents.find(v=>v.id===e.id)):[];
+  const nextWeekReminders=weekOffset===0?eventsNextWeek().filter(e=>!viewedEvents.find(v=>v.id===e.id)&&!isKidBar(e)):[];
   // Render viewed week events (full style)
   renderEventPills('event-pills',viewedEvents,false);
   // Append next week reminders (softer style) if on current week
   if(nextWeekReminders.length){
     const el=document.getElementById('event-pills');
     if(el)el.innerHTML+=' '+nextWeekReminders.map(e=>{
-      const cls=e.type==='camp'?'pill-camp':'pill-vacation';
-      const label=e.type==='camp'?'Camp Week':'Vacation Week';
-      return`<span class="${cls}" onclick="viewLifeEvent(${e.id})" style="opacity:.7;font-weight:500;font-size:10px">&#128198; Next: ${label} — ${e.title}</span>`;
+      const isAppt=e.type==='appointment';
+      const cls=e.type==='camp'?'pill-camp':isAppt?'pill-appt':'pill-vacation';
+      const label=e.type==='camp'?'Camp Week':isAppt?(e.apptIcon||'📅')+' '+(e.apptType||'Appointment'):'Vacation Week';
+      return`<span class="${cls}" onclick="viewLifeEvent(${e.id})" style="opacity:.7;font-weight:500;font-size:10px">&#128198; Next: ${label}${!isAppt&&e.title?' — '+e.title:''}</span>`;
     }).join(' ');
   }
   // Setup controls
@@ -1232,7 +1237,7 @@ function renderCC(){
   const ccWkEl=document.getElementById('cc-week-label');
   if(ccWkEl){const isNow=ccWeekOffset===0,isNxt=ccWeekOffset===1;const pfx=isNow?'This week · ':isNxt?'Next week · ':'';ccWkEl.textContent=pfx+fmtDate(ccMon)+' – '+fmtDate(ccSun);}
   const ccCurEvts=eventsInWeek(ccMon);
-  const ccNextReminders=ccWeekOffset===0?eventsNextWeek().filter(e=>!ccCurEvts.find(v=>v.id===e.id)&&apptWithinCaregiverHours(e)):[];
+  const ccNextReminders=ccWeekOffset===0?eventsNextWeek().filter(e=>!ccCurEvts.find(v=>v.id===e.id)&&apptWithinCaregiverHours(e)&&!isKidBar(e)):[];
   const ccViewedFiltered=ccCurEvts.filter(e=>apptWithinCaregiverHours(e));
   renderEventPills('cc-event-pills',ccViewedFiltered,false);
   if(ccNextReminders.length){
