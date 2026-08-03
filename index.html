@@ -90,6 +90,11 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .appt-bar-icon{font-size:16px;flex-shrink:0}
 .appt-bar-text{font-size:12px;color:#991b1b;font-weight:600}
 .appt-bar-time{font-size:11px;color:var(--gray);width:120px;min-width:120px;font-style:italic;flex-shrink:0;font-family:Georgia,serif}
+.kid-bar{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:4px;border:1px dashed #d4a96a;background:#fdf6ec;margin-top:6px;cursor:pointer}
+.kid-bar:hover{background:#faebd7}
+.kid-bar-icon{font-size:15px;flex-shrink:0}
+.kid-bar-text{font-size:12px;color:#92600a;font-weight:500}
+.kid-bar-time{font-size:11px;color:#b07d3a;width:120px;min-width:120px;font-style:italic;flex-shrink:0;font-family:Georgia,serif}
 .type-team-meeting{background:#fde68a;color:#78350f}
 .pips{display:flex;gap:2px;align-items:center}
 .pip{width:7px;height:7px;border-radius:50%;border:1px solid #9ca3af}
@@ -568,7 +573,22 @@ function getNextWeekRange(){
 function eventsInWeek(weekMonday){
   const start=isoDate(weekMonday);
   const end=isoDate(addDays(weekMonday,6));
-  return S.lifeEvents.filter(e=>!e.archived&&e.startDate&&e.endDate&&e.startDate<=end&&e.endDate>=start);
+  return S.lifeEvents.filter(e=>{
+    if(e.archived)return false;
+    if(!e.startDate)return false;
+    // Repeating weekly activity — show on matching day of week within date range
+    if(e.type==='appointment'&&e.apptType==='Activity'&&e.repeatWeekly){
+      const dow=e.dayOfWeek||new Date(e.startDate+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'});
+      const endsOn=e.endsOn||'9999-12-31';
+      if(e.startDate>end||endsOn<start)return false;
+      // Check if this week contains the matching day of week
+      return DAYS.some((d,i)=>{
+        const dayDate=isoDate(addDays(weekMonday,i));
+        return d===dow&&dayDate>=e.startDate&&dayDate<=endsOn;
+      });
+    }
+    return e.endDate&&e.startDate<=end&&e.endDate>=start;
+  });
 }
 
 function eventsNextWeek(){return eventsInWeek(getNextMonday());}
@@ -722,12 +742,32 @@ function openAddLifeEvent(type){
     sm(`<h3>📅 Add Appointment</h3>
       <div class="f"><div class="fl">Type</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-          ${['Match','General','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${t==='Match'?'checked':''}>${t==='Match'?'🎾':t==='General'?'🏠':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
+          ${['Match','General','Service','Doctor','School','Activity'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" onchange="onApptTypeChange()" ${t==='Match'?'checked':''}>${t==='Match'?'🎾':t==='General'?'🏠':t==='Service'?'🔨':t==='Doctor'?'➕':t==='School'?'🚌':'👧'} ${t}</label>`).join('')}
         </div>
       </div>
       <div class="f"><div class="fl">Date</div><input id="le-start" type="date" value="${today}"></div>
-      <div class="f"><div class="fl">Start time</div><input id="le-stime" placeholder="e.g. 2 PM"></div>
-      <div class="f"><div class="fl">Notes</div><textarea id="le-notes" rows="3" placeholder="e.g. Dr. Smith, 123 Main St..."></textarea></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <div style="flex:1"><div class="fl">Start time</div><input id="le-stime" placeholder="e.g. 3:30 PM"></div>
+        <div style="flex:1"><div class="fl">End time</div><input id="le-etime" placeholder="e.g. 5:00 PM"></div>
+      </div>
+      <div id="activity-fields" style="display:none">
+        <div class="f" style="display:flex;align-items:center;justify-content:space-between">
+          <div class="fl">Assign to caregiver</div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="le-caregiver" style="width:auto"> Yes
+          </label>
+        </div>
+        <div class="f" style="display:flex;align-items:center;justify-content:space-between">
+          <div class="fl">Repeat weekly</div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="le-repeat" style="width:auto" onchange="onRepeatChange()"> Yes
+          </label>
+        </div>
+        <div id="endson-field" style="display:none">
+          <div class="f"><div class="fl">Ends on</div><input id="le-endson" type="date" value="${today}"></div>
+        </div>
+      </div>
+      <div class="f"><div class="fl">Notes</div><textarea id="le-notes" rows="3" placeholder="e.g. Bring cleats, pick up at gym..."></textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#dc2626" onclick="saveLifeEvent('appointment')">Save</button></div>`);
   } else {
     sm(`<h3>🌴 Add Vacation</h3>
@@ -744,6 +784,18 @@ function openAddLifeEvent(type){
   }
 }
 
+function onApptTypeChange(){
+  const t=document.querySelector('input[name="appt-type"]:checked')?.value;
+  const af=document.getElementById('activity-fields');
+  if(af)af.style.display=(t==='Activity')?'block':'none';
+  if(t!=='Activity'){const rf=document.getElementById('endson-field');if(rf)rf.style.display='none';}
+}
+function onRepeatChange(){
+  const chk=document.getElementById('le-repeat');
+  const ef=document.getElementById('endson-field');
+  if(ef)ef.style.display=(chk&&chk.checked)?'block':'none';
+}
+
 function toggleKidPill(el){el.classList.toggle('on');}
 
 function saveLifeEvent(type){
@@ -758,6 +810,10 @@ function saveLifeEvent(type){
   if(!title){alert('Please enter a name.');return;}
   if(!start){alert('Please enter a date.');return;}
   if(type!=='appointment'&&(!end||start>end)){alert('Please enter valid dates.');return;}
+  if(type==='appointment'&&document.getElementById('le-repeat')?.checked){
+    const eo=document.getElementById('le-endson')?.value;
+    if(eo&&eo<start){alert('"Ends on" cannot be before the start date.');return;}
+  }
   const e={id:S.nextId++,type,title,startDate:start,endDate:end,notes:document.getElementById('le-notes')?.value?.trim()||'',archived:false};
   if(type==='camp'){
     e.days=[...document.querySelectorAll('.le-day:checked')].map(x=>x.value);
@@ -768,8 +824,15 @@ function saveLifeEvent(type){
     e.endDate=e.startDate; // single day
     e.apptType=document.querySelector('input[name="appt-type"]:checked')?.value||'Doctor';
     e.startTime=document.getElementById('le-stime')?.value?.trim()||'';
-    const icons={'Match':'🎾','General':'🏠','Service':'🔨','Doctor':'➕'};
+    e.endTime=document.getElementById('le-etime')?.value?.trim()||'';
+    const icons={'Match':'🎾','General':'🏠','Service':'🔨','Doctor':'➕','School':'🚌','Activity':'👧'};
     e.apptIcon=icons[e.apptType]||'📅';
+    if(e.apptType==='Activity'){
+      e.assignedToCaregiver=document.getElementById('le-caregiver')?.checked||false;
+      e.repeatWeekly=document.getElementById('le-repeat')?.checked||false;
+      e.endsOn=e.repeatWeekly?(document.getElementById('le-endson')?.value||''):'';
+      e.dayOfWeek=new Date(e.startDate+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'});
+    }
   }
   S.lifeEvents.push(e);save();cm();renderLife();renderSchedule();
   if(type==='vacation'){
@@ -812,11 +875,31 @@ function openEditLifeEvent(id){
     sm(`<h3>🎾 Edit Appointment</h3>
       <div class="f"><div class="fl">Type</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-          ${['Match','General','Service','Doctor'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" ${e.apptType===t?'checked':''}>${t==='Match'?'🎾':t==='General'?'🏠':t==='Service'?'🔨':'➕'} ${t}</label>`).join('')}
+          ${['Match','General','Service','Doctor','School','Activity'].map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--border);border-radius:5px;background:#fff"><input type="radio" name="appt-type" value="${t}" style="width:auto;flex-shrink:0" onchange="onApptTypeChange()" ${e.apptType===t?'checked':''}>${t==='Match'?'🎾':t==='General'?'🏠':t==='Service'?'🔨':t==='Doctor'?'➕':t==='School'?'🚌':'👧'} ${t}</label>`).join('')}
         </div>
       </div>
       <div class="f"><div class="fl">Date</div><input id="le-start" type="date" value="${e.startDate}"></div>
-      <div class="f"><div class="fl">Start time</div><input id="le-stime" placeholder="e.g. 2 PM" value="${e.startTime||''}"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <div style="flex:1"><div class="fl">Start time</div><input id="le-stime" placeholder="e.g. 3:30 PM" value="${e.startTime||''}"></div>
+        <div style="flex:1"><div class="fl">End time</div><input id="le-etime" placeholder="e.g. 5:00 PM" value="${e.endTime||''}"></div>
+      </div>
+      <div id="activity-fields" style="display:${e.apptType==='Activity'?'block':'none'}">
+        <div class="f" style="display:flex;align-items:center;justify-content:space-between">
+          <div class="fl">Assign to caregiver</div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="le-caregiver" style="width:auto" ${e.assignedToCaregiver?'checked':''}> Yes
+          </label>
+        </div>
+        <div class="f" style="display:flex;align-items:center;justify-content:space-between">
+          <div class="fl">Repeat weekly</div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="le-repeat" style="width:auto" onchange="onRepeatChange()" ${e.repeatWeekly?'checked':''}> Yes
+          </label>
+        </div>
+        <div id="endson-field" style="display:${e.repeatWeekly?'block':'none'}">
+          <div class="f"><div class="fl">Ends on</div><input id="le-endson" type="date" value="${e.endsOn||''}"></div>
+        </div>
+      </div>
       <div class="f"><div class="fl">Notes</div><textarea id="le-notes" rows="3">${e.notes||''}</textarea></div>
       <div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" style="background:#dc2626" onclick="updateLifeEvent(${id},'appointment')">Save</button></div>`);
   } else {
@@ -833,6 +916,11 @@ function openEditLifeEvent(id){
 
 function updateLifeEvent(id,type){
   const e=S.lifeEvents.find(x=>x.id===id);if(!e)return;
+  if(type==='appointment'&&document.getElementById('le-repeat')?.checked){
+    const st=document.getElementById('le-start')?.value||e.startDate;
+    const eo=document.getElementById('le-endson')?.value;
+    if(eo&&eo<st){alert('"Ends on" cannot be before the start date.');return;}
+  }
   if(type!=='appointment'){e.title=document.getElementById('le-title')?.value?.trim()||e.title;}
   e.startDate=document.getElementById('le-start')?.value||e.startDate;
   e.endDate=type==='appointment'?e.startDate:(document.getElementById('le-end')?.value||e.endDate);
@@ -846,8 +934,15 @@ function updateLifeEvent(id,type){
     e.endDate=e.startDate; // single day
     e.apptType=document.querySelector('input[name="appt-type"]:checked')?.value||'Doctor';
     e.startTime=document.getElementById('le-stime')?.value?.trim()||'';
-    const icons={'Match':'🎾','General':'🏠','Service':'🔨','Doctor':'➕'};
+    e.endTime=document.getElementById('le-etime')?.value?.trim()||'';
+    const icons={'Match':'🎾','General':'🏠','Service':'🔨','Doctor':'➕','School':'🚌','Activity':'👧'};
     e.apptIcon=icons[e.apptType]||'📅';
+    if(e.apptType==='Activity'){
+      e.assignedToCaregiver=document.getElementById('le-caregiver')?.checked||false;
+      e.repeatWeekly=document.getElementById('le-repeat')?.checked||false;
+      e.endsOn=e.repeatWeekly?(document.getElementById('le-endson')?.value||''):'';
+      e.dayOfWeek=new Date(e.startDate+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'});
+    }
   }
   save();cm();renderLife();renderSchedule();
 }
@@ -967,10 +1062,20 @@ DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)})
     // Check if this day has a camp event this view week
     const viewDayDate=isoDate(addDays(viewMon,DAYS.indexOf(day)));
     const campToday=S.lifeEvents.find(e=>e.type==='camp'&&!e.archived&&e.days?.includes(day)&&e.startDate<=viewDayDate&&e.endDate>=viewDayDate);
-    const apptToday=S.lifeEvents.filter(e=>e.type==='appointment'&&!e.archived&&e.startDate===viewDayDate);
+    const apptToday=S.lifeEvents.filter(e=>{
+      if(e.type!=='appointment'||e.archived)return false;
+      // Repeating activity — check day of week match
+      if(e.apptType==='Activity'&&e.repeatWeekly){
+        const dow=e.dayOfWeek||new Date(e.startDate+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'});
+        const endsOn=e.endsOn||'9999-12-31';
+        return dow===day&&viewDayDate>=e.startDate&&viewDayDate<=endsOn;
+      }
+      return e.startDate===viewDayDate;
+    });
+    const kidBars=apptToday.filter(a=>a.apptType==='Activity'||a.apptType==='School').map(a=>`<div class="kid-bar" onclick="viewLifeEvent(${a.id})"><span class="kid-bar-time">${a.startTime||''}${a.endTime?' – '+a.endTime:''}</span><span class="kid-bar-icon">${a.apptIcon}</span><span class="kid-bar-text">${a.apptType==='Activity'?a.notes||'Activity':a.apptType}</span></div>`).join('');
+    const apptBars=apptToday.filter(a=>a.apptType!=='Activity'&&a.apptType!=='School').map(a=>`<div class="appt-bar" onclick="viewLifeEvent(${a.id})"><span class="appt-bar-time">${a.startTime?mtd(pti(a.startTime)):'—'}</span><span class="appt-bar-icon" style="margin-right:4px">${a.apptIcon||'📅'}</span><span class="appt-bar-text">${a.apptType||'Appointment'}</span></div>`).join('');
     const campBadge=campToday?`<span style="font-size:10px;background:#d97706;color:#fff;padding:1px 7px;border-radius:20px;margin-left:6px">⛺ ${campToday.title}</span>`:'';
-    const apptBars=apptToday.map(a=>`<div class="appt-bar" onclick="viewLifeEvent(${a.id})"><span class="appt-bar-time">${a.startTime?mtd(pti(a.startTime)):'—'}</span><span class="appt-bar-icon" style="margin-right:4px">${a.apptIcon||'📅'}</span><span class="appt-bar-text">${a.apptType||'Appointment'}</span></div>`).join('');
-    const ccb=(cc&&cc.active?`<div class="cc-bar"><span class="cc-bar-time">${cc.start} \u2013 ${cc.end}</span><span class="cc-bar-label">Childcare${campBadge}</span></div>`:'')+apptBars;
+    const ccb=(cc&&cc.active?`<div class="cc-bar"><span class="cc-bar-time">${cc.start} \u2013 ${cc.end}</span><span class="cc-bar-label">Childcare${campBadge}</span></div>`:'')+apptBars+kidBars;
     const isPTO=pto.active&&dayInPTOForWeek(day,viewMon)&&m;
     const acts=slots.filter(s=>{const st2=ss(s),l=LT[s.type];return(l&&l.fixed)||(st2==='booked'||st2==='partial'||st2==='full');});
     const allDone=isPTO&&acts.length>0&&acts.every(s=>{const l=LT[s.type];return l&&l.fixed?!!pto.subs[s.id]:!!pto.notified[s.id];});
@@ -1094,7 +1199,15 @@ function notifySlot(day,sid){if(role!=='mike')return;const slot=S.slots.find(s=>
 // ── CHILDCARE ──
 
 function apptWithinCaregiverHours(e){
-  // Only filter appointments — camp and vacation always show
+  // Activity — only show to caregiver if explicitly assigned
+  if(e.type==='appointment'&&e.apptType==='Activity'){
+    return e.assignedToCaregiver===true;
+  }
+  // School — never show to caregiver (Mike's awareness only)
+  if(e.type==='appointment'&&e.apptType==='School'){
+    return false;
+  }
+  // Other appointments — only filter if not appointment type
   if(e.type!=='appointment')return true;
   // If no start time entered, show it to be safe
   if(!e.startTime)return true;
@@ -1133,7 +1246,21 @@ function renderCC(){
   }
   document.getElementById('cc-grid').innerHTML=DAYS.map(day=>{
     const cc=S.childcare[day]||{...DCC},m=role==='mike';
-    return`<div class="cd ${!cc.active?'cdo':''}"><div class="cdh"><span class="cdt">${day}</span><div style="display:flex;align-items:center;gap:8px">${cc.active?`<span class="cdhr">&#x1F552; ${cc.start} \u2013 ${cc.end}</span>`:'<span style="font-size:12px;color:rgba(255,255,255,.5);font-style:italic">Day off</span>'}<button class="cctg ${cc.active?'on':''}" onclick="togCC('${day}')">${cc.active?'On':'Off'}</button>${m&&cc.active?`<button class="btn btn-sm" onclick="editCCH('${day}')" style="font-size:10px;padding:4px 10px">Edit hours</button>`:''}</div></div>${cc.active?`<div class="cdb"><div class="cdnl"><span>Activity notes</span><span>${m?'Visible to caregiver':''}</span></div><textarea rows="3" placeholder="e.g. Pool in the morning...">${cc.note||''}</textarea><div class="cdsr"><button class="btn btn-sm" onclick="svCCN('${day}',this.closest('.cdb').querySelector('textarea').value,this)">Save note</button></div></div>`:''}</div>`;
+    const ccMon2=getCCViewMonday();
+    const dayDate=isoDate(addDays(ccMon2,DAYS.indexOf(day)));
+    // Activities assigned to caregiver for this day
+    const dayActivities=S.lifeEvents.filter(e=>{
+      if(e.type!=='appointment'||e.apptType!=='Activity'||!e.assignedToCaregiver||e.archived)return false;
+      if(e.repeatWeekly){
+        const dow=e.dayOfWeek||new Date(e.startDate+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'});
+        if(dow!==day)return false;
+        const endsOn=e.endsOn||'9999-12-31';
+        return dayDate>=e.startDate&&dayDate<=endsOn;
+      }
+      return e.startDate===dayDate;
+    });
+    const activityBars=dayActivities.map(a=>`<div class="kid-bar" onclick="${m?'viewLifeEvent('+a.id+')':''}"><span class="kid-bar-time">${a.startTime||''}${a.endTime?' – '+a.endTime:''}</span><span class="kid-bar-icon">${a.apptIcon}</span><span class="kid-bar-text">${a.notes||'Activity'}</span></div>`).join('');
+    return`<div class="cd ${!cc.active?'cdo':''}"><div class="cdh"><span class="cdt">${day}</span><div style="display:flex;align-items:center;gap:8px">${cc.active?`<span class="cdhr">&#x1F552; ${cc.start} \u2013 ${cc.end}</span>`:'<span style="font-size:12px;color:rgba(255,255,255,.5);font-style:italic">Day off</span>'}<button class="cctg ${cc.active?'on':''}" onclick="togCC('${day}')">${cc.active?'On':'Off'}</button>${m&&cc.active?`<button class="btn btn-sm" onclick="editCCH('${day}')" style="font-size:10px;padding:4px 10px">Edit hours</button>`:''}</div></div>${cc.active?`<div class="cdb">${activityBars}<div class="cdnl"><span>Activity notes</span><span>${m?'Visible to caregiver':''}</span></div><textarea rows="3" placeholder="e.g. Pool in the morning...">${cc.note||''}</textarea><div class="cdsr"><button class="btn btn-sm" onclick="svCCN('${day}',this.closest('.cdb').querySelector('textarea').value,this)">Save note</button></div></div>`:''}</div>`;
   }).join('');
 }
 function togCC(day){if(!S.childcare[day])S.childcare[day]={...DCC};S.childcare[day].active=!S.childcare[day].active;save();renderCC();if(role==='mike')renderSchedule();}
