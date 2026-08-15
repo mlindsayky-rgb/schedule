@@ -82,7 +82,7 @@ body{font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#1a1a2e;ba
 .tbadge{font-size:10px;padding:1px 8px;border-radius:20px;font-family:Georgia,serif}
 .type-private{background:#c5cae9;color:#1a237e}.type-group{background:#b2dfdb;color:#004d40}
 .type-liveball{background:#f8bbd0;color:#880e4f}.type-camp{background:#ffe0b2;color:#e65100}
-.type-adult-team{background:#ce93d8;color:#4a148c}.type-hp-clinic{background:#b39ddb;color:#311b92}
+.type-adult-team{background:#ce93d8;color:#4a148c}.type-hp-clinic{background:#b39ddb;color:#311b92}.type-sub{background:#80cbc4;color:#004d40}
 .type-blocked{background:#d1d5db;color:#374151}
 .type-appointment{background:#fee2e2;color:#991b1b}
 .appt-bar{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:4px;border:1px solid #fca5a5;background:#fff5f5;margin-top:6px;cursor:pointer}
@@ -423,6 +423,7 @@ const LT={
   'camp':{label:'Camp',cap:12,cls:'type-camp',fixed:false},
   'adult-team':{label:'Adult Team',cap:0,cls:'type-adult-team',fixed:true},
   'hp-clinic':{label:'HP Clinic',cap:0,cls:'type-hp-clinic',fixed:true},
+  'sub':{label:'Sub (covering a pro)',cap:0,cls:'type-sub',fixed:true},
   'team-meeting':{label:'Team Meeting',cap:0,cls:'type-team-meeting',fixed:true},
   'appointment':{label:'Appointment',cap:0,cls:'type-appointment',fixed:true,isAppointment:true},
   'blocked':{label:'Blocked',cap:0,cls:'type-blocked',fixed:true},
@@ -453,6 +454,37 @@ function dateInRange(dateStr,startStr,endStr){return dateStr>=startStr&&dateStr<
 let weekOffset=0;
 let ccWeekOffset=0;
 function getViewMonday(){return addDays(mondayOf(new Date()),weekOffset*7);}
+
+// ── WEEK SCOPING ──
+// True if the viewed week has already been stamped (locked for accounting)
+function isWeekStamped(weekMondayDate){
+  const ws=isoDate(weekMondayDate);
+  return (S.weekHistory||[]).some(w=>w.weekStart===ws);
+}
+// Write a slot change scoped to one week only (does not touch template or other weeks)
+function writeSlotThisWeekOnly(slot,weekMondayDate){
+  const key=isoDate(weekMondayDate);
+  if(!S.weekSlots[key]){
+    // Seed this week from the template so the override has a full base
+    S.weekSlots[key]=S.slots.map(s=>({...s}));
+  }
+  const i=S.weekSlots[key].findIndex(x=>x.id===slot.id);
+  if(i>=0)S.weekSlots[key][i]={...slot};
+  else S.weekSlots[key].push({...slot});
+  save();
+}
+// Write a slot change to the template and forward weeks only (past weeks untouched)
+function writeSlotGoingForward(slot,weekMondayDate){
+  const fromKey=isoDate(weekMondayDate);
+  const ti=S.slots.findIndex(x=>x.id===slot.id);
+  if(ti>=0)S.slots[ti]={...slot};else S.slots.push({...slot});
+  Object.keys(S.weekSlots).forEach(wk=>{
+    if(wk<fromKey)return; // never rewrite history
+    const wi=S.weekSlots[wk].findIndex(x=>x.id===slot.id);
+    if(wi>=0)S.weekSlots[wk][wi]={...slot};
+  });
+  save();
+}
 function getCCViewMonday(){return addDays(mondayOf(new Date()),ccWeekOffset*7);}
 function getNextMonday(){return addDays(mondayOf(new Date()),7);}
 
@@ -482,7 +514,7 @@ const SCC={Monday:{start:'10:00 AM',end:'12:30 PM',active:true,note:''},Tuesday:
 
 // STATE
 // lifeEvents: [{id, type:'camp'|'vacation', title, startDate, endDate, days(camp only), startTime(camp), endTime(camp), kids(camp), notes, ptoLinked, archived}]
-let S={slots:SEED.map(s=>({...s})),weekSlots:{},childcare:JSON.parse(JSON.stringify(SCC)),childcareDateNotes:{},people:[],notes:[],activities:[],requests:[],lifeEvents:[],pendingClaims:{},weekHistory:[],nextId:60};
+let S={slots:SEED.map(s=>({...s})),weekSlots:{},childcare:JSON.parse(JSON.stringify(SCC)),childcareDateNotes:{},people:[],notes:[],activities:[],requests:[],lifeEvents:[],pendingClaims:{},weekHistory:[],subPros:[],nextId:60};
 let pto={active:false,startDate:null,endDate:null,subs:{},notified:{},viewWeekOffset:0};
 let _ps=[],_st=null,_showArchived=false,_summaryExpanded=true,_logBadge=0,_logSeen=false;
 
@@ -1186,19 +1218,78 @@ function svSlot(id){if(role!=='mike')return;const s=S.slots.find(x=>x.id===id);i
       _ps.forEach(pid=>{const cb=document.getElementById('close-req-'+pid);if(cb&&cb.checked){openReqs(pid).forEach(r=>{r.closed=true;});}});
     }
   }
-  // Always save back to S.slots (template) so changes persist
-  const siTemplate=S.slots.findIndex(x=>x.id===s.id);
-  if(siTemplate>=0)S.slots[siTemplate]=s;
-  // Also update any existing week copies
+  const vm=getViewMonday();
+  if(isWeekStamped(vm)){alert('This week has been stamped for payroll and is read-only.');return;}
+  if(weekOffset>0){
+    // Future week — ask whether this is a one-off or a permanent change
+    cm();
+    sm(`<h3>Apply change to…</h3>
+      <p style="font-size:13px;color:var(--gray);margin-bottom:14px">You're editing the week of ${fmtDate(vm)}.</p>
+      <div class="ma" style="flex-direction:column;gap:8px">
+        <button class="btn btn-sm" style="width:100%" onclick="_applySlotScope(${id},'week')">Just this week</button>
+        <button class="btn btn-sm" style="width:100%;background:#4b5563" onclick="_applySlotScope(${id},'forward')">This week &amp; going forward</button>
+        <button class="btn btn-sm bcx" style="width:100%" onclick="cm()">Cancel</button>
+      </div>`);
+    _pendingSlot={...s};
+    return;
+  }
+  writeSlotGoingForward(s,vm);
+  cm();renderSchedule();renderPeople();}
+let _pendingSlot=null;
+function _applySlotScope(id,scope){
+  if(!_pendingSlot)return;
+  const vm=getViewMonday();
+  if(scope==='week')writeSlotThisWeekOnly(_pendingSlot,vm);
+  else writeSlotGoingForward(_pendingSlot,vm);
+  _pendingSlot=null;
+  cm();renderSchedule();renderPeople();}
+function delSlot(id){if(role!=='mike')return;
+  const vm=getViewMonday();
+  if(isWeekStamped(vm)){alert('This week has been stamped for payroll and is read-only.');return;}
+  const fromKey=isoDate(vm);
+  if(weekOffset>0){
+    // Future week — remove from this week only, leave template and past weeks intact
+    if(!S.weekSlots[fromKey])S.weekSlots[fromKey]=S.slots.map(s=>({...s}));
+    S.weekSlots[fromKey]=S.weekSlots[fromKey].filter(s=>s.id!==id);
+    save();cm();renderSchedule();return;
+  }
+  S.slots=S.slots.filter(s=>s.id!==id);
   Object.keys(S.weekSlots).forEach(wk=>{
-    const wi=S.weekSlots[wk].findIndex(x=>x.id===s.id);
-    if(wi>=0)S.weekSlots[wk][wi]={...s};
+    if(wk<fromKey)return; // never rewrite history
+    S.weekSlots[wk]=S.weekSlots[wk].filter(s=>s.id!==id);
   });
-  save();cm();renderSchedule();renderPeople();}
-function delSlot(id){if(role!=='mike')return;S.slots=S.slots.filter(s=>s.id!==id);Object.keys(S.weekSlots).forEach(wk=>{S.weekSlots[wk]=S.weekSlots[wk].filter(s=>s.id!==id);});save();cm();renderSchedule();}
-function openAddSlot(def='Monday'){if(role!=='mike')return;sm(`<h3>Add Slot <span style='font-size:11px;color:var(--gray);font-weight:normal;font-style:italic'>— ${fmtDate(getViewMonday())} week</span></h3><div class="f"><label>Day</label><select id="n-day">${DAYS.map(d=>`<option value="${d}" ${d===def?'selected':''}>${d}</option>`).join('')}</select></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="n-start" placeholder="10:00"></div><div style="flex:1"><div class="fl">End</div><input id="n-end" placeholder="11:30"></div></div><div class="f"><label>Label</label><input id="n-label" placeholder="e.g. Lesson \u2014 Smith"></div><div class="f"><label>Type</label><select id="n-type" onchange="ach()">${Object.entries(LT).map(([k,v])=>`<option value="${k}">${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="add-cap-hint">Capacity: 1</div></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addSlot()">Add</button></div>`);}
-function ach(){const t=document.getElementById('n-type')?.value,l=LT[t],el=document.getElementById('add-cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;}
-function addSlot(){if(role!=='mike')return;const type=document.getElementById('n-type').value;const s={id:S.nextId++,day:document.getElementById('n-day').value,startM:pti(document.getElementById('n-start').value),endM:pti(document.getElementById('n-end').value),label:document.getElementById('n-label').value,type,status:isF(type)?'fixed':'auto',roster:[]};S.slots.push(s);save();cm();renderSchedule();}
+  save();cm();renderSchedule();}
+function openAddSlot(def='Monday'){if(role!=='mike')return;sm(`<h3>Add Slot <span style='font-size:11px;color:var(--gray);font-weight:normal;font-style:italic'>— ${fmtDate(getViewMonday())} week</span></h3><div class="f"><label>Day</label><select id="n-day">${DAYS.map(d=>`<option value="${d}" ${d===def?'selected':''}>${d}</option>`).join('')}</select></div><div style="display:flex;gap:8px;margin-bottom:14px"><div style="flex:1"><div class="fl">Start</div><input id="n-start" placeholder="10:00"></div><div style="flex:1"><div class="fl">End</div><input id="n-end" placeholder="11:30"></div></div><div class="f"><label>Label</label><input id="n-label" placeholder="e.g. Lesson \u2014 Smith"></div><div class="f"><label>Type</label><select id="n-type" onchange="ach()">${Object.entries(LT).map(([k,v])=>`<option value="${k}">${v.label}${v.fixed?' \u2014 fixed':` (max ${v.cap})`}</option>`).join('')}</select><div class="ch" id="add-cap-hint">Capacity: 1</div></div><div class="f" id="subfor-field" style="display:none"><label>Subbing for</label><input id="n-subfor" list="sub-pros" placeholder="e.g. Tom"><datalist id="sub-pros">${(S.subPros||[]).map(p=>`<option value="${p}">`).join('')}</datalist><div class="ch">Slot will read: Sub \u2014 [label] (name)</div></div><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Cancel</button><button class="btn btn-sm" onclick="addSlot()">Add</button></div>`);}
+function ach(){const t=document.getElementById('n-type')?.value,l=LT[t],el=document.getElementById('add-cap-hint');if(el)el.textContent=l?.fixed?'Fixed \u2014 no tracking':`Capacity: ${l?.cap||1}`;const sf=document.getElementById('subfor-field');if(sf)sf.style.display=(t==='sub')?'block':'none';}
+function addSlot(){if(role!=='mike')return;
+  const vm=getViewMonday();
+  if(isWeekStamped(vm)){alert('This week has been stamped for payroll and is read-only.');return;}
+  const type=document.getElementById('n-type').value;
+  const s={id:S.nextId++,day:document.getElementById('n-day').value,startM:pti(document.getElementById('n-start').value),endM:pti(document.getElementById('n-end').value),label:document.getElementById('n-label').value,type,status:isF(type)?'fixed':'auto',roster:[]};
+  if(type==='sub'){s.subFor=document.getElementById('n-subfor')?.value?.trim()||'';
+    if(s.subFor){s.label=`Sub — ${s.label} (${s.subFor})`;
+      if(!S.subPros)S.subPros=[];
+      if(!S.subPros.includes(s.subFor))S.subPros.push(s.subFor);}}
+  if(weekOffset>0){
+    cm();
+    sm(`<h3>Add slot to…</h3>
+      <p style="font-size:13px;color:var(--gray);margin-bottom:14px">Adding to the week of ${fmtDate(vm)}.</p>
+      <div class="ma" style="flex-direction:column;gap:8px">
+        <button class="btn btn-sm" style="width:100%" onclick="_applyAddScope('week')">Just this week</button>
+        <button class="btn btn-sm" style="width:100%;background:#4b5563" onclick="_applyAddScope('forward')">Every week going forward</button>
+        <button class="btn btn-sm bcx" style="width:100%" onclick="cm()">Cancel</button>
+      </div>`);
+    _pendingSlot=s;
+    return;
+  }
+  S.slots.push(s);save();cm();renderSchedule();}
+function _applyAddScope(scope){
+  if(!_pendingSlot)return;
+  const vm=getViewMonday();
+  if(scope==='week')writeSlotThisWeekOnly(_pendingSlot,vm);
+  else{S.slots.push({..._pendingSlot});save();}
+  _pendingSlot=null;
+  cm();renderSchedule();}
 function notifySlot(day,sid){if(role!=='mike')return;const slot=S.slots.find(s=>s.id===sid);if(!slot)return;const interested=S.people.filter(p=>p.notifyAll||p.days.includes(day));if(!interested.length){sm(`<h3>No One to Notify</h3><p style="font-size:13px;color:#6b7280;margin-bottom:12px">No people marked as interested in ${day}.</p><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Close</button></div>`);return;}const msg=nmsg(slot,day),enc=encodeURIComponent(msg);const links=interested.map(p=>`<a href="sms:${cp(p.phone)}?body=${enc}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border:1.5px solid #ddd8d0;border-radius:6px;font-size:13px;font-family:Georgia,serif;margin-bottom:8px;color:#1a1a2e;text-decoration:none;background:#faf8f4"><span>${p.name}</span><span style="color:#6b7280;font-size:11px;font-style:italic">${cp(p.phone)} \u203a</span></a>`).join('');sm(`<h3>&#x2708; Notify \u2014 ${day}</h3><div class="mp">${msg}</div><p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:10px">Tap a name to open in Messages:</p>${links}<div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Done</button></div>`);}
 
 // ── CHILDCARE ──
@@ -1410,9 +1501,9 @@ function saveWeekSlots(weekMondayDate,slots){
   const key=isoDate(weekMondayDate);
   // Strip _seeded flag, mark as customized
   S.weekSlots[key]=slots.map(s=>{const c={...s};delete c._seeded;return c;});
-  // Purge week slots older than 28 days
+  // Purge week slots older than 28 days — but keep any week that's been stamped
   const cutoff=isoDate(addDays(new Date(),-28));
-  Object.keys(S.weekSlots).forEach(k=>{if(k<cutoff)delete S.weekSlots[k];});
+  Object.keys(S.weekSlots).forEach(k=>{if(k<cutoff&&!isWeekStamped(new Date(k+'T12:00:00')))delete S.weekSlots[k];});
   save();
 }
 
