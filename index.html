@@ -1085,18 +1085,11 @@ function renderSchedule(){
   }
   const grid=document.getElementById('schedule-grid');
   const viewMon=getViewMonday();const vKey=isoDate(viewMon);
-  // Merge: start with S.slots, apply any week-specific overrides from weekSlots
+  // Merge: if this week has its own slot list, that list IS the week (deletions included).
+  // Otherwise fall back to the template.
   let viewSlots=S.slots;
   if(S.weekSlots[vKey]){
-    // Use S.slots as base, apply ALL weekSlots overrides (attendance, _outThisWeek, etc.)
-    viewSlots=S.slots.map(s=>{
-      const override=S.weekSlots[vKey].find(x=>x.id===s.id);
-      return override?override:s;
-    });
-    // Also include any slots added directly to this week's copy that aren't in template
-    S.weekSlots[vKey].forEach(ws=>{
-      if(!S.slots.find(s=>s.id===ws.id))viewSlots.push(ws);
-    });
+    viewSlots=S.weekSlots[vKey].map(s=>({...s}));
   }
   const bd={};
 DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
@@ -1304,7 +1297,16 @@ function _applyAddScope(scope){
   if(!_pendingSlot)return;
   const vm=getViewMonday();
   if(scope==='week')writeSlotThisWeekOnly(_pendingSlot,vm);
-  else{S.slots.push({..._pendingSlot});save();}
+  else{
+    // Add to template, and into any existing week list from this week forward
+    S.slots.push({..._pendingSlot});
+    const fromKey=isoDate(vm);
+    Object.keys(S.weekSlots).forEach(wk=>{
+      if(wk<fromKey)return;
+      if(!S.weekSlots[wk].find(x=>x.id===_pendingSlot.id))S.weekSlots[wk].push({..._pendingSlot});
+    });
+    save();
+  }
   _pendingSlot=null;
   cm();renderSchedule();}
 function notifySlot(day,sid){if(role!=='mike')return;const slot=findSlotInView(sid);if(!slot)return;const interested=S.people.filter(p=>p.notifyAll||p.days.includes(day));if(!interested.length){sm(`<h3>No One to Notify</h3><p style="font-size:13px;color:#6b7280;margin-bottom:12px">No people marked as interested in ${day}.</p><div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Close</button></div>`);return;}const msg=nmsg(slot,day),enc=encodeURIComponent(msg);const links=interested.map(p=>`<a href="sms:${cp(p.phone)}?body=${enc}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border:1.5px solid #ddd8d0;border-radius:6px;font-size:13px;font-family:Georgia,serif;margin-bottom:8px;color:#1a1a2e;text-decoration:none;background:#faf8f4"><span>${p.name}</span><span style="color:#6b7280;font-size:11px;font-style:italic">${cp(p.phone)} \u203a</span></a>`).join('');sm(`<h3>&#x2708; Notify \u2014 ${day}</h3><div class="mp">${msg}</div><p style="font-size:11px;color:var(--gray);font-style:italic;margin-bottom:10px">Tap a name to open in Messages:</p>${links}<div class="ma"><button class="btn btn-sm bcx" onclick="cm()">Done</button></div>`);}
@@ -1501,16 +1503,8 @@ function shareOpenSlots(){
 function getWeekSlots(weekMondayDate){
   const key=isoDate(weekMondayDate);
   if(!S.weekSlots[key])return S.slots;
-  // Merge: S.slots as base, apply ALL weekSlots overrides (attendance, _outThisWeek, etc.)
-  const merged=S.slots.map(s=>{
-    const override=S.weekSlots[key].find(x=>x.id===s.id);
-    return override?override:s;
-  });
-  // Also include week-only slots not in template
-  S.weekSlots[key].forEach(ws=>{
-    if(!S.slots.find(s=>s.id===ws.id))merged.push(ws);
-  });
-  return merged;
+  // The week's own list is authoritative — deletions and additions both respected
+  return S.weekSlots[key].map(s=>({...s}));
 }
 
 // Save edits to a specific week's slots
