@@ -1095,7 +1095,25 @@ function renderSchedule(){
 DAYS.forEach(d=>bd[d]=[]);viewSlots.forEach(s=>{if(bd[s.day])bd[s.day].push(s)});DAYS.forEach(d=>bd[d].sort((a,b)=>a.startM-b.startM));
   const m=role==='mike';
   grid.innerHTML=DAYS.map(day=>{
-    const slots=bd[day],open=slots.filter(s=>ss(s)==='available').length,hrs=fhr(slots.filter(s=>ss(s)!=='available'&&ss(s)!=='blocked').reduce((a,s)=>a+shr(s),0));
+    const slots=bd[day];
+    const open=slots.filter(s=>ss(s)==='available').length;
+    const dayDateForHrs=isoDate(addDays(getViewMonday(),DAYS.indexOf(day)));
+    const dayIsPTO=ptoDates().includes(dayDateForHrs);
+    const hrs=fhr(dayIsPTO?0:slots.filter(s=>{
+      const st=ss(s);
+      if(s.type==='team-meeting')return false;
+      if(s._outThisWeek)return false;
+      if(st==='blocked')return false;
+      // Past/in-progress Live Ball counts as worked even before attendance is entered
+      if(s.type==='liveball'){
+        const todayS=isoDate(new Date());
+        const nowM=new Date().getHours()*60+new Date().getMinutes();
+        const ran=dayDateForHrs<todayS||(dayDateForHrs===todayS&&s.startM<=nowM);
+        return ran||st!=='available';
+      }
+      if(st==='available')return false;
+      return true;
+    }).reduce((a,s)=>a+shr(s),0));
     const cc=S.childcare[day];
     // Check if this day has a camp event this view week
     const viewDayDate=isoDate(addDays(viewMon,DAYS.indexOf(day)));
