@@ -1309,6 +1309,11 @@ function addSlot(){if(role!=='mike')return;
     if(s.subFor){s.label=`Sub — ${s.label} (${s.subFor})`;
       if(!S.subPros)S.subPros=[];
       if(!S.subPros.includes(s.subFor))S.subPros.push(s.subFor);}}
+  // Sub slots are one-offs — never added to the template, never recurring
+  if(type==='sub'){
+    writeSlotThisWeekOnly(s,vm);
+    cm();renderSchedule();return;
+  }
   if(weekOffset>0){
     cm();
     sm(`<h3>Add slot to…</h3>
@@ -1321,12 +1326,13 @@ function addSlot(){if(role!=='mike')return;
     _pendingSlot=s;
     return;
   }
-  // Current week — add to template, and into this week's list if one already exists
+  // Current week — add to template, and into every existing week list from this week forward
   S.slots.push(s);
   const curKey=isoDate(vm);
-  if(S.weekSlots[curKey]&&!S.weekSlots[curKey].find(x=>x.id===s.id)){
-    S.weekSlots[curKey].push({...s});
-  }
+  Object.keys(S.weekSlots).forEach(wk=>{
+    if(wk<curKey)return; // never rewrite past weeks
+    if(!S.weekSlots[wk].find(x=>x.id===s.id))S.weekSlots[wk].push({...s});
+  });
   save();cm();renderSchedule();}
 function _applyAddScope(scope){
   if(!_pendingSlot)return;
